@@ -63,7 +63,7 @@ jobs:
         echo "::set-output name=folder3-changed::$folder3_changed"
         echo "::set-output name=folder4-changed::$folder4_changed"
  
-  build-folder1:
+  account:
     needs: detect-changes
     runs-on: ubuntu-latest
     if: needs.detect-changes.outputs.folder1-changed == 'true'
@@ -75,7 +75,7 @@ jobs:
     - name: Print Hello
       run: echo "Hello from account"
  
-  build-folder2:
+  admin:
     needs: detect-changes
     runs-on: ubuntu-latest
     if: needs.detect-changes.outputs.folder2-changed == 'true'
@@ -87,7 +87,7 @@ jobs:
     - name: Print Hello
       run: echo "Hello from admin"
  
-  build-folder3:
+  external-messenger:
     needs: detect-changes
     runs-on: ubuntu-latest
     if: needs.detect-changes.outputs.folder3-changed == 'true'
@@ -99,7 +99,7 @@ jobs:
     - name: Print Hello
       run: echo "Hello from messenger"
  
-  build-folder4:
+  messenger:
     needs: detect-changes
     runs-on: ubuntu-latest
     if: needs.detect-changes.outputs.folder4-changed == 'true'
