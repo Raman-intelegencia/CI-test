@@ -255,7 +255,7 @@
       "configurations": {
         "ci": {
           "ci": true,
-          "codeCoverage": false-again
+          "codeCoverage": true
         }
       }
     }
