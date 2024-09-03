@@ -34,10 +34,10 @@ jobs:
         folder2_changed="false"
         folder3_changed="false"
         folder4_changed="false"
-        
+
  
         # Get list of changed files
-        changed_files=$(git diff --name-only $previous_commit $current_commit)
+        changed_files=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})
  
         # Print changed files for debugging
         echo "Changed files:"
