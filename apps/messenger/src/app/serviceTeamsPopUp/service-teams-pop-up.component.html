@@ -1,0 +1,56 @@
+<input type="checkbox"  class="modal-toggle" [checked]="showServiceModal"/>
+<div class="modal bg-black/70">
+    <div
+        class="modal-box max-w-2xl bg-white dark:bg-black rounded p-0 relative overflow-y-hidden dark:border-primary/60 dark:border dark:shadow-xl dark:shadow-primary/20">
+        <div class="flex justify-between text-white items-center bg-primary p-3">
+            <h3 class="font-bold dark:text-white" *ngIf="selectedService.data" > 
+                <span >{{selectedService.data.description}}</span> 
+                <span>- {{selectedService.data.user_ids?.length}} {{'peopleOnThisService' | translate}}</span></h3>
+            <label class="w-7 h-7" (click)="closeServiceModal()">
+                <em class="ph-bold ph-x cursor-pointer text-xl hover:text-accent"></em>
+            </label>
+        </div>
+        <div class="p-4">
+            <div class="max-h-[50vh] overflow-y-auto border dark:border-gray-600 rounded">
+                <ng-container *ngFor="let user of selectedService?.matchedProfiles">
+                        <div class="hover:bg-accent/[0.08] p-3 flex text-gray-600 dark:text-base-100 dark:border-gray-600 border-b cursor-pointer"
+                            (click)="openProfilePopUp($event,user.id)">
+                            <div>
+                                    <img *ngIf="user.data.image_id as image_id" class="w-12 h-12 rounded-full cursor-pointer" [src]="getImageUrl(image_id)"
+                                        alt="Profile-img" (click)="openProfilePopUp($event,user.id)">
+                                <!-- If image_id is not available, use the initials -->
+                                    <span *ngIf="!user.data.image_id"
+                                        class="w-12 h-12 rounded-full bg-base-100 flex items-center justify-center text-primary cursor-pointer"
+                                        (click)="openProfilePopUp($event,user.id)">
+                                        {{getInitials(user.data.first_name, user.data.last_name)}}
+                                    </span>
+                            </div>
+                            <div class="pl-3 w-[calc(100% - 3rem)]">
+                                <span class="font-medium flex gap-1 items-center text-secondary dark:text-white">
+                                    {{user.data.first_name}} {{user.data.last_name}} ({{user.data.profile.ishort}})
+                                    <em class="ph-duotone"
+                                        [class]="user?.data?.status?.s === 'available'? 'ph-check-circle text-green-500': (user?.data?.status?.s === 'off') ? 'ph-minus-circle text-gray-400': 'ph-prohibit text-gray-400'"></em>
+                                    <span class="text-sm" *ngIf="user?.coverageProfile as coverage">
+                                        <span class="font-normal text-base-300">{{'coveredBy' | translate}}:</span> 
+                                        {{coverage?.data?.first_name}} {{coverage?.data?.last_name}}
+                                    </span>
+                                </span>
+                                <p class="text-sm">{{user.data.profile.dept}}</p>
+                                <p *ngIf="user?.data?.status?.r !== undefined || user?.data?.profile?.title" class="text-sm">
+                                    {{ user?.data?.status?.r || [] | formatServiceTeam: maxLength }}
+                                    <ng-container *ngIf="user?.data?.status?.r"> &middot; </ng-container>
+                                    {{ user?.data?.profile?.title }}
+                                  </p>
+                            </div>
+                        </div>
+                </ng-container>
+            </div>
+            <div class="flex justify-end items-center mt-4">
+                <button type="button"class="btn btn-primary text-white" (click)="sendServiceTeamId()">{{'sendMessageToThisService' | translate}}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<web-messenger-user-profile-modal *ngIf="showProfileModal" [userId]="selectedUserId" [showUserProfileModal]="showProfileModal" (sendCoverageIdToCompose)="addComposeQueryParamsForCoverageId($event)" (sendUserIdToCompose)="addComposeQueryParamsForUserId($event)" (showUserProfile)="showUserProfile($event)"
+></web-messenger-user-profile-modal>

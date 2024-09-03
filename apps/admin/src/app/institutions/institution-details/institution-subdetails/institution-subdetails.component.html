@@ -1,0 +1,391 @@
+<div>
+  <ng-container *ngIf="institution">
+    <h2 class="font-semibold text-base text-secondary dark:text-white mb-3">
+      {{ institution.name }}
+    </h2>
+
+    <hr class="mb-4 dark:border-gray-700" />
+
+    <div class="grid sm:grid-cols-2 grid-cols-1 gap-3 w-full">
+      <span>
+        <label class="font-semibold">{{ 'parent' | translate }}</label>
+        <p *ngIf="institution.parent_iid === ''; else parentElseBlock">
+          {{ 'Root' | translate }}
+        </p>
+        <ng-template #parentElseBlock>
+          <p>
+            <a (click)="navigateToPath(institution.parent_iid)" class="link link-primary dark:link-accent  table no-underline" >{{ institution.parent_iid }}</a>
+          </p>
+        </ng-template>
+      </span>
+      <span>
+        <label class="font-semibold">{{ 'master' | translate }}</label>
+        <p
+          class="text-neutral"
+          *ngIf="institution.master_iid === ''; else masterElseBlock"
+        >
+          {{ 'None' | translate }}
+        </p>
+        <ng-template #masterElseBlock>
+          <p>
+            <a (click)="navigateToPath(institution.master_iid)" class="link link-primary dark:link-accent  table no-underline" > {{ institution.master_iid }}</a>
+           </p>
+         
+        </ng-template>
+      </span>
+
+      <span>
+        <label class="font-semibold">{{
+          'institutionStatus' | translate
+        }}</label>
+        <span class="flex items-center gap-x-2">
+          <p *ngIf="institution.is_locked === false; else statusElseBlock">
+            {{ 'Enable' | translate }}
+          </p>
+          <ng-template #statusElseBlock>
+            {{ 'disabled' | translate }}
+          </ng-template>
+          <ng-container
+            *ngIf="
+              getALLCurrentUserPermissionList?.client_institution_permissions
+            "
+          >
+            <button (click)="open_Modal('status')">
+              <em
+                class="ph ph-pencil-simple text-primary dark:text-accent"
+              ></em>
+            </button>
+          </ng-container>
+        </span>
+      </span>
+      <span>
+        <label class="font-semibold">{{ 'sso' | translate }}</label>
+        <span class="flex items-center gap-x-2" (click)="openSSOPage()">
+          <p
+            class="text-neutral"
+            *ngIf="institution.is_sso_enabled === false; else ssoElseBlock"
+          >
+            {{ 'notSso' | translate }}
+          </p>
+          <ng-template #ssoElseBlock>
+            {{ 'ssoEnabled' | translate }}
+          </ng-template>
+          <button>
+            <em class="ph ph-pencil-simple text-primary dark:text-accent"></em>
+          </button>
+        </span>
+      </span>
+      <span *ngIf="institution.is_cellphone_verification_enabled">
+        <label class="font-semibold">{{
+          'cellphoneVerification' | translate
+        }}</label>
+        <span class="flex items-center gap-x-2">
+          <ng-container
+            *ngIf="!institution?.cellphone_verification; else enabledText"
+          >
+            <span class="text-neutral"> Disabled </span>
+          </ng-container>
+          <ng-template #enabledText>
+            <span> Enabled </span>
+          </ng-template>
+          <ng-container
+            *ngIf="
+              getALLCurrentUserPermissionList?.client_institution_permissions
+            "
+          >
+            <button (click)="open_Modal('CellphoneVerification')">
+              <em
+                class="ph ph-pencil-simple text-primary dark:text-accent"
+              ></em>
+            </button>
+          </ng-container>
+        </span>
+      </span>
+      <span>
+        <label class="font-semibold">{{
+          'customSpecialties' | translate
+        }}</label>
+        <span class="flex items-center gap-x-2">
+          <p
+            *ngIf="
+              institution.specialties && institution.specialties.length > 0;
+              else specialtiesElseBlock
+            "
+          >
+            {{ institution.specialties.length }} {{ 'specialties' | translate }}
+          </p>
+          <ng-template #specialtiesElseBlock>
+            {{ 'NoSpecialties' | translate }}
+          </ng-template>
+          <ng-container
+            *ngIf="
+              getALLCurrentUserPermissionList?.client_institution_permissions
+            "
+          >
+            <button (click)="openCustomTitleModal('specialties')">
+              <em
+                class="ph ph-pencil-simple text-primary dark:text-accent"
+              ></em>
+            </button>
+          </ng-container>
+        </span>
+      </span>
+      <span>
+        <label class="font-semibold">{{ 'customTitle' | translate }}</label>
+        <span class="flex items-center gap-x-2">
+          <p
+            *ngIf="
+              institution.titles && institution.titles.length > 0;
+              else titlesElseBlock
+            "
+          >
+            {{ institution.titles.length }} {{ 'titles' | translate }}
+          </p>
+          <ng-template #titlesElseBlock>
+            {{ 'Notitles' | translate }}
+          </ng-template>
+          <ng-container
+            *ngIf="
+              getALLCurrentUserPermissionList?.client_institution_permissions
+            "
+          >
+            <button (click)="openCustomTitleModal('titles')">
+              <em
+                class="ph ph-pencil-simple text-primary dark:text-accent"
+              ></em>
+            </button>
+          </ng-container>
+        </span>
+      </span>
+      <span>
+        <label class="font-semibold">{{ 'webTimeout' | translate }}</label>
+        <span class="flex items-center gap-x-2">
+          <ng-container
+            *ngIf="!booleanFlags.isWebEditing; else editingWebSection"
+          >
+            <span
+              [class]="
+                webtimeoutValue !== timeoutConfigCheck.web_timeout_minutes
+                  ? 'text'
+                  : 'text-neutral'
+              "
+            >
+              {{
+                webtimeoutValue !== timeoutConfigCheck.web_timeout_minutes
+                  ? webtimeoutValue + ' minutes'
+                  : 'Not Set'
+              }}
+            </span>
+
+            <ng-container
+              *ngIf="
+                getALLCurrentUserPermissionList?.client_institution_permissions
+              "
+            >
+              <button (click)="startEditing('webTimeout')">
+                <em
+                  class="ph ph-pencil-simple text-primary dark:text-accent"
+                ></em>
+              </button>
+            </ng-container>
+          </ng-container>
+          <ng-template #editingWebSection>
+            <input
+              class="border-b border-gray-600"
+              type="number"
+              [(ngModel)]="editedWebtimeoutValue"
+              min="0"
+            />
+            <button (click)="saveChangesSettime('web_timeout_minutes')">
+              <em class="ph ph-floppy-disk text-primary dark:text-accent"></em>
+            </button>
+          </ng-template>
+        </span>
+      </span>
+      <span>
+        <label class="font-semibold">{{
+          'messageRetention(days)' | translate
+        }}</label>
+        <span class="flex items-center gap-x-2">
+          <ng-container
+            *ngIf="!booleanFlags.isMessageEditing; else editingMessageSection"
+          >
+            <span
+              [class]="
+                messageRetention !== timeoutConfigCheck.retention_days
+                  ? 'text'
+                  : 'text-neutral'
+              "
+            >
+              {{
+                messageRetention !== timeoutConfigCheck.retention_days
+                  ? messageRetention + ' days'
+                  : 'Not Set'
+              }}
+            </span>
+            <ng-container
+              *ngIf="
+                getALLCurrentUserPermissionList?.client_institution_permissions
+              "
+            >
+              <button (click)="startEditing('messageRetention')">
+                <em
+                  class="ph ph-pencil-simple text-primary dark:text-accent"
+                ></em>
+              </button>
+            </ng-container>
+          </ng-container>
+          <ng-template #editingMessageSection>
+            <input
+              class="border-b border-gray-600"
+              type="number"
+              [(ngModel)]="editedmessageRetention"
+              min="0"
+            />
+            <button (click)="saveChangesSettime('retention_days')">
+              <em class="ph ph-floppy-disk text-primary dark:text-accent"></em>
+            </button>
+          </ng-template>
+        </span>
+      </span>
+      <span>
+        <label class="font-semibold">{{ 'mobileTimeout' | translate }}</label>
+        <span class="flex items-center gap-x-2">
+          <ng-container
+            *ngIf="!booleanFlags.isMobileEditing; else editingMobileSection"
+          >
+            <span
+              [class]="
+                mobiletimeoutValue !== timeoutConfigCheck.mobile_timeout_minutes
+                  ? 'text'
+                  : 'text-neutral'
+              "
+            >
+              {{
+                mobiletimeoutValue !== timeoutConfigCheck.mobile_timeout_minutes
+                  ? mobiletimeoutValue + ' minutes'
+                  : 'Not Set'
+              }}
+            </span>
+            <ng-container
+              *ngIf="
+                getALLCurrentUserPermissionList?.client_institution_permissions
+              "
+            >
+              <button (click)="startEditing('mobiletimeoutValue')">
+                <em
+                  class="ph ph-pencil-simple text-primary dark:text-accent"
+                ></em>
+              </button>
+            </ng-container>
+          </ng-container>
+          <ng-template #editingMobileSection>
+            <input
+              class="border-b border-gray-600"
+              type="number"
+              [(ngModel)]="editedMobiletimeoutValue"
+              min="0"
+            />
+
+            <button (click)="saveChangesSettime('mobile_timeout_minutes')">
+              <em class="ph ph-floppy-disk text-primary dark:text-accent"></em>
+            </button>
+          </ng-template>
+        </span>
+      </span>
+      <span>
+        <label class="font-semibold">{{ 'reportingTag' | translate }}</label>
+        <span class="flex items-center gap-x-2">
+          <p
+            *ngIf="
+              institution.tags && institution.tags.length > 0;
+              else reportTagElseBlock
+            "
+          >
+            {{ institution.tags.length }} {{ 'tags' | translate }}
+          </p>
+          <ng-template #reportTagElseBlock>
+            {{ 'noReportingTags' | translate }}
+          </ng-template>
+          <ng-container
+            *ngIf="
+              getALLCurrentUserPermissionList?.client_institution_permissions
+            "
+          >
+            <button (click)="openCustomTitleModal('tags')">
+              <em
+                class="ph ph-pencil-simple text-primary dark:text-accent text-primary dark:text-accent"
+              ></em>
+            </button>
+          </ng-container>
+        </span>
+      </span>
+      <span>
+        <label class="font-semibold">{{
+          'semLimit_(hours)' | translate
+        }}</label>
+        <span class="flex items-center gap-x-2">
+          <ng-container
+            *ngIf="!booleanFlags.isSemEditing; else editingSemSection"
+          >
+            <span
+              [class]="
+                semLimit !== timeoutConfigCheck.sem_hours
+                  ? 'text'
+                  : 'text-neutral'
+              "
+            >
+              {{
+                semLimit !== timeoutConfigCheck.sem_hours
+                  ? semLimit + ' hours'
+                  : semLimit
+              }}
+            </span>
+            <ng-container
+              *ngIf="
+                getALLCurrentUserPermissionList?.client_institution_permissions
+              "
+            >
+              <button (click)="startEditing('semlimit')">
+                <em
+                  class="ph ph-pencil-simple text-primary dark:text-accent"
+                ></em>
+              </button>
+            </ng-container>
+          </ng-container>
+          <ng-template #editingSemSection>
+            <input
+              class="border-b border-gray-600"
+              type="number"
+              [(ngModel)]="editedSemlimit"
+              min="0"
+            />
+            <button (click)="saveChangesSettime('sem_hours')">
+              <em class="ph ph-floppy-disk text-primary dark:text-accent"></em>
+            </button>
+          </ng-template>
+        </span>
+      </span>
+    </div>
+  </ng-container>
+</div>
+
+<web-messenger-permission-modal
+  *ngIf="showCheckboxModal"
+  [isCheckboxModal]="showCheckboxModal"
+  (closePopup)="closeCheckboxModal($event)"
+  [title]="dynamicModalTitle"
+  [overrideModal]="overrideModal"
+  [checkboxOptions]="CheckboxOptionsArray"
+  (onsaveOverride)="updatedOverride($event)"
+  [overrideModal]="overrideModal"
+></web-messenger-permission-modal>
+<web-messenger-reporting-tags
+  *ngIf="isCustomTitleModal"
+  [isReportingTag]="isCustomTitleModal"
+  [showTitle]="enableServiceModalTitle"
+  [modaltitle]="ServiceTeamModalTitle"
+  [serviceTags]="serviceTeamResptags"
+  (isReportingTags)="isreportingTags($event)"
+  (saveTitlesEvent)="onSaveTitles($event)"
+></web-messenger-reporting-tags>

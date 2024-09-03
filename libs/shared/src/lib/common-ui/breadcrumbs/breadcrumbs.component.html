@@ -1,0 +1,12 @@
+<div class="breadcrumbs flex flex-row gap-3 text-primary dark:text-accent text-[19px] pb-[26px]">
+    <ng-container *ngFor="let item of items">
+        <div [class]="currentStep === item.name ? 'is-active' : ''" 
+            (click)="tryActivateItem(item)">
+            {{ item.displayText | translate }}
+        </div>
+
+        <div *ngIf="(item !== items.slice(-1)[0])">
+            <img src="/assets/images/Icon-Right-Arrow-Gray.svg">
+        </div>
+    </ng-container>
+</div>

@@ -1,0 +1,29 @@
+<p class="font-bold text-[18px] pb-10">{{ institutionId }}</p>
+<h2 class="text-[35px] font-semibold mb-[15px] mt-4">{{ 'integrationWizard.doneHeader' | translate }}</h2>
+<p class="text-sm">{{ 'integrationWizard.exitPrompt' | translate }}</p>
+
+<div class="pt-6">
+    <h1 class="text-[20px] pb-[17px]">{{ 'Summary' | translate }}</h1>
+    <table class="w-2/5 text-[15px]">
+        <thead class="bg-base-100 dark:bg-gray-600">
+            <tr>
+                <th class="p-5 rounded-l"></th>
+                <th class="font-bold">{{ "MATCHED" | translate }}</th>
+                <th class="font-bold rounded-r">{{ "UNMATCHED" | translate }}</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="border-b border-[#B6B8C8] dark:border-gray-100">
+                <th class="p-2 font-light text-left">{{ "users" | translate }}</th>
+                <th class="p-2">{{ usersMatched }}</th>
+                <th class="p-2">{{ usersRemaining }}</th>
+            </tr>
+
+            <tr class="border-b border-[#B6B8C8] dark:border-gray-100">
+                <th class="p-2 font-light text-left">{{ "serviceTeams" | translate }}</th>
+                <th class="p-2">{{ serviceTeamsMatched }}</th>
+                <th class="p-2">{{ serviceTeamsRemaining }}</th>
+            </tr>
+        </tbody>
+    </table>
+</div>

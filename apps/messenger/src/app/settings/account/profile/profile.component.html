@@ -1,0 +1,151 @@
+<div id="profile" class="px-6 h-full overflow-y-auto" (click)="closetoggleDropdown()">  
+    <div class="flex flex-wrap justify-between mb-4">
+        <h2 class="text-secondary text-xl font-medium dark:text-white"> {{ "profile" | translate }}
+        </h2>
+        <span *ngIf="!authResponse?.user?.flag_managed" class="text-gray-600 dark:text-base-100">{{ "editNameEmailText" | translate }} <a  href="mailto:amsconnect@americanmessaging.net?subject=AMSConnect+account+support"
+                class="text-primary dark:text-accent font-bold text-sm"> {{ "contactSupport" | translate }}</a></span>
+                <span *ngIf="authResponse?.user?.flag_managed" class="text-gray-600 dark:text-base-100">{{ "editNameEmailSpecialtyTitle" | translate }} <a  href="mailto:amsconnect@americanmessaging.net?subject=AMSConnect+account+support"
+                    class="text-primary dark:text-accent font-bold text-sm"> {{ "contactSupport" | translate }}</a></span>
+    </div>
+    <div class="flex items-center gap-2 mb-4">
+        <div class="image-container">
+            <span class="relative block" >
+                <img *ngIf="isImageVisible" class="w-24 h-24 rounded-full border-2 border-base-100"   id="imagePreview"
+                    [src]="storeImageUrl" />
+                    <ng-container *ngIf="showLoader">
+                        <svg class="animate-spin -ml-1 mr-3 h-6 w-6 top-1 text-base-300 absolute left-[40%] top-[40%]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="blue" stroke-width="4"></circle>
+                          <path class="opacity-75" fill="blue" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                      </ng-container>
+                    <div class=" w-24 h-24 rounded-full border-2 border-base-100 bg-base-100 flex items-center justify-center text-primary" *ngIf="authResponse.user && !isImageVisible">
+                        <span class="text-2xl uppercase">{{authResponse.user.first_name |slice:0:1}}{{authResponse.user.last_name
+                          |slice:0:1}}</span>
+                      </div>
+                <label title="{{'changePhoto' | translate}}"
+                    class="absolute bottom-1 right-1 rounded-full bg-gray-50 h-6 w-6 flex items-center justify-center cursor-pointer">
+                    <em class="ph-fill ph-camera text-xl text-primary" (click)="handleFileInputClick()"></em>
+                    <input type='file' id="imageUpload" accept=".png, .jpg, .jpeg" #fileInput
+                        class="opacity-0 w-4 h-4 absolute" (change)="uploadFile($event)" />
+                </label>
+            </span>
+            <a *ngIf="isRemovePhoto" class="text-neutral text-sm cursor-pointer" (click)="removePhoto()">{{
+                "removePhoto" | translate
+                }}</a>
+        </div>
+        <h4 class="text-secondary dark:text-white font-bold mb-4 ml-2 text-xl"
+            *ngIf="authResponse && authResponse.user"> {{authResponse.user.first_name}} {{authResponse.user.last_name}}
+        </h4>
+    </div>
+    <div class="lg:w-3/6 md:w-4/6">
+        <div class="relative"  *ngIf="authResponse.user">  
+              <div class="mb-4">
+            <label class="font-bold text-secondary text-sm dark:text-base-100 md:w-[12rem]">{{'specialty'|translate}}</label>
+            <div class="collapse  border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-2 px-2" [ngClass]="{'pointer-events-none' : authResponse.user.flag_managed}" (click)="toggleDropdown($event)">
+               
+                <input type="checkbox" class="p-0 min-h-0" [disabled]="authResponse.user.flag_managed" />
+                <div class="collapse-title p-0 pr-4 pl-2 min-h-0" (click)="onListItemChange()" >
+                    <em class="absolute right-0 top-1" [ngClass]= "showDropdownSpecialty ? 'ph ph-caret-up' : 'ph ph-caret-down' "></em>
+                    <span [innerHTML]="selectedSpecialty | sanitizeHtml"></span>
+                </div>
+                <ng-container *ngIf="showDropdownSpecialty">
+                    <ng-container *ngIf="!closeInput">
+                    <div class="mt-3" *ngIf="settingsArrayStates?.filteredSpecialties" >
+                        <input type="text" (keyup)="inputKeyUpSpecialityOrTitle($event,settingsArrayStates.filteredSpecialties,'specialty')"  
+                            class="border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-2 px-3" maxlength="40"
+                            autocomplete="off" name="institution" (focusout)="searchSpecialty($event)" (change)="onListItemChange()" (click)="clickSpecialtyTitle($event)"
+                            id="specialtyInput" placeholder="{{'specialities' | translate}}"/>
+                        <ul class="select2-results max-h-24 overflow-y-auto mt-2 cursor-pointer">
+                            <li class="rounded px-1 rounded" #specialtyItem [class.selected-list]="i === selectedIndex"  
+                                *ngFor="let specialities of settingsArrayStates.filteredSpecialties | search: inputValue ,let i=index"
+                                (click)="selectSpecialty(specialities); selectedIndex = -1;">{{specialities}}</li>
+                        </ul>
+                    </div>
+                </ng-container>
+            </ng-container>
+            </div>
+        </div>
+        <div class="mb-4">
+            <label class="mb-1 flex justify-between font-semibold text-secondary text-sm dark:text-base-100"
+                for="email">
+                {{ "currentServiceTeam" | translate }}
+                <span class="text-primary  hover:text-accent dark:text-accent cursor-pointer"
+                    (click)="openCurrentServiceTeamModal()">
+                    <em class="ph-bold ph-pencil-simple"></em> {{ "edit" | translate }}</span>
+
+            </label>
+            <input type="text"
+                class="border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-2 px-3"
+                name="text"
+                [value]="settingsArrayStates.showCurrentServiceTeam ? (settingsArrayStates.showCurrentServiceTeam| formatServiceTeam: maxLength) : 'noCurrentServiceTeam'|translate"
+                disabled />
+        </div>
+        <div class="mb-4">
+            <label class="font-bold text-secondary text-sm dark:text-base-100 md:w-[12rem]">{{"title"|translate}}</label>
+            <div
+                class="collapse  border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-2 px-2" [ngClass]="{'pointer-events-none' : authResponse.user.flag_managed}" (click)="toggleDropdownTitle($event)">
+                
+                <input  type="checkbox" class="p-0 min-h-0" [disabled]="authResponse.user.flag_managed" />
+                <div class="collapse-title p-0 pr-4 pl-2 min-h-0">
+                    <em class="absolute right-0 top-1" [ngClass]= "showDropdownTitle ? 'ph ph-caret-up' : 'ph ph-caret-down' "></em>
+                    <span [innerHTML]="selectedTitle | sanitizeHtml"></span>
+                </div>
+                <ng-container *ngIf="showDropdownTitle">  
+                    <ng-container *ngIf="!closeInput">
+                    <div class="mt-3" *ngIf="institutions && institutions?.titles">
+                        <input type="text" (keyup)="inputKeyUpSpecialityOrTitle($event,settingsArrayStates.filteredTitles,'title')"
+                            class="border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-2 px-3"
+                            autocomplete="off" name="institution" (focusout)="searchTitle($event)" id="titleInput" (change)="onListItemChange()" (click)="clickSpecialtyTitle($event)"
+                            placeholder="{{'title' | translate}}" maxlength="40" #titleInput />
+                        <ul class="select2-results max-h-24 overflow-y-auto mt-2 cursor-pointer">
+                            <li #titleItem *ngFor="let title of settingsArrayStates.filteredTitles | search: inputValue,let i=index" (click)="selectTitles(title); selectedIndex = -1;" [class.selected-list]="i === selectedIndex">{{title}}</li>
+                        </ul>
+                    </div>
+                    </ng-container>
+            </ng-container>
+            </div>
+        </div>
+        <div class="mb-4">
+            <label class="mb-1 block font-semibold text-secondary text-sm dark:text-base-100" for="email">
+                {{ "email" | translate }}
+            </label>
+                <input type="email"
+                    class="border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-2 px-3"
+                    name="email" [value]="authResponse.user.email" disabled />
+        </div>
+
+        <div class="mb-4">
+            <label class="mb-1 flex justify-between font-semibold text-secondary text-sm dark:text-base-100"
+                for="email">
+                {{ "cellPhone" | translate }}
+                <span class="text-primary  hover:text-accent dark:text-accent cursor-pointer" (click)="changeButton=== EditOrSave.Save ? saveCellPhoneNumber() : editCellPhoneNumber()"> 
+                <em class="ph-bold ph-pencil-simple" *ngIf="changeButton===EditOrSave.Edit"></em> {{changeButton}}</span>
+
+            </label>
+            <form  [formGroup]="CellPhoneForm">
+            <input type="text" id="editCellPhoneInput"
+                class="border bg-transparent border-base-300 dark:border-gray-600 dark:text-white cursor-text blinking-cursor leading-none resize-none text-gray-600 rounded w-full py-2 px-3"
+                name="text" minlength="10"
+                formControlName="cell_phone" autofocus /></form>
+        </div>
+
+        <div class="mb-4" *ngIf="authResponse.user.profile.pager_number">
+            <label class="mb-1 block font-semibold text-secondary text-sm dark:text-base-100" for="pagerNo">
+                {{ "pagerNo" | translate }}
+            </label>
+                <input type="text"
+                    class="border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-2 px-3"
+                    name="pagerNo" [value]="authResponse.user.profile.pager_number" disabled />
+        </div>
+        <div class="mb-4">
+            <label class="mb-1 block font-semibold text-secondary text-sm dark:text-base-100" for="email">
+                {{ "institution" | translate }}
+            </label>
+                <input type="text"
+                    class="border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-2 px-3"
+                    name="text" [value]="authResponse.user.profile.iname" disabled />
+        </div>
+    </div>
+</div>
+
+<web-messenger-current-service-team *ngIf="serviceTeamModalState" (showServiceTeamPopUp)="closeServiceTeamPopUp($event)" [userDataFromMessenger]="updatedUserDetails"></web-messenger-current-service-team>

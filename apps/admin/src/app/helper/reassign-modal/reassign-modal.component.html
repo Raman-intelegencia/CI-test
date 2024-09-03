@@ -1,0 +1,41 @@
+<form >
+    <input type="checkbox" [checked]="showResignServiceModal" class="modal-toggle" />
+   
+    <div class="modal bg-black/70">
+      <div class="modal-box max-w-2xl bg-white dark:bg-black rounded p-0 relative overflow-y-hidden dark:border-primary/60 dark:border dark:shadow-xl dark:shadow-primary/20">
+        <div class="flex justify-between text-white items-center bg-primary p-3">
+          <h3 class="font-bold dark:text-white">{{"reassignService" | translate }}</h3>
+          
+          <button type="button" (click)="onCloseClick()">
+            <em class="ph-bold ph-x cursor-pointer text-xl hover:text-accent"></em>
+          </button>
+        </div>
+        <div class="p-4 text-gray-600 dark:text-base-100 text-sm">
+          <div class="max-h-[60vh] overflow-y-auto px-2">
+            <p class="mb-3">{{"removedAndRename" | translate }}</p>
+            <p class="mb-3">{{"clickOnService" | translate }}</p>
+            <div *ngFor="let release of activeRoles" class="collapse border rounded dark:border-gray-700 mb-1 p-0">
+              <input type="checkbox" class="peer min-h-0" />
+              <div class="collapse-title cur' py-1 px-3 text-lg text-secondary cursor-pointer dark:text-white min-h-0">
+                {{release}}
+              </div>
+              <div class="collapse-content px-0 peer-checked:pb-2">
+                <label *ngFor="let item of roles;" class="cursor-pointer label justify-start flex gap-2 border-t dark:border-gray-700 px-3">
+                  <input type="checkbox" class="checkbox checkbox-xs checkbox-primary dark:checkbox-accent rounded"
+                         (change)="checkSelect(release, item)" [checked]="selectedItems[release] && selectedItems[release].includes(item)" />
+                  <span class="mr-4">{{ item }}</span>
+                </label>
+              </div>
+            </div>
+          </div>
+          <div class="flex justify-end items-center mt-8 px-2">
+           
+            <button type="button" class="btn btn-primary"  (click)="onSubmit()">
+              {{"saveService" | translate }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+

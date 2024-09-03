@@ -1,0 +1,296 @@
+<div
+    class="w-full md:px-12 px-4 bg-gray-100 dark:bg-gray-700/20 dark:border-b dark:border-gray-700 dark:text-white py-4">
+    <h2 class="text-secondary text-lg font-bold dark:text-white">{{"BroadcastMessaging" | translate }}</h2>
+</div>
+
+<div
+    class="w-full md:h-[calc(100vh-7rem)] h-[calc(100vh-9.5rem)] py-4 md:px-12 px-4 text-gray-600 dark:text-base-100 overflow-y-auto ">
+    <p>{{"AllBroadCastMessage" | translate }}</p>
+    <form class="lg:w-4/6 md:w-5/6 mt-4" [formGroup]="createBroadcastMessageForm" (ngSubmit)="createBroadcastMessage()">
+        <div class="grid md:grid-cols-2 gap-6 grid-cols-1">
+            <div>
+                <div class="mb-3">
+                    <h3 class="text-secondary font-medium dark:text-white text-lg mb-2">
+                        {{broadcastResponseData?.subject?.msg}}</h3>
+                    <label class="mb-1.5">{{"Subject" | translate }}</label>
+                    <input formControlName="subject" type="text" name="subject"
+                        [placeholder]="'SubjectPlaceholder' | translate"
+                        class="mt-3 border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-2 px-3">
+                </div>
+                <div class="mb-3">
+                    <h3 class="text-secondary font-medium dark:text-white text-lg mt-3 mb-2">
+                        {{broadcastResponseData?.sender?.msg}}</h3>
+                    <label class="mb-1.5">{{"Sender" | translate }}</label><br>
+                    <!--Load the API-->
+                    <div class="collapse border border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-1.5 pl-3"
+                        (click)="sendertoggleDropdown($event)">
+                            <input type="checkbox" name="IIDs" [ngClass]=" hideSendUser ? 'w-10 ml-auto' : 'peer min-h-0 p-0'"  />
+                        <div class="collapse-title p-0 min-h-0 gap-2">
+                            <div class="flex flex-wrap gap-1 items-center m-2 rounded px-2 py-0.5 text-sm">
+                                <em class="absolute right-2 top-1"
+                                    [ngClass]="sendershowDropdown ? 'ph ph-caret-up' : 'ph ph-caret-down' "></em>
+                                <ng-container *ngIf="removeCrossIcon">
+                                    <span class="bg-gray-50 dark:bg-gray-900 rounded px-2 py-0.5 my-2 text-sm"
+                                        (click)="unSelectUser(createBroadcastMessageForm.get('Sender')?.value)">
+                                        {{ userName}}
+                                        <em class="ph ph-x mr-1 cursor-pointer"></em>
+                                    </span>
+                                </ng-container>
+                            </div>
+                        </div>
+                        <ng-container *ngIf="sendershowDropdown">
+                            <div class="collapse-content p-0 pr-3">
+                                <div>
+
+                                        <input type="text" (keyup)="searchUser();" [placeholder]="'Search' | translate"
+                                        formControlName="searchQueryUser" (click)="searchUserStop($event)" (focus)="searchUser()"
+                                        class="mt-3 border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-2 px-3">
+
+                                    <div class="mt-2 max-h-[35vh] overflow-y-auto">
+                                        <span *ngFor="let user of allUsersListData">
+                                            <span class="my-2" (click)="selectsender(user);">
+                                                <b class="block text-sm">{{user.first_name}} {{user.last_name}}</b>
+                                                <p class="block text-xs">{{user.profile.iname}}</p>
+                                                <p class="block text-xs mb-2">{{user.profile.dept}}-{{user.profile.title}}
+                                                </p>
+                                            </span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </ng-container>
+                    </div>
+                </div>
+            </div>
+            <div class="mb-3">
+                <h3 class="text-secondary font-medium dark:text-white text-lg mb-2">
+                    {{broadcastResponseData?.message?.msg}}</h3>
+                <label class="mb-1.5">{{"Message" | translate }}</label>
+                <textarea formControlName="message" type="text" name="Message" rows="5"
+                    [placeholder]="'MessagePlaceholder' | translate"
+                    class="mt-3 border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-2 px-3"></textarea>
+            </div>
+        </div>
+
+
+        <label class="table cursor-pointer label justify-start mt-3 pb-1">
+            <input type="checkbox" formControlName="urgent"
+                class="checkbox  checkbox-xs checkbox-primary dark:checkbox-accent rounded" checked />
+            <span class="ml-4">{{broadcastResponseData?.urgent?.msg}}</span>
+        </label>
+        <hr class="my-6 dark:border-gray-700">
+        <h3 class="text-secondary font-medium dark:text-white text-lg mb-2">{{"ChooseRecipients" | translate }}</h3>
+        <label class="mb-1.5">{{"IIDs" | translate }}</label>
+        <div>
+
+            <div class="collapse border border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-2 pl-3"
+                (click)="toggleDropdown($event)">
+                <input type="checkbox" name="IIDs"
+                    [ngClass]=" isSelectedInstitute ? 'w-10 ml-auto' : 'peer min-h-0 p-0'" />
+                <div class="collapse-title p-0 min-h-0 gap-2">
+                    <div class="flex flex-wrap gap-1 items-center m-2 rounded px-2 py-0.5 text-sm">
+                        <em class="absolute right-2 top-1"
+                            [ngClass]="showDropdown ? 'ph ph-caret-up' : 'ph ph-caret-down' "></em>
+                        <ng-container *ngFor="let institute of selectedInstitute; let k = index">
+                            <span class="bg-gray-100 dark:bg-gray-900 rounded px-2 py-0.5 text-sm">
+                               <span>
+                                    <em (click)="unselectInstitution(institute.name,$event);"
+                                        class="ph ph-x mr-1 cursor-pointer"></em>{{institute.name}}
+                                </span>
+                            </span>
+                        </ng-container>
+                    </div>
+                </div>
+                
+                    <div class="collapse-content p-0 pr-3">
+                        <form [formGroup]="instituteSearchForm">
+                            <input type="text" formControlName="searchQuery" placeholder="{{'selectInstitutions' | translate}}"
+                                autocomplete="off" name="institution"
+                                (click)="institutionSearch(instituteSearchForm.get('institution')?.value); isInstituteInputFocused = true"
+                                formControlName="institution"
+                                (keyup)="institutionSearch(instituteSearchForm.get('institution')?.value)"
+                                class="border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-2 px-3"
+                                #institute />
+                            <ng-container *ngIf="isInstituteInputFocused">
+                            <ul class="select2-results max-h-24 overflow-y-auto mt-2">
+                                <li *ngFor="let institute of allInstitutions; let i = index"
+                                    [ngClass]="{'bg-blue-50 dark:bg-gray-900 dark:text-base-100': i === selectedIndex}"
+                                    (click)="selectInstitution(institute); selectedIndex = -1;">
+                                    <p class="font-medium text-secondary dark:text-base-100"
+                                        [innerHTML]="institute?.name | highlightSearchTxt:searchTerm"></p>
+                                    <p class="text-sm" [innerHTML]="institute?.id | highlightSearchTxt:searchTerm"></p>
+                                </li>
+                            </ul>
+                        </ng-container>
+                        </form>
+                    </div> 
+            </div>
+        </div>
+        <div class="grid md:grid-cols-2 gap-x-6 grid-cols-1 mt-3">
+            <div class="mb-3">
+                <label class="mb-1.5">{{"ServiceTeam" | translate }}</label>
+                <div
+                    class="border flex justify-between bg-transparent border-base-300 dark:border-gray-600 block dark:text-white text-gray-600 rounded w-full py-1 px-3">
+                    <span><span *ngFor="let ServiceTeam of serviceTeam;; let first = first; let last = last" class="text-xs"> {{ first ? ServiceTeam : '' }}
+                        <ng-container *ngIf="last && serviceTeam.length > 1">
+                            +{{ serviceTeam.length - 1 }} more
+                        </ng-container>
+                    </span></span>
+                
+                        <span *ngIf="disableService; else enable ">
+                            <label for="chooseUsers" class="tooltip tooltip-primary cursor-pointer " data-tip="Edit">
+                                <em class="text-primary text-base ph-bold ph-note-pencil" (click)="openServiceTeam()"></em>
+                            </label>
+                           
+                        </span>
+                        <ng-template #enable>
+                            <label for="chooseUsers" class="tooltip tooltip-primary cursor-not-allowed" data-tip="Not Allowed"> <em class="text-neutral ph ph-note-pencil"></em></label>
+                           
+                        </ng-template>
+                       
+                   
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="mb-1.5">{{"Specialty" | translate }}</label>
+                <div
+                    class="border flex justify-between bg-transparent border-base-300 dark:border-gray-600 block dark:text-white text-gray-600 rounded w-full py-1 px-3">
+                    <span><span *ngFor="let specialty of  selectedSpecialties;let first = first; let last = last" class="text-xs"> {{ first ? specialty: '' }}
+                        <ng-container *ngIf="last && selectedSpecialties.length > 1">
+                            +{{ selectedSpecialties.length - 1 }} more
+                        </ng-container></span></span>
+                        
+                    <label for="chooseSpecialtyTeam" class="tooltip tooltip-primary cursor-pointer " data-tip="Edit">
+                        <em class="text-primary text-base ph-bold ph-note-pencil" (click)="openSpecialties()"></em>
+                    </label>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="mb-1.5">{{"Title" | translate }}</label>
+                <div
+                    class="border flex justify-between bg-transparent border-base-300 dark:border-gray-600 block dark:text-white text-gray-600 rounded w-full py-1 px-3">
+                    <span><span *ngFor="let titleselected of selectedTitle ;let first = first; let last = last" class="text-xs">{{ first ? titleselected: '' }}
+                        <ng-container *ngIf="last && selectedTitle.length > 1">
+                            +{{ selectedTitle.length - 1 }} more
+                        </ng-container></span></span>
+                    <label for="chooseTitle" class="tooltip tooltip-primary cursor-pointer " data-tip="Edit"> <em
+                            class="text-primary text-base ph-bold ph-note-pencil" (click)="openTitle()"></em> </label>
+                </div>
+            </div>
+            <p class="mt-7">or <span>
+                    <input type="file" id="userfile" #fileInput class="hidden" (change)="uploadFile($event)" />
+                    <label for="userfile"
+                        class="rounded py-2 px-6 bg-base-100 dark:bg-gray-700 cursor-pointer">{{"ChooseFile" | translate
+                        }}</label>
+                </span></p>
+                <p class="mt-7"><span class="mx-1" *ngIf="checkFileSystemINCSV">{{selectedFileName}} 
+                    <ng-container *ngIf="selectedFileName">
+                        <em class="ph ph-x mr-1 cursor-pointer" (click)="removeFile();"></em>
+                    </ng-container>
+                </span></p>
+
+        </div>
+
+        <div class="flex gap-3 mt-8">
+            <label for="PreviewUser"
+                class="btn btn-outline btn-primary dark:btn-outline dark:btn-accent text-white px-6"
+                *ngIf="hidePreviewUser" (click)="previouUser();">{{"PreviewUsers" | translate }}</label>
+            <button class="btn btn-primary text-white px-6"
+                [disabled]="enableOrDisableStartProcess">{{"StartProcess" | translate }}</button>
+        </div>
+
+    </form>
+</div>
+
+
+<!--Service Team-->
+<input type="checkbox" id="chooseUsers" class="modal-toggle" />
+<div class="modal bg-black/70" #chooseUsers *ngIf="isChildVisibleServiceTeam">
+    <div
+        class="modal-box max-w-2xl bg-white dark:bg-black rounded p-0 relative overflow-y-hidden dark:border-primary/60 dark:border dark:shadow-xl dark:shadow-primary/20">
+        <div class="flex justify-between text-white items-center bg-primary p-3">
+            <h3 class="font-bold dark:text-white">{{"selectserviceTeams" | translate }}</h3>
+            <label (click)="closeServiceTeamPopUp()" class="w-7 h-7">
+                <em class="ph-bold ph-x cursor-pointer text-lg hover:text-accent"></em>
+            </label>
+        </div>
+        <div class="p-4 text-gray-600 dark:text-base-100 text-sm">
+            <input type="text"
+                class="border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-2 px-3"
+                autocomplete="off" name="institution" [placeholder]="'FilterServiceTeams' | translate" />
+            <div class="max-h-[60vh] overflow-y-auto mt-4">
+                <label class="cursor-pointer label justify-start flex gap-2 border-b dark:border-gray-700">
+                    <input type="checkbox" class="checkbox checkbox-xs checkbox-primary dark:checkbox-accent rounded"
+                        [(ngModel)]="allSpecialTeamChecked" (change)="checkAllServiceTeam()" />
+                    <span class="mr-4">* All</span>
+                </label>
+
+                <div *ngFor="let service of showCurrentServiceTeam; let j = index">
+                    <label class="cursor-pointer label justify-start flex gap-2 border-b dark:border-gray-700">
+                        <input type="checkbox"
+                            class="checkbox checkbox-xs checkbox-primary dark:checkbox-accent rounded"
+                            [(ngModel)]="allUserCheckboxStates[j]" (change)="onCheckboxChangeService(j, service.description)" />
+                        <span class="mr-4">{{ service.description }} <span class="ml-1 text-xs font-bold bg-accent rounded p-1 dark:text-black" *ngIf="service.tag">{{service.tag }}</span></span>
+                    </label>
+                </div>
+                
+            </div>
+            <div class="flex justify-end items-center mt-4 px-2">
+                <button type="button" class="btn btn-primary" (click)="submitService()" [disabled]="!serviceTeam">
+                    Save
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Specialty Team-->
+<!---->
+<web-messenger-specialty *ngIf="isSpecialty"
+[isSpecialties]="isSpecialty" [createBroadcastMessageForm]="createBroadcastMessageForm"
+    [settingsArrayStates]="settingsArrayStates"
+    (submitSpecialties)="handleSpecialtiesChanged()"(closePopUp)="closePopUp($event)"></web-messenger-specialty>
+
+<!--Title Team-->
+<web-messenger-title *ngIf="isTitles"
+[isTitles]="isTitles" [createBroadcastMessageForm]="createBroadcastMessageForm"
+    [settingsArrayStates]="settingsArrayStates" (submitSpecialties)="handleTitleChanged()" (closePopUp)="closeTitlesPopUp($event)"></web-messenger-title>
+
+
+<!--preview user-->
+<input type="checkbox" id="PreviewUser" class="modal-toggle" />
+<div class="modal bg-black/70">
+    <div
+        class="modal-box max-w-2xl bg-white dark:bg-black rounded p-0 relative overflow-y-hidden dark:border-primary/60 dark:border dark:shadow-xl dark:shadow-primary/20">
+        <div class="flex justify-between text-white items-center bg-primary p-3">
+            <h3 class="font-bold dark:text-white">
+                {{"PreviewUser" | translate }} </h3>
+            <label for="PreviewUser" class="w-7 h-7">
+                <em class="ph-bold ph-x cursor-pointer text-lg hover:text-accent"></em>
+            </label>
+        </div>
+        <div class="p-4 text-gray-600 dark:text-base-100 text-base max-h-[60vh] overflow-y-auto">
+            <ng-container *ngIf="listPreviewUser.length > 0 else noUsers">
+                <p class=" border-b dark:border-gray-700 pb-3 mb-3" *ngFor="let item of listPreviewUser">
+                    <span class="block"><strong class="font-bold">{{item.email}}</strong> ({{item.profile.iid}})</span>
+                    {{item.profile.title}} - {{item.profile.dept}}
+                </p>
+            </ng-container>
+            <ng-template #noUsers>
+                <p class=" border-b dark:border-gray-700 pb-3 mb-3">
+                    {{"noResultsFound" | translate}}
+                </p>
+            </ng-template>
+        </div>
+    </div>
+</div>
+<web-messenger-modal *ngIf="showSuccessPopup" [modalId]="'success-modal'" [modalTitle]="'Success' | translate"
+    [modalMessage]="showSuccessPopup " (closePopup)="closeErrorPopup()" (cancelPopup)="closeErrorPopup()"
+    [modalCloseText]="'close' | translate"></web-messenger-modal>
+<web-messenger-modal *ngIf="successError" [modalId]="'error-modal'" [modalTitle]="'error' | translate"
+    [modalMessage]="successError" (closePopup)="closeErrorPopup()" (cancelPopup)="closeErrorPopup()"
+    [modalCloseText]="'close' | translate"></web-messenger-modal>
+
+<web-messenger-modal *ngIf="isDiscard" [modalId]="'error-modal'" [modalTitle]="'discardChanges' | translate"
+    [modalMessage]="isDiscard" (closePopup)="discardPopup()" (cancelPopup)="cancelPopup()"
+    [modalCloseText]="'Discard' | translate"></web-messenger-modal>

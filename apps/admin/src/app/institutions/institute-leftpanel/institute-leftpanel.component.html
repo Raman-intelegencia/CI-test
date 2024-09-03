@@ -1,0 +1,202 @@
+<aside
+class="md:w-72 bg-blue-50 dark:bg-gray-900  md:h-[calc(100%-4rem)] flex flex-col z-50 md:left-auto text-gray-600 dark:text-base-100">
+<div class="py-2 h-full">
+<ng-container *ngIf="institution">
+    <label  
+        class="text-primary dark:text-accent cursor-pointer font-bold mb-2 px-6 md:pr-0 pr-8 flex items-center">
+        {{institution.name}} 
+    
+        <span *ngIf="getALLCurrentUserPermissionList?.client_institution_permissions && getALLCurrentUserPermissionList?.client_institution_create" >
+        
+            <em (click)="open_EditInstitute()" class=" ph ph-pencil-simple ml-2"></em>
+        </span>
+        
+    </label>
+        <div class="py-2 px-6 text-sm">
+           
+                <label class="font-semibold">Internal ID</label>
+                <p>{{institution.id }}</p>
+                <label class="font-semibold">Short name</label>
+                <p>{{ institution.short_name}}</p>
+           
+        </div>
+    </ng-container>   
+        <span class="md:hidden block dark:text-accent text-2xl mt-0.5 cursor-pointer px-4 py-2 absolute right-0 top-0" (click)="institutionToggle=!institutionToggle"><em class="ph-fill ph-dots-three-outline-vertical"></em></span>
+        <div class="overflow-y-auto md:max-h-[calc(100vh-13rem)]" [ngClass]="institutionToggle ? 'block absolute bg-blue-50 dark:bg-gray-900 rounded shadow right-6 top-10 max-h-[60vh] overflow-auto transition-all' : 'md:block hidden'">
+        <div class="py-2 px-6 flex flex-col gap-1 text-sm border-b border-gray-200 dark:border-gray-800">
+            <ng-container *ngIf="getALLCurrentUserPermissionList?.client_institution_permissions" >
+            <a  (click)="navigateToPermissions()"
+                class="link link-primary dark:link-accent text-left link-hover font-semibold  mt-2">
+                {{"Permissions" | translate }}
+            </a>
+            </ng-container>
+            <ng-container *ngIf="getALLCurrentUserPermissionList?.
+            client_institution_create
+            " >
+            <label
+                class="ink link-primary dark:link-accent cursor-pointer text-left link-hover font-semibold mt-2"
+                (click)="open_Modal('features')">{{"Features" | translate}}</label>
+            </ng-container>    
+            <label class="link link-primary dark:link-accent text-left link-hover font-semibold mt-2"
+                (click)="navigateTo('admins')">
+                {{"SeeAdmins" | translate}}
+            </label>
+        </div>
+
+        <!-- reporting section added  -->
+        <div class="py-4 px-6 flex flex-col gap-3 text-sm border-b border-gray-200 dark:border-gray-800">
+            <label class="font-semibold">{{"Reporting" | translate}}</label>
+            <button (click)="navigateToReportingPage()" class="link link-primary dark:link-accent text-left link-hover font-normal">
+                {{"RunOn-DemandReport" | translate }}
+            </button>
+            <button class="link link-primary dark:link-accent text-left link-hover font-normal"
+                (click)="navigateTo('eventLog')">
+                {{"EventLog" | translate }}
+            </button>
+            <button class="link link-primary dark:link-accent text-left link-hover font-normal"
+                (click)="navigateTo('apiLog')">
+                {{"APILog" | translate }}
+            </button>
+            <button class="link link-primary dark:link-accent text-left link-hover font-normal"
+                (click)="navigateTo('batchjob')">
+                {{"BatchJobs" | translate}}
+            </button>
+        </div>
+
+        <!-- dropdowm menu -->
+        <div class="py-2 px-6 flex flex-col gap-3 text-sm">
+            <div [className]=" isServiceteam ? 'collapse collapse-arrow p-0':'collapse p-0' ">
+                <input type="checkbox" class="peer min-h-0 p-0" />  
+                <ng-container *ngIf="!isServiceteam; else ServiceTeam" >
+                    <div class="p-0  dark:link-accent  min-h-0">
+                        {{"ServiceTeams" | translate}} 
+                        <span class="text-neutral">{{"no_Services" | translate}}</span>
+                    </div>
+                </ng-container>
+                <ng-template #ServiceTeam>
+                    <div class="collapse-title p-0 link link-primary dark:link-accent link-hover min-h-0">
+                        {{"ServiceTeams" | translate}} 
+                    </div>
+                </ng-template>
+                <div class="collapse-content p-0 -mb-3">
+                    <label for="adEditTags" class="block link link-primary dark:link-accent link-hover my-2"
+                        (click)="open_service_modal('general')">{{"GeneralServiceTeam" | translate}}</label>
+                    <label for="adEditTags" class="block link link-primary dark:link-accent link-hover my-2"
+                        (click)="open_service_modal('reserved')">{{"ReservedServiceTeam" | translate}}</label>
+                    <label for="adEditTags" class="block link link-primary dark:link-accent link-hover my-2"
+                        (click)="open_service_modal('restricted')">{{"RestrictedServiceTeam" |
+                        translate}}</label>
+                    <label *ngIf="getALLCurrentUserPermissionList?.client_manage_integrated_service_team && getAllClientPermissions?.is_integrated_service_team_enabled" for="adEditTags" class="block link link-primary dark:link-accent link-hover my-2" (click)="open_service_modal('integrated')">{{"IntegratedServiceTeam" | translate}}  </label>
+                </div>
+            </div>
+            <label
+                [className]=" isOverRideActive ? 'link link-primary dark:link-accent link-hover' : 'pointer-events-none'"
+                (click)="open_Modal('override')">{{"OverrideOption" | translate}}</label>
+            <label class="link link-primary dark:link-accent link-hover" (click)="navigateTo('customemail')">
+                {{"CustomEmails" | translate}}
+            </label>
+            <label >
+                <span class="link link-primary dark:link-accent link-hover mr-2" (click)="open_service_modal('quickMessage')" >{{"QuickMessages" | translate}}</span>
+                <span  class="link link-primary dark:link-accent link-hover" *ngIf="defaultQuickMessage" (click)="openDefaultQuickMessage()">{{"Default" | translate}}</span>
+            </label>
+        </div>
+    </div>
+</div>
+</aside>
+
+<!-- EditInstitution -->
+<input type="checkbox" [checked]="showInstitueEdit" class="modal-toggle" /> 
+<div class="modal bg-black/70">
+    <div
+        class="modal-box max-w-xl bg-white dark:bg-black rounded p-0 relative overflow-y-hidden dark:border-primary/60 dark:border dark:shadow-xl dark:shadow-primary/20">
+        <div class="flex justify-between text-white items-center bg-primary p-3">
+            <h3 class="font-bold dark:text-white">{{"EditInstitutionDetails" | translate}}</h3>
+            <label class="w-7 h-7">
+            <button  (click)="close_EditInstitute()">
+                <em class="ph-bold ph-x cursor-pointer text-xl hover:text-accent"></em>
+            </button>
+            </label>
+        </div>
+        <div class="p-4 text-gray-600 dark:text-base-100 text-sm">
+            <div class="max-h-[60vh] overflow-y-auto px-2">
+                <ng-container *ngIf="institution">
+                    <div class="mb-3">
+                        <label class="mb-1.5 font-medium">{{"InstitutionName" | translate}}</label>
+                        <input type="text" [placeholder]="'InstituteName' |  translate"
+                            [(ngModel)]="prevInstituteName" (change)="onNameChange($event)"
+                            class="border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-1.5 px-3" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="mb-1.5 font-medium">{{"InstitutionShort" | translate}}</label>
+                        <input type="text" [placeholder]="'InstituteShortName' |  translate"
+                        [(ngModel)]="prevInstituteShortName" (change)="onShortNameChange($event)"
+                            class="border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-1.5 px-3" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="mb-1.5 font-medium">{{"IID" | translate}}</label>
+                        <input type="text" [placeholder]="'InstituteIID' | translate" [value]="institution.id"
+                            disabled
+                            class="border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-1.5 px-3" />
+                    </div>
+                </ng-container>
+            </div>
+            <div class="flex justify-end items-center mt-4 px-2">
+                <button type="button" (click)="close_EditInstitute()"
+                    class="bg-base-100 hover:bg-base-300 text-primary py-1 px-3 rounded inline-flex items-center mr-4">
+                    Cancel
+                </button>
+                <button type="button" class="btn btn-primary" (click)="saveInstitutionDetails()">{{"save" | translate}}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!----Default-->
+<input type="checkbox" [checked]="showDefaultQuickMessage" class="modal-toggle" /> 
+<div class="modal bg-black/70">
+    <div
+        class="modal-box max-w-xl bg-white dark:bg-black rounded p-0 relative overflow-y-hidden dark:border-primary/60 dark:border dark:shadow-xl dark:shadow-primary/20">
+        <div class="flex justify-between text-white items-center bg-primary p-3">
+            <h3 class="font-bold dark:text-white">{{"defaultQuickMessage" | translate}}</h3>
+            <label class="w-7 h-7">
+            <button  (click)="closeDefaultQuickMessage()">
+                <em class="ph-bold ph-x cursor-pointer text-xl hover:text-accent"></em>
+            </button>
+            </label>
+        </div>
+        <div class="p-4 text-gray-600 dark:text-base-100 text-sm">
+            <div class="max-h-[60vh] overflow-y-auto px-4 ">
+                <div>
+                    <ul class="list-disc">
+                        <li *ngFor="let item of defaultQuickMessageArray" class="mb-2">
+                            {{item}}</li>
+                    </ul>
+                </div>   
+            </div>
+        </div>
+    </div>
+</div>
+
+
+ <!-- service-team modal -->
+<web-messenger-reporting-tags *ngIf="isServiceTeamModal" [isReportingTag]="isServiceTeamModal"
+    [showTitle]="enableServiceModalTitle" [modaltitle]="ServiceTeamModalTitle" [serviceTags]="serviceTeamResp"
+    [isaddUser]="isaddUser" (isReportingTags)="isreportingTags($event)" (saveRolesEvent)="onSaveRoles($event)"
+    [Iroles]="serviceTeamsDetails"[activeRoles]="activeRoles" [updateInstitutionPermission]="getALLCurrentUserPermissionList.client_institution_permissions" [user]="user" [isQuickMessage]="isQuickMessageModal"> </web-messenger-reporting-tags>
+
+<web-messenger-permission-modal 
+    *ngIf="showCheckboxModal" 
+    [isCheckboxModal]="showCheckboxModal" 
+    (closePopup)="closeCheckboxModal($event)" 
+    [title]="dynamicModalTitle" 
+    [checkboxOptions]="CheckboxOptionsArray" 
+    (onSaveFeature)="updatedFeature($event)" 
+    (onsaveOverride)="updatedOverride($event)" 
+    [filteredFeatureData]="filteredFeatureData" 
+    [overrideModal]="overrideModal"
+></web-messenger-permission-modal>
+
+<web-messenger-reassign-modal *ngIf="showResignServiceModal"  [showResignServiceModal]="showResignServiceModal" [activeRoles]="reassignValueArray" [roles]="roleAssign" (saveChanges)="saveReassignChanges($event)" (closeReassignModal)="closeReassignModal($event)"></web-messenger-reassign-modal>
+
+<web-messenger-modal *ngIf="warningError" [modalId]="'error-modal'" [modalTitle]="'Role Warnings' | translate"
+[modalMessage]="warningError" (closePopup)="closeWarningPopup()" (cancelPopup)="closeWarningPopup()" [modalCloseText]="'close' | translate"></web-messenger-modal>

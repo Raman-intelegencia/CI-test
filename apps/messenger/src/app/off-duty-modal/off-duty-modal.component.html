@@ -1,0 +1,182 @@
+<input type="checkbox" id="off-duty-modal" class="modal-toggle" [checked]="showOffDutyModal" />
+<div class="modal bg-black/70">
+    <div class="modal-box max-w-xl bg-white dark:bg-black rounded p-0 relative overflow-y-hidden dark:border-primary/60 dark:border dark:shadow-xl dark:shadow-primary/20">
+      <div class="flex justify-between text-white items-center bg-primary p-3">
+            <h2 class="font-bold text-white">{{"welcomeBack"|translate}}</h2>
+
+            <label  class="w-7 h-7" (click)="closeOffDutyModal()">
+                <em class="ph-bold ph-x cursor-pointer text-xl hover:text-accent"></em>
+            </label>
+        </div>
+
+        <div class="p-4 dropdown-content max-h-[65vh] overflow-y-auto" tabindex="0">
+            <h3 class="dark:text-white mb-4 font-bold">{{"updateStatus"|translate}}
+            </h3>
+            <div class="bg-gray-100 dark:border dark:border-gray-700 dark:bg-transparent rounded p-3 mb-3">
+                <div class="grid grid-cols-3 gap-2">
+                    <span *ngFor="let statusOption of statusOptions" class="text-center rounded hover:bg-white py-3 dark:hover:bg-primary/30"
+                        [ngClass]="{
+                        'border': isSelectedUserStatus(statusOption.value),
+                        'border-green-500': isSelectedUserStatus(statusOption.value) && selectedStatus === 'available',
+                        'border-red-500': isSelectedUserStatus(statusOption.value) && selectedStatus === 'busy',
+                        'border-gray-500': isSelectedUserStatus(statusOption.value) && selectedStatus === 'off',
+                        'bg-white dark:bg-primary/20': isSelectedUserStatus(statusOption.value), 'text-green-500': statusOption.class === 'text-green-500',
+                        'text-neutral': statusOption.class === 'text-neutral',
+                        'text-gray-600 dark:text-base-300': statusOption.class === 'text-gray-600'}" 
+                        (click)="setSelectedStatus(statusOption.value)">
+
+                        <em class="ph-duotone ph ph-{{ statusOption.icon }} text-4xl"></em>
+                        <p class="text-sm mt-1">{{ statusOption.label | translate }}</p>
+                    </span>
+                </div>
+                <p class=" text-gray-600 dark:text-base-100 text-sm mt-2 text-center font-semibold mt-4" *ngIf="selectedStatus==='off'">
+                    {{"offDutyNotificationMsg"
+                    |translate}}</p>
+
+                <div class="text-gray-600 dark:text-base-100 items-center my-3 text-sm"
+                    *ngIf="selectedStatus==='busy'|| selectedStatus==='off'">
+                    <span class="mb-1 block">{{"currentCoverage"|translate}}</span>
+                    <div tabindex="0" class="collapse w-full">
+                        <div
+                            class="flex gap-1 bg-white dark:bg-transparent dark:border dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-1.5 px-3">
+                            <span *ngFor="let user of selectedUsers" (click)="openUserProfile(user.id)"
+                                class="px-2 py-1 rounded text-xs bg-blue-100 text-secondary flex items-center whitespace-nowrap justify-between">
+                                {{user?.data?.first_name}} {{user?.data?.last_name}}<em
+                                    (click)="removeUser(user);showModalStates.inputEditable = true;"
+                                    class="ph ph-x ml-2"></em>
+                            </span>
+                            <input #currentCoverage class="bg-transparent border-0 w-full"
+                                (keyup)="getSearchedUsersList()" [placeholder]="selectedUsers.length?'': 'selectCoverage' | translate"
+                                (focus)="showModalStates.isInputFocused = true; getSearchedUsersList()" type="text"
+                                name="" id="currentCoverage" [readonly]="!showModalStates.inputEditable" />
+                        </div>
+                        <ng-container *ngIf="searchResults.length">
+                            <div class="max-h-48 overflow-y-auto ">
+                                <div (click)="selectUser(user)" *ngFor="let user of searchResults"
+                                    class="hover:bg-accent/[0.08] px-3 py-2 bg-white dark:bg-black rounded flex items-center text-gray-600 cursor-pointer mb-1">
+                                    <ng-container *ngIf="user.data.image_id as image_id; else noImageFound">
+                                        <img class="w-12 h-12 rounded-full" [src]="getImageUrl(image_id)" alt="Profile-img" (click)="openUserProfile(user.id)">
+                                      <!-- If image_id is not available, use the initials -->
+                                    </ng-container>
+                                      <ng-template #noImageFound>
+                                        <span class="w-12 h-12 rounded-full bg-base-100 flex items-center justify-center text-primary" (click)="openUserProfile(user.id)">
+                                          {{(user.data.first_name | slice:0:1) | uppercase}}{{(user.data.last_name | slice:0:1) | uppercase}}
+                                        </span>
+                                      </ng-template>
+                                    <div class="w-[calc(100%-3.2rem)] ml-3 dark:text-base-100">
+                                        <p class="font-medium text-secondary dark:text-base-100">
+                                            {{user?.data?.first_name}}
+                                            {{user?.data?.last_name}} ({{user?.data?.profile?.ishort}})
+                                            <ng-container *ngIf="user?.data?.status?.s">
+                                                <em *ngIf="user?.data?.status?.s === 'available'; else busyAndOff"
+                                                  class="ph-duotone ph-check-circle text-green-500"></em>
+                                                <ng-template #busyAndOff>
+                                                  <em *ngIf="user?.data?.status?.s === 'busy'; else offOnly"
+                                                    class="ph-duotone ph-prohibit text-neutral"></em>
+                                                  <ng-template #offOnly>
+                                                    <em *ngIf="user?.data?.status?.s === 'off'"
+                                                      class="ph-duotone ph-minus-circle text-base-300"></em>
+                                                  </ng-template>
+                                                </ng-template>
+                                            </ng-container>
+                                        </p>
+                                        <p class="text-sm">{{user?.data?.profile?.dept}}</p>
+                                        <p class="text-sm">
+                                            <span *ngIf="user?.data?.status?.r as serviceTeam">
+                                                <span *ngIf="serviceTeam.length" >
+                                                  {{serviceTeam[serviceTeam.length - 1] | slice:0:8}}
+                                                </span> 
+                                                <span *ngIf="serviceTeam.length > 1">, +{{serviceTeam.length - 1}}</span>
+                                            </span> 
+                                            {{user?.data?.profile?.title}}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </ng-container>
+                    </div>
+                  
+                </div>
+                <div class=" text-gray-600 dark:text-base-100 text-sm"
+                *ngIf="selectedStatus==='busy'|| selectedStatus==='off'">
+                <span class="w-full mb-1 flex justify-between">{{"autoResponse"|translate}}
+                    <label class="text-primary dark:text-accent text-sm cursor-pointer" for="auto-response-modal"
+                        (click)="showAutoResponseModal()"> <em class="ph-bold ph-pencil-simple"></em>
+                        {{"edit"|translate}}</label>
+                </span>
+                    <ng-container *ngIf="showModalStates.showAutoResponsePopup">
+            <input type="checkbox" id="auto-response-modal" class="modal-toggle" />
+            <div class="modal bg-black/70">
+                <div class="modal-box max-w-xl bg-white dark:bg-black rounded p-0 relative overflow-y-hidden dark:border-primary/60 dark:border dark:shadow-xl dark:shadow-primary/20">
+                  <div class="flex justify-between text-white items-center bg-primary p-3">
+                        <h3 class="font-bold dark:text-white">{{ "autoResponse"| translate }}</h3>
+                        <label for="auto-response-modal" class="w-7 h-7">
+                            <em class="ph-bold ph-x cursor-pointer text-xl hover:text-accent"></em>
+                        </label>
+                    </div>
+                    <form class="px-8 py-4 dark:text-base-100 max-h-[65vh] overflow-y-auto" [formGroup]="autoResponseForm">
+                        <div class="flex justify-between mb-4">
+                            <div class="label cursor-pointer " (click)="selectedAutoResponse('default')"> 
+                                <input type="radio" name="autoResponse" id="default" class="radio radio-primary dark:radio-accent radio-sm mr-2" value="default" formControlName="autoResponse"
+                                     />                             
+                                <label class="label cursor-pointer" for="default">   {{'default'|translate}}</label>
+                            </div>
+                            <div class="label cursor-pointer" (click)="selectedAutoResponse('custom')">
+                                <input type="radio" name="autoResponse" id="custom" class="radio radio-primary dark:radio-accent radio-sm mr-2" value="custom" formControlName="autoResponse"
+                                    />
+                                <label class="label cursor-pointer" for="custom"> {{'custom'|translate}}</label>
+                            </div>
+                            <div class="label cursor-pointer" (click)="selectedAutoResponse('disable')">
+                                <input type="radio" id="disable"  name="autoResponse" class="radio radio-primary dark:radio-accent radio-sm mr-2" value ="disable" formControlName="autoResponse"
+                                      />
+                                <label class="label cursor-pointer" for="disable">  {{'disable'|translate}}</label>
+                            </div>
+                        </div>
+                        <input type="text" *ngIf="showModalStates.isCustomResponseEnabled"
+                            [disabled]="!showModalStates.isCustomResponseEnabled"
+                            [placeholder]="customAutoResponse?customAutoResponse : 'Write custom auto-response'"
+                            [(ngModel)]="customAutoResponse" name="customResponse"
+                            [ngModelOptions]="{ standalone: true }"
+                            class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-2 px-3">
+                        <div class="flex justify-end items-center mt-4">
+                            <label  class="btn btn-neutral mr-3 border-0"
+                                (click)="enableDisablefn('showAutoResponsePopup')">{{'cancel'|translate}}
+                            </label>
+                            <button type="button" (click)="saveAutoResponse()" class="btn btn-primary text-white">
+                                {{ 'save'|translate }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </ng-container>
+                <input
+                    class="bg-white dark:bg-transparent dark:border dark:border-gray-600  dark dark:text-white text-gray-600 rounded w-full py-1.5 px-3"
+                    type="text" name="" id="auto_response" disabled
+                    [placeholder]="autoResponse|| userUpdateStatus.away_message_mode? autoResponse || userUpdateStatus.away_message_mode : ''" />
+            </div>
+            </div>
+            <ng-container *ngIf="authResponse?.config?.client_permissions?.role">
+                <div class="text-gray-600 dark:text-base-100 text-sm">
+                    <span class="text-secondary dark:text-base-100 flex justify-between mb-1"
+                        >{{"currentServiceTeam"|translate}}
+                        <label class="text-primary dark:text-accent cursor-pointer" for="current-service-team-modal" (click)="showCurrentServiceTeamModal()"> <em
+                                class="ph-bold ph-pencil-simple"></em> {{"edit"|translate}}</label>
+                    </span>
+                    <input class="rounded bg-gray-100 px-3 py-2 w-full text-gray-800 dark:bg-transparent dark:border dark:border-gray-600" type="text" name=""
+                        id="serviceTeam" disabled
+                        [placeholder]="showServices ? (showServices| formatServiceTeam: maxLength) : 'noCurrentServiceTeam'|translate" />
+                </div>
+            </ng-container>
+        
+            <div class="flex justify-end mt-4">
+                <button type="button" (click)="enableDisablefn('showModal')" class="btn btn-primary text-white">
+                  {{ 'goToInbox'|translate }}
+                </button>
+        </div>
+    </div>
+</div>
+<web-messenger-current-service-team *ngIf="showModalStates.showCurrentServiceTeam" ></web-messenger-current-service-team>
+<web-messenger-user-profile-modal *ngIf="showProfileModal" [showUserProfileModal]="showProfileModal"
+  [userId]="selectedUserIdDetails" (sendCoverageIdToCompose)="addComposeQueryParamsForCoverageId($event)" (showUserProfile)="showUserProfile($event)"
+   (sendUserIdToCompose)="addComposeQueryParamsForUserId($event)"></web-messenger-user-profile-modal>

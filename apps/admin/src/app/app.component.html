@@ -1,0 +1,105 @@
+<amsconnect-error></amsconnect-error>
+<div class="bg-white dark:bg-black  relative z-10">
+  <div class="h-screen overflow-hidden">
+    <header class="bg-white dark:bg-black border-b border-gray-25 dark:border-gray-600 md:px-12 px-4 navbar p-0 relative z-[60]">
+      <div class="flex-1 items-center">
+        <a (click)="navigateToUsers()">
+          <img srcset="assets/images/ams-white-logo.svg, assets/images/ams-dark-logo.svg" class="h-6 bg-no-repeat logo cursor-pointer"
+          alt="{{'imageDescription' | translate}}" /> 
+        </a>
+        <div class="md:order-2 order-1 nav-menu w-auto md:mx-auto mr-4">
+          <em class="md:hidden block dark:text-accent text-2xl mt-0.5 cursor-pointer" (click)="menutoggle=!menutoggle" [ngClass]="menutoggle ? 'ph-bold ph-x' : 'ph-bold ph-list'"></em>
+          <ul  class="md:inline-flex menu menu-horizontal px-1 bg-white dark:bg-black dark:border-primary dark:text-white text-secondary-100 text-sm md:w-auto" [ngClass]="menutoggle ? 'block absolute left-0 z-50 top-[4rem] w-48 bg-white h-[calc(100%-4rem)] overflow-auto shadow-sm' : 'hidden'">
+            <li>
+              <a class="font-bold w-full md:w-auto" (click)="navigateToUsers()">
+                {{'users' | translate}} <em class="ph-bold ph-caret-down"></em>
+              </a>
+              <ul class="p-2 bg-white shadow-sm dark:bg-black dark:border-primary dark:text-white md:absolute relative">
+                <li *ngIf="userAdminPermissions?.client_user_view"><a (click)="navigateToPage('/search')">{{'searchUsers' | translate}}</a></li>
+                <li *ngIf="userAdminPermissions?.client_user_create"><a (click)="navigateToPage('/user')">{{'createUser' | translate}}</a></li>
+              </ul>
+            </li>
+            <li>
+              <a class="font-bold w-full md:w-auto" (click)="navigateToInstitutions()">
+                {{'institutions' | translate}} <em class="ph-bold ph-caret-down"></em>
+              </a>
+              <ul class="p-2 bg-white shadow-sm dark:bg-black dark:border-primary dark:text-white md:absolute relative">
+                <li *ngIf="userAdminPermissions?.client_user_view"><a (click)="navigateToPage('/institution/search')">{{'search' | translate}}</a></li>
+                <li *ngIf="userAdminPermissions?.client_institution_create"><a (click)="navigateToPage('/institution/create')">{{'createInstitution' | translate}}</a></li>
+                <li *ngIf="userAdminPermissions?.client_report_execute"><a (click)="navigateToPage('/institution/reporting')">{{'reporting' | translate}}</a></li>
+                <li *ngIf="userAdminPermissions?.client_user_info_update"><a (click)="navigateToPage('/institution/batch_processing/quick_messages')">{{'quickMessages' | translate}}</a></li>
+                <li *ngIf="userAdminPermissions?.client_institution_broadcast"><a (click)="navigateToPage('/institution/batch_processing/broadcast_messaging')">{{'broadcastMessaging' | translate}}</a></li>
+
+              </ul>
+            </li>
+            <li *ngIf="userAdminPermissions?.client_ctn_search">
+              <a class="font-bold w-full md:w-auto" (click)="navigateToPatients()">
+                {{'patients' | translate}} <em class="ph-bold ph-caret-down"></em>
+              </a>
+              <ul class="p-2 bg-white shadow-sm dark:bg-black dark:border-primary dark:text-white md:absolute relative">
+
+                <li *ngIf="userAdminPermissions?.client_ctn_search" (click)="navigateToPatients()"><a>{{'patients' | translate}}</a></li>
+
+              </ul>
+            </li>
+            <li>
+              <a class="font-bold w-full md:w-auto" (click)="navigateToFileAreas()">
+                {{'files' | translate}} <em class="ph-bold ph-caret-down"></em>
+              </a>
+              <ul class="p-2  shadow-sm bg-white dark:bg-black dark:border-primary dark:text-white md:absolute relative">
+                <li *ngIf="fileAreaAdmin"><a (click)="navigateToPage('/filearea')">{{'fileAreas' | translate}}</a></li>
+                <li *ngIf="userAdminPermissions?.client_user_view"><a (click)="navigateToPage('/jobs/mine')">{{'myBatchJobs' | translate}}</a></li>
+
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="flex items-center space-x-4">
+          <div *ngIf="authResponse && authResponse.user">
+            <img *ngIf="isImageVisible; else showInitials" class="w-10 h-10 rounded-full border-2 border-base-100" id="imagePreview"
+            [src]="userImageUrl" />
+            <ng-template #showInitials>
+              <div class="bg-base-100 flex items-center justify-center text-primary rounded-full w-12 h-12">
+                <span class="text-xl uppercase">{{authResponse.user.first_name |slice:0:1}}{{authResponse.user.last_name
+                  |slice:0:1}}</span>
+              </div>
+            </ng-template>
+          </div>
+        <div>
+          <span class="font-medium text-secondary block dark:text-white">{{userName}}</span>
+          <span class="flex gap-x-2 dark:text-gray-600">
+            <button class="border-0 link text-sm text-primary dark:text-accent" type="submit" (click)="logout()">{{'logout' | translate}}</button>
+             <span *ngIf="multiAccountUsersData?.length">|
+               <button class="border-0 link text-sm text-primary dark:text-accent" type="submit" (click)="showUsersForSwitch = !showUsersForSwitch">{{'switch' | translate}}</button>
+             </span>
+            <!-- new UI for switching accounts -->
+          </span>
+          <div *ngIf="showUsersForSwitch" class="mt-3 shadow absolute right-6 bg-white dark:bg-black dark:border dark:border-gray-700  max-h-[60vh] overflow-y-auto rounded sm:w-[25vw]">
+            <ng-container *ngFor="let multipleAcc of multiAccountUsersData" >
+              <div (click)="openSelectedAccount(multipleAcc._id.$oid)" class="flex p-4 border-base-100 dark:border-gray-600 border-b last:border-0 cursor-pointer dark:text-base-100" >
+                  <img *ngIf="multipleAcc?.image_id"
+                      class="w-12 h-12 rounded-full bg-base-100" id="imagePreview"
+                      [src]="config_profileimage_url + multipleAcc.image_id + '_profile.png'" />
+                  <div class="w-12 h-12 rounded-full bg-base-100 flex items-center justify-center text-primary"
+                      *ngIf="multipleAcc && !multipleAcc?.image_id">
+                      <span class="text-2xl uppercase">{{multipleAcc?.first_name
+                          |slice:0:1}}{{multipleAcc?.last_name
+                          |slice:0:1}}</span>
+                  </div>
+                <div class="ml-3 w-[100%-3.1rem] relative">
+                  <p class="font-medium text-secondary dark:text-base-100">{{multipleAcc.first_name}}
+                    {{multipleAcc.last_name}} ({{multipleAcc.profile.ishort}})
+                  </p>
+                  <p class="text-sm ">{{multipleAcc.email}}</p>
+                </div>
+              </div>
+            </ng-container>
+          </div>        
+        </div>        
+      </div>
+    </header>
+    <router-outlet></router-outlet>
+  </div>
+</div>
+<web-messenger-change-password  *ngIf="isTempPassword" [showChangePassModal]="isTempPassword" [showPassword_Change_Reason]="is_password_change_reason"/>

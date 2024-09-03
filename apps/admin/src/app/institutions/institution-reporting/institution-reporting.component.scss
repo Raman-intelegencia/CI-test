@@ -1,0 +1,14 @@
+
+::ng-deep .mat-datepicker-content {
+    background-color: #f5f5f5;
+  }
+  
+  /* Example: Style the input field */
+  ::ng-deep .mat-datepicker-input-container {
+    width: 100%;
+  }
+  
+  /* Example: Style the calendar icon */
+  ::ng-deep .mat-datepicker-toggle-default-icon {
+    color: #007bff; /* Change to your preferred color */
+  }

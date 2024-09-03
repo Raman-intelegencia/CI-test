@@ -1,0 +1,144 @@
+// ==========================================================================
+// Sharable Utils - Variables, functions, mixins, etc
+// NO-OP
+// ==========================================================================
+
+// ---
+// COMMON IMPORTS
+// ---
+@import '../style/common.scss';
+//@import '~@cureatr/common/files/style/_util.scss';
+// ---
+// VARIABLES
+// ---
+
+// dimensions of reference sketch file, for relative sizing
+// $baseVW: 1920;
+// $baseVH: 1080;
+// $baseType: 18;
+
+// set here to share between components
+$gutter: 10px;
+$appMaxWidth: 624px;
+$arrowSize: 10px;
+
+// colors
+$color-black: #000;
+$color-blue: #0F238C;
+$color-bluegray: #616b82;
+$color-darkgray: #4a4a4a;
+$color-gold: #f5a623;
+$color-accent: #5ED1FA;
+$color-lightblue: #d1e6ff; 
+$color-lightgray: #c4cbd4;
+$color-mediumblue: #49cfff;
+$color-offwhite: #f2f8ff;
+$color-red: #aa0d21;
+$color-white: #fff;
+
+// z-indexes
+$z-background: 1;
+$z-content: $z-background + 1;
+$z-ui: 10;
+$z-priority: 100;
+
+// font stacks and weights
+$fontStack-Default: 'IBM Plex Sans', 'Helvetica Neue', arial, sans-serif;
+$fontStack-Mono: monospace;
+$weight-light: 300;
+$weight-normal: 400;
+$weight-bold: 600;
+
+// transitions and animations
+$transition-opacity: opacity 100ms ease-in;
+$transition-size: height 100ms ease-in, width 100ms ease-in;
+
+// borders
+$border-default: 1px solid rgba($color-black, 0.26);
+
+// media queries
+$mq-showExtras: "(min-width: 500px)";
+$mq-appMaxWidth: "(min-width: 624px)"; // === $appMaxWidth
+$mq-fillSpace: "(min-width: 1010px)";
+// NOTE: android chrome recalculates max-height when keyboard is open,
+// so small/landscape phones might cross this line, so instead use device height
+$mq-tooShort: "(max-device-height: 250px)";
+
+// ---
+// EXTENDS / Placeholder Selectors
+// ---
+// GZIP is pretty good, so use mixins
+
+// ---
+// FUNCTIONS
+// ---
+
+// ---
+// MIXINS
+// ---
+@mixin clearfix {
+    &::before,
+    &::after {
+        content: "";
+        display: table;
+    }
+
+    &::after {
+        clear: both;
+    }
+}
+
+@mixin visualbutton {
+    border: none;
+    background-color: $color-accent;
+    border-radius: 6px;
+    color: $color-black;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 5px 10px;
+    transition: $transition-opacity;
+    text-decoration: none;
+    text-transform: uppercase;
+
+    &:disabled {
+        opacity: 0.4;
+    }
+
+    &:hover,
+    &:active {
+        background-color: $color-mediumblue;
+        color: $color-blue;
+        text-decoration: none;
+    }
+}
+
+@mixin link {
+    background-color: transparent;
+    color: $color-blue;
+    cursor: pointer;
+    display: inline;
+    font-size: 1em;
+    font-weight: $weight-normal;
+    text-decoration: none;
+
+    &:hover,
+    &:active {
+        background-color: transparent;
+        color: $color-mediumblue;
+        text-decoration: underline;
+    }
+    @media (prefers-color-scheme: dark) {
+        color: $color-accent;
+    }
+}
+
+// a <button /> that is visually styled as a link
+// NOTE: this will typically be on an element that has visualbutton() so watch that cascade
+@mixin button--link {
+    @include link();
+
+    border: none;
+    padding: 0;
+    text-transform: none;
+    vertical-align: baseline;
+}

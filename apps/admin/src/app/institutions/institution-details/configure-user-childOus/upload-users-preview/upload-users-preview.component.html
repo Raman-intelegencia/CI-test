@@ -1,0 +1,229 @@
+<div class="p-4 bg-gray-50 m-0 md:px-12 px-4 dark:bg-white/[0.05] dark:border-b dark:border-gray-700  dark:text-white">
+    <a (click)="navigateToPreviousURL()"class="link link-primary dark:link-accent text-sm table no-underline">
+        <em class="ph ph-arrow-left mr-1"></em>
+        {{'GoBackToInstitution' | translate }}</a>
+        <div class="flex gap-x-3 w-full md:flex-nowrap flex-wrap  mt-2">
+    <h1 class="font-semibold text-lg">{{'uploadUsersPreview' | translate}}</h1>
+    <form [formGroup]="uploadForm" class="flex gap-x-3 ml-auto md:flex-nowrap flex-wrap">
+        <div class="flex w-full items-center md:mb-0 mb-2">
+          <span class="mr-2 text-secondary dark:text-base-100 whitespace-nowrap">{{'uploadType' | translate}}</span>
+          <select class="border bg-transparent border-base-300 dark:text-white dark:bg-black text-gray-600 rounded w-full h-10 px-3"
+                  formControlName="uploadType">
+                  <option disabled selected value="">{{ 'selectUploadType' | translate }}</option>
+            <option *ngFor="let type of uploadTypes" [value]="type.value">{{ type.label }}</option>
+          </select>
+        </div>
+        <button type="submit" (click)="getBatchUsersData()" [disabled]="!uploadForm.get('uploadType')?.value"
+                class="btn-sm btn btn-primary text-white px-4 rounded text-sm">
+            {{'uploadButton' | translate}}
+        </button>
+      </form>
+
+    </div>
+    
+</div>
+<div class="h-[calc(100%-10rem)] px-12 overflow-y-auto py-6 text-gray-600 dark:text-base-100">
+    <div class="flex justify-between flex-wrap mb-2">
+        <h2 class="font-semibold text-lg">{{'newUsers' | translate}}</h2>
+        <p class="font-medium">{{'totalNewUsers' | translate}}: {{newUserData.length}}</p>
+    </div>
+    <div class="h-[30vh] overflow-auto">
+        <table class="table w-full">
+            <!-- head -->
+            <thead class="sticky top-0">
+                <tr>
+                    <th>{{'user_id'| translate }}</th>
+                    <th>{{'first_name'| translate }}</th>
+                    <th>{{'last_name'| translate }}</th>
+                    <th>{{'primary_ou'| translate }}</th>
+                    <th>{{'associated_ou'| translate }}</th>
+                    <th>{{'email' | translate}}</th>
+                    <th>{{'title'| translate }}</th>
+                    <th>{{'specialty'| translate }}</th>
+                    <th>{{'location'| translate }}</th>
+                    <th>{{'location_details'| translate }}</th>
+                    <th>{{'city'| translate }}</th>
+                    <th>{{'zip_code'| translate }}</th>
+                    <th>{{'reporting_tags'| translate }}</th>
+                    <th>{{'basic'| translate }}</th>
+                    <th>{{'app_platform'| translate }}</th>
+                    <th>{{'app_version'| translate }}</th>
+                    <th>{{'account_status'| translate }}</th>
+                    <th>{{'managed'| translate }}</th>
+                    <th>{{'has_password'| translate }}</th>
+                    <th>{{'has_pin'| translate }}</th>
+                    <th>{{'time_created'| translate }}</th>
+                    <th>{{'time_first_login'| translate }}</th>
+                    <th>{{'time_last_login'| translate }}</th>
+                    <th>{{'last_login_method'| translate }}</th>
+                    <th>{{'time_last_activity'| translate }}</th>
+                    <th>{{'legal_agreement'| translate }}</th>
+                    <th>{{'latest_agreement_version'| translate }}</th>
+                    <th>{{'acceptance_date'| translate }}</th>
+                    <th>{{'admin_permissions'| translate }}</th>
+                    <th>{{'features'| translate }}</th>
+                    <th>{{'services'| translate }}</th>
+                    <th>{{'bounced_emails'| translate }}</th>
+                    <th>{{'status'| translate }}</th>
+                    <th>{{'status_message'| translate }}</th>
+                    <th>{{'cellphone'| translate }}</th>
+                    <th>{{'email_comm'| translate }}</th>
+                    <th>{{'sms_comm'| translate }}</th>
+                    <th>{{'pager_number'| translate }}</th>
+                    <th>{{'update_uid'| translate }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="user_row" *ngFor="let newUsersData of newUserData">
+                    <td>{{newUsersData.user_id}}</td>
+                    <td>{{newUsersData.first_name}}</td>
+                    <td>{{newUsersData.last_name}}</td>
+                    <td>{{newUsersData.primary_ou}}</td>
+                    <td>{{newUsersData.associated_ou}}</td>
+                    <td>{{newUsersData.email}}</td>
+                    <td>{{newUsersData.title}}</td>
+                    <td>{{newUsersData.specialty}}</td>
+                    <td>{{newUsersData.location}}</td>
+                    <td>{{newUsersData.location_detail}}</td>
+                    <td>{{newUsersData.city}}</td>
+                    <td>{{newUsersData.zip_code}}</td>
+                    <td>{{newUsersData.reporting_tags}}</td>
+                    <td>{{newUsersData.basic}}</td>
+                    <td>{{newUsersData.app_platform}}</td>
+                    <td>{{newUsersData.app_version}}</td>
+                    <td>{{newUsersData.account_status}}</td>
+                    <td>{{newUsersData.managed}}</td>
+                    <td>{{newUsersData.has_password}}</td>
+                    <td>{{newUsersData.has_pin}}</td>
+                    <td>{{newUsersData.time_created}}</td>
+                    <td>{{newUsersData.time_first_login}}</td>
+                    <td>{{newUsersData.time_last_login}}</td>
+                    <td>{{newUsersData.last_login_method}}</td>
+                    <td>{{newUsersData.time_last_activity}}</td>
+                    <td>{{newUsersData.legal_agreement}}</td>
+                    <td>{{newUsersData.latest_agreement_version}}</td>
+                    <td>{{newUsersData.acceptance_date}}</td>
+                    <td>{{newUsersData.admin_permissions}}</td>
+                    <td>{{newUsersData.features}}</td>
+                    <td>{{newUsersData.services}}</td>
+                    <td>{{newUsersData.bounced_emails}}</td>
+                    <td>{{newUsersData.status}}</td>
+                    <td>{{newUsersData.status_message}}</td>
+                    <td>{{newUsersData.cellphone}}</td>
+                    <td></td>
+                    <td></td>
+                    <td>{{newUsersData.pager_number}}</td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <hr class="my-6">
+    <div class="flex justify-between flex-wrap mb-2">
+        <h2 class="font-semibold text-lg">{{'existingUsers' | translate}}</h2>
+        <p class="font-medium">{{'totalExistingUsers' | translate}}: {{existingUserData.length}}</p>
+    </div>
+    <div class="h-[30vh] overflow-auto">
+        <table class="table w-full">
+            <!-- head -->
+            <thead class="sticky top-0">
+                <tr>
+                    <th>{{'user_id'| translate }}</th>
+                    <th>{{'first_name'| translate }}</th>
+                    <th>{{'last_name'| translate }}</th>
+                    <th>{{'primary_ou'| translate }}</th>
+                    <th>{{'associated_ou'| translate }}</th>
+                    <th>{{'email' | translate}}</th>
+                    <th>{{'title'| translate }}</th>
+                    <th>{{'specialty'| translate }}</th>
+                    <th>{{'location'| translate }}</th>
+                    <th>{{'location_details'| translate }}</th>
+                    <th>{{'city'| translate }}</th>
+                    <th>{{'zip_code'| translate }}</th>
+                    <th>{{'reporting_tags'| translate }}</th>
+                    <th>{{'basic'| translate }}</th>
+                    <th>{{'app_platform'| translate }}</th>
+                    <th>{{'app_version'| translate }}</th>
+                    <th>{{'account_status'| translate }}</th>
+                    <th>{{'managed'| translate }}</th>
+                    <th>{{'has_password'| translate }}</th>
+                    <th>{{'has_pin'| translate }}</th>
+                    <th>{{'time_created'| translate }}</th>
+                    <th>{{'time_first_login'| translate }}</th>
+                    <th>{{'time_last_login'| translate }}</th>
+                    <th>{{'last_login_method'| translate }}</th>
+                    <th>{{'time_last_activity'| translate }}</th>
+                    <th>{{'legal_agreement'| translate }}</th>
+                    <th>{{'latest_agreement_version'| translate }}</th>
+                    <th>{{'acceptance_date'| translate }}</th>
+                    <th>{{'admin_permissions'| translate }}</th>
+                    <th>{{'features'| translate }}</th>
+                    <th>{{'services'| translate }}</th>
+                    <th>{{'bounced_emails'| translate }}</th>
+                    <th>{{'status'| translate }}</th>
+                    <th>{{'status_message'| translate }}</th>
+                    <th>{{'cellphone'| translate }}</th>
+                    <th>{{'email_comm'| translate }}</th>
+                    <th>{{'sms_comm'| translate }}</th>
+                    <th>{{'pager_number'| translate }}</th>
+                    <th>{{'update_uid'| translate }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="user_row" *ngFor="let existingUsersData of existingUserData">
+                    <td>{{existingUsersData.user_id}}</td>
+                    <td>{{existingUsersData.first_name}}</td>
+                    <td>{{existingUsersData.last_name}}</td>
+                    <td>{{existingUsersData.primary_ou}}</td>
+                    <td>{{existingUsersData.associated_ou}}</td>
+                    <td>{{existingUsersData.email}}</td>
+                    <td>{{existingUsersData.title}}</td>
+                    <td>{{existingUsersData.specialty}}</td>
+                    <td>{{existingUsersData.location}}</td>
+                    <td>{{existingUsersData.location_detail}}</td>
+                    <td>{{existingUsersData.city}}</td>
+                    <td>{{existingUsersData.zip_code}}</td>
+                    <td>{{existingUsersData.reporting_tags}}</td>
+                    <td>{{existingUsersData.basic}}</td>
+                    <td>{{existingUsersData.app_platform}}</td>
+                    <td>{{existingUsersData.app_version}}</td>
+                    <td>{{existingUsersData.account_status}}</td>
+                    <td>{{existingUsersData.managed}}</td>
+                    <td>{{existingUsersData.has_password}}</td>
+                    <td>{{existingUsersData.has_pin}}</td>
+                    <td>{{existingUsersData.time_created}}</td>
+                    <td>{{existingUsersData.time_first_login}}</td>
+                    <td>{{existingUsersData.time_last_login}}</td>
+                    <td>{{existingUsersData.last_login_method}}</td>
+                    <td>{{existingUsersData.time_last_activity}}</td>
+                    <td>{{existingUsersData.legal_agreement}}</td>
+                    <td>{{existingUsersData.latest_agreement_version}}</td>
+                    <td>{{existingUsersData.acceptance_date}}</td>
+                    <td>{{existingUsersData.admin_permissions}}</td>
+                    <td>{{existingUsersData.features}}</td>
+                    <td>{{existingUsersData.services}}</td>
+                    <td>{{existingUsersData.bounced_emails}}</td>
+                    <td>{{existingUsersData.status}}</td>
+                    <td>{{existingUsersData.status_message}}</td>
+                    <td>{{existingUsersData.cellphone}}</td>
+                    <td></td>
+                    <td></td>
+                    <td>{{existingUsersData.pager_number}}</td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+<web-messenger-modal *ngIf="showSuccessPopup == true" [modalId]="'success-modal'" 
+[modalTitle]='"Suceess" | translate'
+[modalMessage]='modalShowMessage' 
+(closePopup)=" cancelpopup()"  
+[modalCloseText]="'Ok' | translate" 
+(cancelPopup)="cancelpopup()" 
+[cancelText]="'no'|translate"
+[showNavigationLink]="true" [jobID]='csvUploadJobID'>
+</web-messenger-modal>
+

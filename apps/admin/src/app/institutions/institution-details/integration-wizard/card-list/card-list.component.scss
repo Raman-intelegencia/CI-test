@@ -1,0 +1,9 @@
+.search-icon {
+  @apply absolute h-4 w-4 -translate-x-2/4 -translate-y-2/4 right-0 top-4 bg-[url('/assets/images/search.svg')] bg-contain;
+}
+
+@media (prefers-color-scheme:dark) {
+  .icon-invertable {
+    filter: invert(1);
+  }
+}

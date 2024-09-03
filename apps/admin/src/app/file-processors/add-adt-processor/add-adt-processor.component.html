@@ -1,0 +1,35 @@
+<div
+    class="w-full md:px-12 px-4 bg-gray-100 dark:bg-gray-700/20 dark:border-b dark:border-gray-700 dark:text-white py-4">
+    <h2 class="text-secondary text-xl font-bold dark:text-white">{{ "addProcessor" | translate }}</h2>
+</div>
+
+<div
+    class="w-full md:h-[calc(100vh-7rem)] h-[calc(100vh-9.5rem)] py-4 md:px-12 px-4 text-gray-600 dark:text-base-100 overflow-y-auto ">
+
+    <form [formGroup]="addADTProcessForm" class="lg:w-3/6 md:w-4/6 mt-4" >
+        <div class="mb-4">
+            <label class="mb-1 block font-semibold text-secondary text-sm dark:text-base-100">{{ "type" | translate }}</label>
+            <input type="text" name="typeADTProcess" id="typeADTProcess" formControlName="typeADTProcess"
+                class="border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-2 px-3" />
+        </div>
+        <div class="mb-4">
+            <label class="mb-1 block font-semibold text-secondary text-sm dark:text-base-100">{{ "url" | translate }}</label>
+            <input type="text" name="uRLADTProcess" id="uRLADTProcess" formControlName="uRLADTProcess"
+                class="border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-2 px-3" />
+        </div>
+        <div class="mb-4">
+            <label class="mb-1 block font-semibold text-secondary text-sm dark:text-base-100">{{ "fid" | translate }}</label>
+            <input type="text" placeholder="Feed" name="fid" id="fid" formControlName="fid"
+                class="border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-2 px-3" />
+        </div>
+        <div class="mb-4">
+            <label class="mb-1 block font-semibold text-secondary text-sm dark:text-base-100">{{ "pollInterval" | translate }}</label>
+            <input type="text" placeholder="Interval (Seconds)" name="interval" id="interval" formControlName="interval"
+                class="border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-2 px-3" />
+        </div>
+        <div class="flex gap-3 mt-4">
+            <button  class="btn btn-primary text-white px-6" (click)="addADTProcessSubmit()" [disabled]="!disabledFormChanged">{{ "save" | translate }}</button>
+            <button class="btn bg-gray-300 hover:bg-gray-400 border-0 text-secondary" (click)="returnToRoute()">{{ "cancel" | translate }}</button>
+        </div>
+    </form>
+</div>

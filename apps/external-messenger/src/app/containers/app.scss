@@ -1,0 +1,13 @@
+/* Your styles goes here. */
+@import '../style/_util.scss';
+
+.app__main {
+    color: $color-darkgray;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    height: 100%; // redunant to flex settings(?), but ios safari 9 needs it
+    @media (prefers-color-scheme: dark) {
+        color: $color-offwhite;
+    }
+}

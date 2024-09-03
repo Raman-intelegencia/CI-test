@@ -1,0 +1,26 @@
+<input type="checkbox" class="modal-toggle" [checked]="showReleaseNote" />
+<div class="modal bg-black/70">
+    <div
+        class="modal-box max-w-2xl bg-white dark:bg-black rounded-none p-0 relative overflow-y-hidden dark:border-primary/60 dark:border dark:shadow-xl dark:shadow-primary/20">
+        <div class="flex justify-between text-white items-center bg-primary p-3">
+            <h3 class="font-bold dark:text-white">{{ "releaseNotes" | translate }}</h3>
+            <label class="w-7 h-7">
+                <em class="ph-bold ph-x cursor-pointer text-xl hover:text-accent" (click)="closePopup()"></em>
+            </label>
+        </div>
+        <div class="max-h-[65vh] overflow-y-auto p-4">
+            <div
+                class="p-4 rounded-none border border-base-300 dark:border-gray-600 text-secondary dark:bg-black dark:text-white">
+                <p class="font-bold text-xl dark:text-base-100">{{selectedName}} </p>
+                <p class="dark:text-base-100">{{selectedDate}}</p>
+                <label class="mb-2 pt-3 block text-secondary dark:text-base-100 break-words">{{ "whatsNew" | translate }}</label>
+                <p class="mb-2 pt-1 pl-2 block text-secondary dark:text-base-100 break-words" [innerHTML]="selectedSummary"></p>
+            </div>
+            <div class="flex justify-end items-center mt-4">
+                <button type="button" class="btn btn-primary" (click)="closePopup()">
+                    {{ "close" | translate }}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

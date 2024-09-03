@@ -1,0 +1,117 @@
+<div class="dropdown dropdown-bottom dropdown-end">
+  <!-- We use a <label tabindex="0"> instead of a <button> because Safari has a bug that prevents the button from being focused (daisyui) -->
+  <label tabindex="0" class="text-primary dark:text-accent hover:opacity-90 cursor-pointer no-underline whitespace-nowrap md:text-base text-sm"><span class="hidden md:inline-block">{{"conversationSettings"|translate}}</span>  <i class="ph-fill text-xl ph-gear md:hidden inline-block"></i></label> 
+  <div tabindex="0"
+    class="dropdown-content menu p-2 px-3 shadow border border-base-100 dark:border-primary/[0.3] bg-white dark:bg-black rounded w-64">
+    <span
+      class="table my-2 text-secondary dark:text-white text-sm font-semibold">{{"conversationSettings"|translate}}</span>
+    <label *ngIf="(
+      !settingsLabelStates.externalThreads &&
+      showSaveAsMessagingGrp && !isBasic &&
+      userIsInThread &&
+      !settingsLabelStates.pagerThreads &&
+      !settingsLabelStates.broadcastThreads
+    )" for="messaging-modal" (click)="openSaveAsMessagingGrpModal(true)"
+      class="table my-2 text-primary dark:text-accent hover:opacity-90 cursor-pointer no-underline">{{"saveMessagingGrp"|translate}}</label>
+    <label for="add-recipient-modal" *ngIf="(
+      (settingsLabelStates.peerToPeerThreads || settingsLabelStates.externalThreads) &&
+      !isBasic && userIsInThread
+      )" (click)="settingsLabelStates.isAddRecipientPopup = true"
+      class="table my-2 text-primary dark:text-accent hover:opacity-90 cursor-pointer no-underline">{{"addRecipient"|translate}}</label>
+
+    <label *ngIf="isBasic || matchingRecipientIdWithLoggedInUser.length === 0  " (click)="showRecipientModal()" for="recipient-modal"
+      class="table my-2 text-primary dark:text-accent hover:opacity-90 cursor-pointer no-underline">{{"recipient"|translate}}</label>
+    <button
+      *ngIf="settingsLabelStates.peerToPeerThreads|| settingsLabelStates.broadcastThreads|| settingsLabelStates.externalThreads || isBasic || settingsLabelStates.pagerThreads"
+      class="table my-2 text-primary dark:text-accent hover:opacity-90 cursor-pointer no-underline"
+      (click)="archiveThread()">{{showArchive}}</button>
+    <button *ngIf="settingsLabelStates.peerToPeerThreads|| settingsLabelStates.broadcastThreads|| isBasic"
+      class="table my-2 text-primary dark:text-accent hover:opacity-90 cursor-pointer no-underline"
+      (click)="muteThread()">{{showMuteUnmuteText}}</button>
+    <button
+      *ngIf="!settingsLabelStates.pagerThreads && matchingRecipientIdWithLoggedInUser.length && !isBasic && !showLeaveEndConversation.isExternalThreadInitiater && !settingsLabelStates.broadcastThreads"
+      class="text-neutral cursor-pointer no-underline text-left my-2"
+      (click)="showLeaveConversationPopup()">{{"leave"|translate}}</button>
+    <button *ngIf="showLeaveEndConversation.isExternalThreadInitiater && !getExternalMsgThreadEndsVal && !isBasic"
+      class="text-neutral no-underline my-2"
+      (click)="showEndConversationPopup()">{{"endConversation"|translate}}</button>
+  </div>
+</div>
+<web-messenger-add-recipient *ngIf="settingsLabelStates.isAddRecipientPopup"
+  [showAddRecipientModal]="settingsLabelStates.isAddRecipientPopup"
+  (sendUpdatedRecipientToConversationList)="getUpdatedRecipientsData($event)"
+  [selectedThreadProfiles]="selectedThreadProfiles" [selectedChatThread]="selectedChatThread" [selectedChatThreadData]="selectedChatThreadData"
+  [showLeaveEndConversation]="showLeaveEndConversation" [matchingRecipientIdWithLoggedInUser]="matchingRecipientIdWithLoggedInUser"
+  [loggedInUserDetails]="loggedInUserDetails"></web-messenger-add-recipient>
+<web-messenger-save-as-messaging-grp *ngIf="settingsLabelStates.isSaveMessagingGrpModal"
+  (showSaveAsMsgGrpModal)="openSaveAsMessagingGrpModal($event)" [selectedThreadProfiles]="selectedThreadProfiles"
+  [selectedChatThread]="selectedChatThread"
+  [loggedInUserDetails]="loggedInUserDetails"></web-messenger-save-as-messaging-grp>
+<web-messenger-modal *ngIf="settingsLabelStates.showLeavePopup" [modalId]="'leave-modal'"
+  [modalTitle]="'leaveConversationHeading' | translate" [modalMessage]="'leaveConversationWarningMsg' | translate"
+  [modalCloseText]="'leaveConversation' | translate" [showCancelButton]="true" (cancelPopup)="closePopup()"
+  [cancelText]="'cancel'|translate" (closePopup)="leaveConversation()" />
+<web-messenger-modal *ngIf="settingsLabelStates.showEndConversation" [modalId]="'end_conversation_modal'"
+  [modalTitle]="'endThisConversation' | translate" [modalMessage]="'endConversationMsgExternal' | translate"
+  [modalCloseText]="'endConversation' | translate" [showCancelButton]="true" (cancelPopup)="closePopup()"
+  (closePopup)="endConversation()" [cancelText]="'cancel'|translate" />
+<ng-container *ngIf="showErrorMessage">
+  <web-messenger-modal *ngIf="showErrorMessage" [modalId]="'error-modal'" [modalTitle]="'error' | translate"
+    [modalMessage]="showErrorMessage" [modalCloseText]="'close' | translate"
+    (closePopup)="closeErrorPopup()" (cancelPopup)="closeErrorPopup()"></web-messenger-modal></ng-container>
+
+<input type="checkbox" id="recipient-modal" class="modal-toggle" *ngIf="settingsLabelStates.showRecipient" />
+<div class="modal bg-black/70">
+  <div
+    class="modal-box max-w-2xl bg-white dark:bg-black rounded p-0 relative overflow-y-hidden dark:border-primary/60 dark:border dark:shadow-xl dark:shadow-primary/20">
+    <div class="flex justify-between text-white items-center bg-primary p-3">
+      <h3 class="font-bold"> {{ "recipient" | translate }}</h3>
+      <label for="recipient-modal" class="w-7 h-7">
+        <em class="ph-bold ph-x cursor-pointer text-xl hover:text-accent"></em>
+      </label>
+    </div>
+    <div class="max-h-[65vh] overflow-y-auto mb-4">
+      <div
+        class="hover:bg-accent/[0.08] p-3 flex items-center text-gray-600 dark:text-base-100 dark:hover:bg-gray-600/30 border-base-100 dark:border-gray-600 border-b"
+        *ngFor="let profileData of selectedThreadProfiles">
+          <img *ngIf="profileData.image_id as image_id" class="w-12 h-12 rounded-full" [src]="getImageUrl(image_id)" alt="Profile-img" (click)="openProfilePopUp($event,profileData._id.$oid)">
+        <!-- If image_id is not available, use the initials -->
+          <span *ngIf="!profileData.image_id"
+            class="w-12 h-12 rounded-full bg-base-100 flex items-center justify-center text-primary" (click)="openProfilePopUp($event,profileData._id.$oid)">
+            {{(profileData.first_name | slice:0:1) | uppercase}}{{(profileData.last_name | slice:0:1) | uppercase}}
+          </span>
+        <div class="flex justify-between text-sm w-full ml-3">
+          <div class="w-full">
+            <p class="font-medium text-base text-secondary dark:text-white" *ngIf="profileData?.first_name">
+              {{profileData?.first_name}}
+              {{profileData?.last_name}} ({{profileData?.profile?.ishort}})
+              <ng-container [ngSwitch]="profileData.status.s">
+                <em *ngSwitchCase="'available'" class="ph-duotone ph-check-circle text-green-500"></em>
+                <em *ngSwitchCase="'busy'" class="ph-duotone ph-prohibit text-neutral"></em>
+                <em *ngSwitchCase="'off'" class="ph-duotone ph-minus-circle text-base-300"></em>
+              </ng-container>
+            </p>
+            <ng-container *ngIf="profileData?.data?.description">
+              <p class="font-medium text-base text-secondary dark:text-white"> {{profileData.data?.description}} </p>
+              <p *ngIf="profileData?.data?.user_ids"> {{'serviceWith'|translate}} {{ profileData.data?.user_ids?.length
+                }} {{"people"|translate}}
+              </p>
+            </ng-container>
+            <p class="text-sm">{{profileData?.profile?.dept}}</p>
+            <p *ngIf="profileData?.status?.r || profileData?.profile?.title" class="text-sm">
+              {{ profileData?.status?.r || [] | formatServiceTeam: serviceTeamCharacterMaxLength }}
+              <ng-container *ngIf="profileData?.status?.r"> &middot; </ng-container>
+              {{ profileData.profile.title }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<ng-container *ngIf="showProfileModal">
+  <web-messenger-user-profile-modal 
+  [userId]="selectedUserId"  (sendCoverageIdToCompose)="addComposeQueryParamsForCoverageId($event)" (sendUserIdToCompose)="addComposeQueryParamsForUserId($event)"
+      [showUserProfileModal]="showProfileModal" (showUserProfile)="showUserProfile($event)"
+  ></web-messenger-user-profile-modal>
+</ng-container>

@@ -1,0 +1,114 @@
+<div class="flex flex-wrap justify-between h-full overflow-hidden relative">
+  <div class="md:w-3/6 md:block hidden login-img w-full bg-bottom bg-cover bg-no-repeat"></div>
+  <div class="md:w-3/6 sm:w-9/12 w-full mx-auto bg-white dark:bg-black md:relative h-full overflow-y-auto flex flex-col">
+    
+       <ng-container [ngSwitch]="routeCheck">
+      <!-- Email Login Screen -->
+      <ng-container *ngSwitchCase="ROUTECHECK.showEmail">
+        <form class="login-form xl:max-w-md m-auto p-8 xl:p-0 w-full items-center pb-12" [formGroup]="nonSSOLoginForm" ngNativeValidate>
+          <img class="h-8 bg-no-repeat logo mb-8" alt="image description">
+          <h2 class="text-2xl font-bold text-secondary dark:text-white">
+            {{ "login" | translate }}
+          </h2>
+          <div *ngIf="institutionResponseFlag.showErrorMessage" class="text-sm border text-neutral border-neutral p-2 mt-2 rounded flex">
+            <em class="ph-fill ph-warning-circle mr-1 mt-1"></em>
+            {{institutionResponseFlag.showErrorMessage}}
+          </div>
+          <p class="mb-4 mt-2 md:pr-4 text-base text-secondary dark:text-base-100">
+            {{ "emailAddress" | translate }}
+          </p>
+          <div class="mb-4">
+            <label class="mb-2 block font-bold text-secondary text-sm dark:text-base-100" for="email">
+              {{ "email" | translate }}
+            </label>
+            <input type="email" formControlName="email" [ngClass]="{'border-neutral': institutionResponseFlag.showErrorMessage }"
+              class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-2 px-3"
+              size="64" maxlength="64" name="email" id="email" placeholder="jane@example.com" required />
+          </div>
+          <button type="submit" value="Submit" (click)="getUserInstitutions()"
+            class="btn-primary text-white py-2 rounded w-full">
+            {{ "continue" | translate }}
+          </button>
+          <div
+            class="after:border-t after:flex-1 after:mt-0.5 before:border-t before:border-base-300 dark:before:border-base-300 after:border-base-300 dark:after:border-base-300 before:flex-1 before:mt-0.5 flex items-center my-4">
+            <span class="mx-3 mb-0 text-center text-base text-base-300 dark:text-base-100">
+              {{ "or" | translate }}
+            </span>
+          </div>
+          <a routerLink="/login/institution"
+            class="btn btn-outline btn-primary dark:btn-accent dark:btn-outline  rounded w-full">
+            {{ "logInWithInstitution" | translate }}
+          </a>
+
+        </form>
+      </ng-container>
+      <!-- Non-SSO Password Screen -->
+      <ng-container *ngSwitchCase="ROUTECHECK.showPassword">
+        <form class="login-form xl:max-w-md m-auto p-8 xl:p-0 w-full items-center pb-12" [formGroup]="nonSSOLoginForm" ngNativeValidate>
+          <img class="h-8 bg-no-repeat logo mb-8 cursor-pointer" alt="image description" (click)="resetToEmailScreen()">
+          <h2 class="text-2xl font-bold text-secondary dark:text-white">
+            {{ "welcome" | translate }}
+          </h2>
+          <div *ngIf="institutionResponseFlag.showErrorMessage" class="text-sm border text-neutral border-neutral p-2 mt-2 rounded flex">
+            <em class="ph-fill ph-warning-circle mr-1 mt-1"></em>
+            {{institutionResponseFlag.showErrorMessage}}
+          </div>
+          <p class="mb-4 mt-2 md:pr-4 text-base text-secondary dark:text-base-100">
+            {{ email.value}}
+            <a (click)="changeEmail()" class="cursor-pointer text-primary dark:text-accent hover:opacity-80">{{
+              "changeEmail" | translate
+              }}</a>
+          </p>
+          <p *ngIf="institutionResponseFlag.institutionName" class="mb-4 mt-2 md:pr-4 text-base dark:text-base-100">
+            {{ "enterPassword" | translate }}
+            <b class="font-bold">
+              {{ institutionResponseFlag.institutionName}} </b>
+          </p>
+          <div class="mb-0">
+            <label class="mb-2 block font-bold text-secondary text-sm dark:text-base-100" for="password">
+              {{ "password" | translate }}
+            </label>
+            <input type="password" formControlName="password" [ngClass]="{'border-neutral': institutionResponseFlag.showErrorMessage }"
+              class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-2 px-3"
+              name="password" id="password" required />
+          </div>
+          <a type="button" routerLink="/password/reset" routerLinkActive="active"
+            class="text-primary dark:text-accent hover:opacity-80 cursor-pointer text-sm float-right mt-2 mb-4">
+            {{ "forgotPassword" | translate }}
+          </a>
+          <button type="submit" value="Submit" (click)="nonSSOLogin()"
+            class="btn-primary text-white py-2 rounded w-full">
+            {{ "login" | translate }}
+          </button>
+
+        </form>
+      </ng-container>
+      <!-- Show Multiple Institution -->
+      <ng-container *ngSwitchCase="ROUTECHECK.showMultiple">
+        <form class="login-form xl:max-w-md m-auto p-8 xl:p-0 w-full items-center pb-12">
+          <img class="h-8 bg-no-repeat logo mb-8 cursor-pointer" alt="image description" (click)="resetToEmailScreen()">
+          <h2 class="text-2xl text-secondary dark:text-base-100 font-bold">{{"multipleInstitutions"|translate}}</h2>
+          <p class="mb-4 mt-2  text-base text-secondary dark:text-base-100">{{email.value}} <a
+              (click)="resetToEmailScreen()"
+              class="text-primary dark:text-accent hover:opacity-80 cursor-pointer">{{"changeEmail"|translate}}</a></p>
+          <p class="mb-4 mt-2  text-base text-secondary dark:text-base-100">
+            {{"selectInstitution"|translate}} </p>
+            <div class="max-[380px]:max-h-[40vh] max-[850px]:max-h-[52vh] max-[1024px]:max-h-[48vh] max-h-[50vh] px-1 overflow-y-auto">
+              <a *ngFor="let institution of filteredInstitutions" (click)="institutionLogin(institution)"
+                class="mb-4 mt-2 text-base text-secondary dark:text-base-100 btn btn-ghost dark:dark:border-gray-600 hover:bg-primary hover:text-base-100 shadow w-full flex justify-between">
+                {{institution.name}}
+                <em class="ph-bold ph-arrow-right text-xl"></em>
+              </a>
+            </div>
+        </form>
+      </ng-container>
+      <!-- SSO login -->
+      <ng-container *ngSwitchCase="ROUTECHECK.showSSO">
+        <web-messenger-institution class="my-auto" [showSSOLoginScreen]="true" (showHideEmailScreen)="resetToEmailScreen()"
+          [selectedInstName]="institutionResponseFlag.selectedInstName" [selectedInstitutionId]="institutionResponseFlag.selectedInstId"></web-messenger-institution>
+      </ng-container>
+    </ng-container>
+    <web-messenger-help-support></web-messenger-help-support>
+     
+  </div>
+</div>

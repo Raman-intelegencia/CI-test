@@ -1,0 +1,57 @@
+.integration-table {
+    @apply border-spacing-0 text-[15px];
+
+    thead {
+        @apply text-center font-bold h-[30px];
+    }
+
+    th {
+        @apply border-[#CFD0DB] bg-[#CFD0DB] border-[1px];
+
+        &:first-child {
+            @apply border-l-[1px] rounded-l-[4px] text-left;
+        }
+
+        &:last-child {
+            @apply border-r-[1px] rounded-r-[4px];
+        }
+    }
+
+    tr {
+        td {
+            @apply border-b-[1px] border-x-0 border-[#B6B8C8];
+
+            div div {
+                @apply pt-[1px];
+            }
+        }
+
+        &:first-child td {
+            @apply border-t-0;
+        }
+    }
+
+    .integration-body {
+        @apply text-center;
+    }
+}
+
+.btn {
+    @apply h-[30px] 
+}
+
+.toast.closing >* {
+    animation: toast-pop-out 0.25s ease-out;
+    opacity: 0;
+}
+
+@keyframes toast-pop-out {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+}

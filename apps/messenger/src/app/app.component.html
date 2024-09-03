@@ -1,0 +1,114 @@
+<iframe [src]="xdUrl" title="Empty" tabindex="-1" height="0" width="0" style="display: none;"></iframe>
+<div class="bg-accent/[.05] dark:bg-black">
+  <div class="w-full" *ngIf="connectionError">
+    <p class="bg-neutral-100 text-center text-sm p-1 text-neutral rounded-sm" [innerHTML]="connectionError">{{connectionError}}</p>
+  </div>
+  <div class="h-screen">
+    <header
+      class="bg-white dark:bg-black border-b border-gray-25 dark:border-gray-600 mb-4 md:px-12 px-4 navbar p-0">
+      <a class="flex-1">
+        <span (click)="navigateTo('inbox')">
+        <img srcset="assets/images/ams-white-logo.svg, assets/images/ams-dark-logo.svg" class="h-6 bg-no-repeat logo cursor-pointer" 
+          alt="{{'imageDescription' | translate}}" /></span>
+      </a>
+
+      
+      <div class="gap-2">
+        <div class="flex sm:mr-4 mr-2">
+          <a (click)="navigateTo('patients')" *ngIf="showPatientTab"
+          [ngClass]="isRouterLinkActive('patients') ? 'border-primary dark:border-accent text-primary dark:text-accent' : 'text-gray-600 dark:text-white border-primary/0'"
+            class=" hover:text-secondary dark:hover:text-accent border-b-2  text-lg flex items-center md:px-7 px-2 py-5 cursor-pointer">
+            <em class="ph-fill ph-users sm:mr-2 text-xl"></em>
+            <span class="sm:inline-block hidden">{{"patients"|translate}}</span>
+          </a>
+          <a (click)="navigateTo('inbox')"
+          [ngClass]="isRouterLinkActive('inbox') ? 'border-primary dark:border-accent text-primary  dark:text-accent' : 'text-gray-600 dark:text-white border-primary/0'"
+            class="relative hover:text-secondary dark:hover:text-accent border-b-2 text-lg flex items-center md:px-7 px-2 py-5 cursor-pointer">
+            <em class="ph-fill ph-chat sm:mr-2 text-xl"></em>
+            <span *ngIf="showCounts>0"
+              class="bg-neutral text-white rounded-full absolute -mt-6 ml-2.5 text-center text-xs px-1">{{showCounts}}</span>
+            <span class="sm:inline-block hidden">{{"messages"|translate}}</span>
+          </a>
+        </div>
+        <div class="dropdown dropdown-end">
+          <div (click)="toggleDropdown($event)" tabindex="0" class="flex items-center" *ngIf="authResponse && authResponse.user">
+            <span class="text-gray-600 dark:text-white mr-2 text-right sm:inline-block hidden capitalize cursor-pointer">
+              {{authResponse.user.first_name}} {{authResponse.user.last_name}}
+              <small class="text-sm block">{{showServices| formatServiceTeam: maxLength}}</small>
+            </span>
+            <span class="relative">
+              <div *ngIf="authResponse?.user?.image_id === '' || imageId === ''; else showImage" class="bg-base-100 flex items-center justify-center text-primary rounded-full w-12 h-12">
+                <span  class="text-xl uppercase">{{authResponse.user.first_name |slice:0:1}}{{authResponse.user.last_name
+                  |slice:0:1}}</span>
+                </div>
+                <ng-template #showImage>
+                  <img class="w-12 h-12 rounded-full border-2 border-base-100" id="imagePreview" [src]="getUserImage()"/>
+                </ng-template>
+                <ng-container [ngSwitch]="userAvailabilityStatus">
+                  <em *ngSwitchCase="'available'" class="ph-duotone ph-check-circle text-green-500 absolute right-0 bottom-0 bg-white rounded-full"></em>
+                  <em *ngSwitchCase="'busy'" class="ph-duotone ph-prohibit text-neutral absolute right-0 bottom-0 bg-white rounded-full"></em>
+                  <em *ngSwitchCase="'off'" class="ph-duotone ph-minus-circle text-base-300 absolute right-0 bottom-0 bg-white rounded-full"></em>
+                </ng-container>
+            </span> 
+            <em class="ml-1 dark:text-base-100" [ngClass]= "isDropdownOpen ? 'ph ph-caret-up' : 'ph ph-caret-down' "></em>
+          </div>
+          <web-messenger-profile-status-dropdown *ngIf="isDropdownOpen" [isDropdownOpen]="isDropdownOpen" (dropdownClosed)="handleDropdownClosed($event)" (usersUpdatedStatus)="getUpdatedUsersStatus($event)"></web-messenger-profile-status-dropdown>
+        </div>
+      </div>
+    </header>
+    <router-outlet></router-outlet>
+  </div>
+  <div class="absolute z-[999] flex justify-center top-6 w-full" *ngIf="errorMessage">
+    <p class="bg-neutral-100 max-w-[30vw] text-neutral text-center p-3 rounded-sm" [innerHTML]="errorMessage">{{errorMessage}}</p>
+  </div>
+</div>
+  <!-- Compose Popup UI-->
+<div class="fixed z-50 bottom-2 right-2 flex items-end">
+  <div *ngIf="composePopups().length > 2 || externalComposePopups().length > 2"
+    class="flex items-center px-4 bg-primary rounded-t-md py-2.5 dropdown dropdown-top dropdown-end mr-2">
+    <label tabindex="0" class="text-lg w-full flex items-center justify-between text-base-100 cursor-pointer">
+      <em class="ph ph-chat-circle mr-2"></em> {{composePopups().length + externalComposePopups().length - (composePopups().length > 1 ? 1:0 + externalComposePopups().length > 1 ? 1:0) }} more
+    </label>
+    <div tabindex="0"
+      class="dropdown-content menu shadow w-[15rem] border border-base-100 dark:border-gray-600 bg-white dark:bg-black rounded">
+      <span *ngFor="let _ of composePopups(); let i = index">
+        <ng-container *ngIf="i > 0">
+          <button
+            class="w-full p-2 px-3 text-secondary hover:bg-primary/10 dark:text-base-100 border-b border-base-100 dark:border-gray-600"
+            (click)="swapActivePopup(i)">
+            {{ "newMessage" | translate}}
+          </button>
+        </ng-container>
+      </span>
+      <span *ngFor="let _ of externalComposePopups(); let i = index">
+        <ng-container *ngIf="i > 0">
+          <button
+            class="w-full p-2 px-3 text-secondary hover:bg-primary/10 dark:text-base-100 border-b border-base-100 dark:border-gray-600"
+            (click)="swapActiveExternalPopup(i)">
+            {{ "newSecureExternalMessage" | translate}}
+          </button>
+        </ng-container>
+      </span>
+
+    </div>
+  </div>
+<ng-container *ngFor="let data of composePopups().slice().reverse(); let i = index">
+    <web-messenger-compose (closeComposePopup)="closeComposePopup(composePopups().length - i - 1)"
+    [composeArrayIndex]="composePopups().length - i - 1" [composeArrayLength]="composePopups().length"  [selectedUserId]="selectedUserId"
+    [composePopupObjectData]="data" [patientData]="patientData" [showPatientTab]="showPatientTab"></web-messenger-compose>
+</ng-container> 
+<ng-container *ngFor="let data of externalComposePopups().slice().reverse(); let i = index">
+  <web-messenger-external-compose
+    (closeComposePopup)="closeComposePopup(externalComposePopups().length - i - 1,messageType.externalMessage)"
+    [composeArrayIndex]="externalComposePopups().length - i - 1"
+    [composeArrayLength]="externalComposePopups().length"
+    [composePopupObjectData] ="data"   
+  ></web-messenger-external-compose>
+</ng-container>
+</div>
+<web-messenger-modal *ngIf="successError" [modalId]="'error-modal'"[modalTitle] ="'error' | translate"
+[modalMessage]="successError" (closePopup)="closepopup()" [modalCloseText]="'close' | translate"></web-messenger-modal>
+<web-messenger-terms-of-services *ngIf="tosUrl" [termsOfServiceUrl]="tosUrl" [agreement]="agreement"></web-messenger-terms-of-services> 
+<web-messenger-otp></web-messenger-otp>
+<web-messenger-off-duty-modal *ngIf="showOffDutyModal" ></web-messenger-off-duty-modal>
+<web-messenger-change-password  *ngIf="isTempPassword" [showChangePassModal]="isTempPassword" [showPassword_Change_Reason]="is_password_change_reason"/>

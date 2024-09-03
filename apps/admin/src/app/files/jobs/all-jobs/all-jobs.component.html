@@ -1,0 +1,107 @@
+<div class="p-4 bg-gray-50 m-0 md:px-12 px-4 dark:bg-white/[0.05] dark:border-b dark:border-gray-700  dark:text-white">
+    <ng-container *ngIf="newJobID === null; else bucketNavigation">
+        <h2 class="text-secondary text-lg font-bold dark:text-white mb-3" *ngIf="router.url.includes('/jobs/all')">{{ 'AllBatchJobs' | translate }}</h2>
+        <h2 class="text-secondary text-lg font-bold dark:text-white mb-3" *ngIf="!router.url.includes('/jobs/all')">{{ 'MyBatchJobs' | translate }}</h2>
+      </ng-container>
+      
+      <ng-template #bucketNavigation>
+        <h2 class="text-secondary text-lg font-bold dark:text-white mb-3">
+            <a (click)="navigateToBucket()">{{ HeaderMessage }}</a>
+        </h2>
+      </ng-template>
+
+    <form class="flex gap-x-3 w-full md:flex-nowrap flex-wrap" [formGroup]="timeRangeForm">
+        <div class="flex w-full items-center md:mb-0 mb-2">
+            <span class="mr-2 text-secondary dark:text-base-100 whitespace-nowrap">{{"from"| translate}}</span>
+            <input type="date" id="timeFrom" formControlName="timeFrom" required
+                class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1.5 px-3" />
+        </div>
+        <div class="flex w-full items-center md:mb-0 mb-2">
+            <span class="mr-2 text-secondary dark:text-base-100 whitespace-nowrap">{{"to"| translate}}</span>
+            <input type="date" id="timeTo" formControlName="timeTo" required
+                class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1.5 px-3" />
+        </div>
+        <button  (click)="onBatchJobsSearch()" type="submit" [disabled]="timeRangeForm.invalid" 
+        class="btn-sm btn btn-primary  text-white px-4 rounded text-sm">
+            {{"Search" | translate }}
+        </button>
+
+        <button *ngIf="showAllJobsButton === true" type="button" class="btn-sm btn btn-primary  text-white px-4 rounded text-sm" (click)="listAllBatchFile()">
+            {{"showall" | translate }}
+        </button>
+        <button type="button" class="btn-sm btn btn-primary text-white px-4 rounded text-sm tooltip tooltip-primary"
+            data-tip="Refresh" (click)="refreshMyBatchTab()">
+            <em class="ph-bold ph-arrow-clockwise"></em>
+        </button>
+    </form>
+</div>
+<div class="py-6" *ngIf="isLoader">
+<web-messenger-loader-model></web-messenger-loader-model>
+</div>
+<div class="md:px-12 px-4 mt-6 overflow-auto sm:h-[calc(100vh-14rem)] h-[calc(100vh-20rem)]"
+(scroll)="onScroll($event)">
+    <table class="table w-full" *ngIf="jobList.length > 0 else noBatchJobsFound">
+        <!-- head -->
+        <thead class="sticky top-0">
+            <tr>
+                <th>{{"Processor" | translate }}</th>
+                <th>{{"Institution" | translate }}</th>
+                <th>{{"Filename" | translate }}</th>
+                <th>{{"User" | translate }}</th>
+                <th>{{"Created" | translate }}</th>
+                <th>{{"state" | translate }}</th>
+            </tr>
+        </thead>
+        <tbody>
+                <ng-container *ngFor="let job of jobList">
+                    <tr class="cursor-pointer">
+                        <td><a (click)="navigateToDetails(job)"  >{{ job.processor }}</a></td>
+                        <td><a (click)=" navigateToInstitution(job.iid)" class="text-primary dark:text-accent">{{ job.iid }}</a></td>
+                        <td><a (click)="navigateToDetails(job)" >{{ job.filename }}</a></td>
+                        <td><a (click)="navigateToUser(job.requestor.id)" class="text-primary dark:text-accent">{{ job.requestor.name }}</a></td>
+                        <td> 
+                            <a (click)="navigateToDetails(job)" > 
+                                {{ job.time_created | date: 'medium' }}
+                            </a>
+                        </td>
+                        <td>
+                            <a class="text-white inline-block" (click)="navigateToDetails(job)" >
+                            <span class="rounded"
+                                [ngClass]="{
+                                    'bg-green-600 text-white px-3 py-0.7 text-sm': job.state === jobStates.Completed,
+                                    'bg-blue-500 text-white px-2 py-0.5 text-sm': job.state === jobStates.Running,
+                                    'bg-yellow-500 text-white px-2 py-0.5 text-sm': job.state === jobStates.Pending,
+                                    'bg-neutral text-white px-2 py-0.5 text-sm': job.state === jobStates.Failed,
+                                    'bg-gray-400 text-white px-2 py-0.5 text-sm': job.state === jobStates.Rerun,
+                                    'bg-red-600 text-white px-2 py-0.5 text-sm': job.state === jobStates.Aborted,
+                                    'bg-blue-600 text-white px-2 py-0.5 text-sm': job.state === jobStates.Processing,
+                                    'bg-neutral-500 text-white px-2 py-0.5 text-sm': job.state === jobStates.New,
+                                }">
+                                <ng-container *ngIf="job.state === jobStates.Processing else noProcessing">
+                                    {{getProgressPercentage(job.progress)}} {{ job.state.toUpperCase() }}
+                                </ng-container>
+                                <ng-template #noProcessing>
+                                    {{ job.state.toUpperCase() }} 
+                                </ng-template>
+                            </span>
+                            </a>
+                        </td>
+                        
+                    </tr>
+                </ng-container>
+        </tbody>
+        <div class="mx-auto table" *ngIf="showLoader">
+            <svg class="animate-spin -ml-1 mr-3 h-12 w-12 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" 
+                    fill="currentColor" 
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+        </div>
+    </table>
+    <ng-template #noBatchJobsFound>
+        <p class="text-center dark:text-base-100 text-2xl py-4" *ngIf="!showLoader && !isLoader">
+            {{"noResultsFound" | translate}}!
+        </p>
+    </ng-template>
+</div>

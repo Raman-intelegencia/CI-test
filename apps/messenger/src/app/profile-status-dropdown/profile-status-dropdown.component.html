@@ -1,0 +1,331 @@
+<div *ngIf="isDropdownOpen" #dropdownElement
+  class="mt-3 py-4 shadow dropdown-content bg-white dark:bg-black dark:border dark:border-gray-700  max-h-[75vh] overflow-y-auto rounded w-80"
+  tabindex="0">
+  <ng-container *ngIf="hasMultipleAccounts">
+    <div class=" text-gray-600 dark:text-base-100 text-sm mb-3">
+      <span class="w-full mb-1 px-4 flex justify-between">Other Accounts
+        <label class="text-primary dark:text-accent cursor-pointer text-sm" for="multiple-acc-modal"
+          (click)="openManageMultipleAccs()"> <em class="ph-bold ph-pencil-simple"></em> {{"edit"|translate}}</label>
+      </span>
+      <div class="flex justify-between px-4  border-base-100 dark:border-gray-600 border-b last:border-0 "
+        *ngFor="let multipleAcc of accountInformation">
+        <ng-container>
+          <div class="py-3 flex items-center text-gray-600 dark:text-base-100">
+            <span  (click)="viewProfile(multipleAcc, 'userObj')" >
+              <img *ngIf="multipleAcc?.image_id"
+                  class="w-12 h-12 rounded-full bg-base-100" id="imagePreview"
+                  [src]="config_profileimage_url + multipleAcc.image_id + '_profile.png'" />
+              <div class="w-12 h-12 rounded-full bg-base-100 flex items-center justify-center text-primary"
+                  *ngIf="multipleAcc && !multipleAcc?.image_id">
+                  <span class="text-2xl uppercase">{{multipleAcc?.first_name
+                      |slice:0:1}}{{multipleAcc?.last_name
+                      |slice:0:1}}</span>
+              </div>
+            </span>
+            <div class="ml-3 w-[100%-3.1rem] relative cursor-pointer" (click)="navigateToAccountScreen(multipleAcc._id.$oid)">
+              <p class="font-medium text-secondary dark:text-base-100">{{multipleAcc.first_name}}
+                {{multipleAcc.last_name}} ({{multipleAcc.profile.ishort}})
+              </p>
+              <span *ngIf="checkIfUserLoggedOut(multipleAcc._id.$oid)" class="bg-gray-700 text-sm px-2 border-gray-50 py-0.5 cursor-pointer text-white">Signed Out</span>
+              <p class="text-sm">{{multipleAcc.email}}</p>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+  </ng-container>
+  <div class="bg-gray-100 dark:bg-gray-900/80 rounded p-3 mb-3 mx-4">
+    <div class="grid grid-cols-3 gap-2">
+      <span *ngFor="let statusOption of statusOptions"
+        class="text-center rounded hover:bg-white py-2.5 dark:hover:bg-gray-300/10" [ngClass]="{
+      'border': isSelectedUserStatus(statusOption.value),
+      'border-green-500': isSelectedUserStatus(statusOption.value) && selectedUsersStatus === 'available',
+      'border-red-500': isSelectedUserStatus(statusOption.value) && selectedUsersStatus === 'busy',
+      'border-gray-500': isSelectedUserStatus(statusOption.value) && selectedUsersStatus === 'off',
+      'bg-white dark:bg-gray-300/10': isSelectedUserStatus(statusOption.value), 'text-green-500': statusOption.class === 'text-green-500',
+      'text-neutral': statusOption.class === 'text-neutral',
+      'text-gray-600 dark:text-base-300': statusOption.class === 'text-gray-600'}"
+        (click)="setSelectedUsersStatus(statusOption.value)">
+
+        <em class="ph-duotone ph ph-{{ statusOption.icon }} text-4xl"></em>
+        <p class="text-sm">{{ statusOption.label | translate }}</p>
+      </span>
+    </div>
+    <div class="text-gray-600 dark:text-base-100 items-center my-3 text-sm"
+      *ngIf="selectedUsersStatus==='busy'|| selectedUsersStatus==='off'">
+      <span class="mb-1 block">{{"currentCoverage"|translate}}</span>
+      <div tabindex="0" class="collapse w-full">
+        <div
+          class="flex gap-1 bg-white dark:border dark:border-gray-700 dark:bg-transparent dark:text-white text-gray-600 rounded w-full py-1.5 px-3">
+           <ng-container *ngFor="let user of selectedUsers; trackBy: trackByUserId">
+            <span *ngIf="user.data"
+            class="px-2 py-1 rounded text-xs bg-blue-100 text-secondary flex items-center whitespace-nowrap justify-between">
+            {{user?.data?.first_name}} {{user?.data?.last_name}}<em
+              (click)="removeRecipient($event);showModalStates.inputEditable = true;" class="ph ph-x ml-2"></em>
+          </span>
+        </ng-container>
+        <ng-container  *ngFor="let user of selectedUsersData; trackBy: trackByUserProfileId">
+        <span  *ngIf="selectedUsers.length === 0 && user"
+        class="px-2 py-1 rounded text-xs bg-blue-100 text-secondary flex items-center whitespace-nowrap justify-between">
+        {{user.first_name}} {{user.last_name}}<em
+          (click)="removeRecipient($event);showModalStates.inputEditable = true;" class="ph ph-x ml-2"></em></span>
+        </ng-container>
+            <input #currentCoverage class="bg-transparent border-0 w-full"
+            (keyup)="getSearchedUsersList()" [placeholder]="!showModalStates.inputEditable?'': 'selectCoverage' | translate"
+            (focus)="showModalStates.isInputFocused = true; getSearchedUsersList()" type="text"
+            name="" id="currentCoverage" [readonly]="!showModalStates.inputEditable" />
+        </div>
+        <!-- users list data here -->
+        <ng-container *ngIf="!showModalStates.noResultsFound">
+          <div class="max-h-48 overflow-y-auto ">
+            <div (click)="selectUser(user,$event)" *ngFor="let user of searchResults"
+              class="hover:bg-accent/[0.08] px-3 py-2 bg-white dark:bg-black rounded flex items-center text-gray-600 cursor-pointer mb-1">
+              <ng-container *ngIf="user.data.image_id as image_id; else noImageFound">
+                <img class="w-12 h-12 rounded-full" [src]="getImageUrl(image_id)" alt="Profile-img" (click)="viewProfile(user.id, 'userId')">
+              <!-- If image_id is not available, use the initials -->
+            </ng-container>
+              <ng-template #noImageFound>
+                <span class="w-12 h-12 rounded-full bg-base-100 flex items-center justify-center text-primary" (click)="viewProfile(user.id, 'userId')">
+                  {{(user.data.first_name | slice:0:1) | uppercase}}{{(user.data.last_name | slice:0:1) | uppercase}}
+                </span>
+              </ng-template>
+              <div class="w-[calc(100%-3.1rem)] ml-3 dark:text-base-300">
+                <p class="font-medium text-secondary dark:text-base-100">
+                  {{user?.data?.first_name}}
+                  {{user?.data?.last_name}} ({{user?.data?.profile?.ishort}})
+                  <ng-container *ngIf="user?.data?.status?.s">
+                    <em *ngIf="user?.data?.status?.s === 'available'; else busyAndOff"
+                      class="ph-duotone ph-check-circle text-green-500"></em>
+                    <ng-template #busyAndOff>
+                      <em *ngIf="user?.data?.status?.s === 'busy'; else offOnly"
+                        class="ph-duotone ph-prohibit text-neutral"></em>
+                      <ng-template #offOnly>
+                        <em *ngIf="user?.data?.status?.s === 'off'"
+                          class="ph-duotone ph-minus-circle text-base-300"></em>
+                      </ng-template>
+                    </ng-template>
+                  </ng-container>
+                </p>
+                <p class="text-sm">{{user?.data?.profile?.dept}}</p>
+                <p class="text-sm">
+                  <span *ngIf="user?.data?.status?.r as serviceTeam">
+                    <span *ngIf="serviceTeam.length" >
+                      {{serviceTeam[serviceTeam.length - 1] | slice:0:8}}
+                    </span> 
+                    <span *ngIf="serviceTeam.length > 1">, +{{serviceTeam.length - 1}}</span>
+                </span> 
+                  {{user?.data?.profile?.title}}
+                </p>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+    <div class=" text-gray-600 dark:text-base-100 text-sm"
+      *ngIf="selectedUsersStatus==='busy'|| selectedUsersStatus==='off'">
+      <span class="w-full mb-1 flex justify-between">{{"autoResponse"|translate}}
+        <label class="text-primary dark:text-accent cursor-pointer text-sm" for="autoResponseModal"
+        (click)="openAutoResponsePopup()"> <em class="ph-bold ph-pencil-simple"></em> {{"edit"|translate}}</label>
+      </span>
+      <input class="bg-white dark:border dark:border-gray-700 dark:bg-transparent dark:text-white text-gray-600 rounded w-full py-1.5 px-3"
+        type="text" name="" id="auto_response" disabled [placeholder]="autoResponse ? autoResponse : ''" />
+    </div>
+   
+    <p class=" text-gray-600 dark:text-base-100 text-sm mt-2" *ngIf="selectedUsersStatus==='off'">
+      {{"offDutyNotificationMsg"
+      |translate}}</p>
+  </div>
+  <!-- <label class="px-4 cursor-pointer text-sm text-primary mb-2 dark:text-accent table" (click)="openScheduledStatus()" for="scheduled-status">{{"scheduledStatus"|translate}}</label> -->
+  <ng-container *ngIf="authResponse?.config?.client_permissions?.role">
+    <div class="text-gray-600 dark:text-base-100 text-sm px-4">
+      <span class="text-secondary dark:text-base-100 flex justify-between mb-1" (click)="openCurrentServiceTeamModal()">{{"currentServiceTeam"|translate}}
+        <label class="text-primary dark:text-accent cursor-pointer" for="current-service-team-modal" >
+          <em class="ph-bold ph-pencil-simple"></em> {{"edit"|translate}}</label>
+      </span>
+      <input class="rounded bg-gray-100 dark:border dark:border-gray-700 dark:bg-transparent py-1.5 px-3 w-full text-gray-800" type="text" name="" id="serviceTeam" disabled
+        [placeholder]="showCurrentServiceTeam.length ? (showCurrentServiceTeam| formatServiceTeam: maxLength) : 'noCurrentServiceTeam'|translate" />
+    </div>
+  </ng-container>
+  <div class="my-2 px-4" *ngIf="authResponse?.config?.client_permissions?.service_teams_notifications_enabled">
+      <label class="text-primary dark:text-accent hover:opacity-90 cursor-pointer flex items-center text-sm" for="serviceTeamNotifications"><em class="ph-fill ph-bell mr-1"></em>  {{"serviceTeamNotifications"|translate}}</label>
+  </div>
+  <div class="my-2 px-4 flex flex-col border-b border-base-100 dark:border-gray-700 pb-3 mb-3">
+    <a *ngIf="checkAdminUser" (click)="openAdmin()"
+      class="text-primary dark:text-accent hover:opacity-90 my-2 cursor-pointer">{{"admin"|translate}}</a>
+    <a class="text-primary dark:text-accent hover:opacity-90 my-2 cursor-pointer"
+      (click)="redirectTo('settings/account')">{{"settings"|translate}}</a>
+    <a class="text-primary dark:text-accent hover:opacity-90 my-2"
+      href="mailto:amsconnect@americanmessaging.net?subject=AMSConnect+account+support">{{"support"|translate}}</a>
+  </div>
+  <button class="text-neutral no-underline mx-auto font-semibold table hover:opacity-90 p-0" (click)="openLogoutPopup()"
+    id="logout">{{"logOut"|translate}}</button>
+</div>
+<web-messenger-modal *ngIf="showLogoutPopup" [modalId]="'logout'" [modalTitle]="'logoutTitle' | translate"
+  [modalMessage]="'logoutConfirmationMsg'|translate" (closePopup)="logout()" (cancelPopup)="closeLogout()"
+  [cancelText]="'close'|translate" [modalCloseText]="'logOut' | translate"></web-messenger-modal>
+<ng-container *ngIf="showModalStates.showCurrentServiceTeam">
+  <web-messenger-current-service-team [showCurrentServiceTeam]="showCurrentServiceTeam" [userDataFromMessenger]="loggedInUserDetails"></web-messenger-current-service-team>
+</ng-container>
+<ng-container *ngIf="showModalStates.showAutoResponsePopup">
+  <input type="checkbox" id="autoResponseModal" class="modal-toggle"/>
+  <div class="modal bg-black/70">
+    <div
+      class="modal-box max-w-xl bg-white dark:bg-black rounded p-0 relative overflow-y-hidden dark:border-primary/60 dark:border dark:shadow-xl dark:shadow-primary/20">
+      <div class="flex justify-between text-white items-center bg-primary p-3">
+        <h3 class="font-bold">{{ "autoResponse"| translate }}</h3>
+        <label for="autoResponseModal" class="w-7 h-7">
+          <em class="ph-bold ph-x cursor-pointer text-xl hover:text-accent"></em>
+        </label>
+      </div>
+      <form class="px-8 py-4 dark:text-base-100 max-h-[65vh] overflow-y-auto" [formGroup]="autoResponseForm">
+        <div class="flex justify-between mb-4">
+            <div class="label cursor-pointer " (click)="selectedAutoResponse('default')"> 
+                <input type="radio" name="autoResponse" id="default" class="radio radio-primary dark:radio-accent radio-sm mr-2" value="default" formControlName="autoResponse"
+                     />                             
+                <label class="label cursor-pointer" for="default">   {{'default'|translate}}</label>
+            </div>
+            <div class="label cursor-pointer" (click)="selectedAutoResponse('custom')">
+                <input type="radio" name="autoResponse" id="custom" class="radio radio-primary dark:radio-accent radio-sm mr-2" value="custom" formControlName="autoResponse"
+                    />
+                <label class="label cursor-pointer" for="custom"> {{'custom'|translate}}</label>
+            </div>
+            <div class="label cursor-pointer" (click)="selectedAutoResponse('disable')">
+                <input type="radio" id="disable"  name="autoResponse" class="radio radio-primary dark:radio-accent radio-sm mr-2" value ="disable" formControlName="autoResponse"
+                      />
+                <label class="label cursor-pointer" for="disable">  {{'disable'|translate}}</label>
+            </div>
+        </div>
+        <input type="text" *ngIf="showModalStates.isCustomResponseEnabled"
+        [disabled]="!showModalStates.isCustomResponseEnabled"
+        [placeholder]="customAutoResponse?customAutoResponse : 'Write custom auto-response'"
+        [(ngModel)]="customAutoResponse" name="customResponse"
+        [ngModelOptions]="{ standalone: true }"
+        class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-2 px-3">
+        <div class="flex justify-end items-center mt-4">
+          <label class="btn bg-base-100 text-primary mr-3 border-0"
+            (click)="enableDisablefn('showAutoResponsePopup')">{{'cancel'|translate}}
+          </label>
+          <button type="button" (click)="saveAutoResponse()" class="btn btn-primary text-white">
+            {{ 'save'|translate }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</ng-container>
+<ng-container *ngIf="showManageMultipleAcc">
+  <input type="checkbox" id="multiple-acc-modal" class="modal-toggle" />
+  <div class="modal bg-black/70">
+    <div
+      class="modal-box max-w-xl bg-white dark:bg-black rounded p-0 relative overflow-y-hidden dark:border-primary/60 dark:border dark:shadow-xl dark:shadow-primary/20">
+      <div class="flex justify-between text-white items-center bg-primary p-3">
+        <h2 class="font-bold text-white">{{"manageMultipleAccounts"|translate}}</h2>
+        <label for="multiple-acc-modal" class="w-7 h-7">
+          <em class="ph-bold ph-x cursor-pointer text-xl hover:text-accent"></em>
+        </label>
+      </div>
+      <div class="p-4 max-h-[60vh] overflow-y-auto">
+        <p class="text-base text-gray-600 dark:text-base-100 mb-3">{{"multipleAccDesc"|translate}}</p>
+        <div class="bg-gray-100 dark:border dark:border-gray-700 dark:bg-transparent rounded p-3 mb-3 flex justify-between">
+          <div class="flex">
+              <span  (click)="viewProfile(loggedInUsersData.user, 'userObj')" >
+              <img *ngIf="loggedInUsersData.user?.image_id" 
+                  class="w-12 h-12 rounded-full bg-base-100" id="imagePreview"
+                  [src]="config_profileimage_url + loggedInUsersData.user.image_id + '_profile.png'" />
+              <div class="w-12 h-12 rounded-full bg-base-100 flex items-center justify-center text-primary"
+                  *ngIf="loggedInUsersData.user && !loggedInUsersData.user?.image_id">
+                  <span class="text-2xl uppercase">{{loggedInUsersData.user.first_name
+                      |slice:0:1}}{{loggedInUsersData.user.last_name
+                      |slice:0:1}}</span>
+              </div>
+            </span>
+            <div class="ml-3 w-[100%-3.1rem]" *ngIf="loggedInUsersData">
+              <p class="font-medium text-secondary dark:text-base-100">{{loggedInUsersData.user.first_name}}
+                {{loggedInUsersData.user.last_name}} ({{loggedInUsersData.user.profile.ishort}})
+              </p>
+              <p class="text-sm dark:text-base-100">{{loggedInUsersData.user.email}}</p>
+            </div>
+          </div>
+          <span class="font-semibold text-secondary dark:text-base-100">{{"thisAcc"|translate}} </span>
+        </div>
+        <ng-container *ngIf="accountInformation">
+          <div class="flex justify-between border-base-100 dark:border-gray-600 border-b mt-3"
+            *ngFor="let multipleAcc of accountInformation">
+            <ng-container>
+              <div class="py-3 flex items-center text-gray-600 dark:text-base-100">
+                <span  (click)="viewProfile(multipleAcc, 'userObj')" >
+                  <img *ngIf="multipleAcc?.image_id"
+                      class="w-12 h-12 rounded-full bg-base-100" id="imagePreview"
+                      [src]="config_profileimage_url + multipleAcc.image_id + '_profile.png'" />
+                  <div class="w-12 h-12 rounded-full bg-base-100 flex items-center justify-center text-primary"
+                      *ngIf="multipleAcc && !multipleAcc?.image_id">
+                      <span class="text-2xl uppercase">{{multipleAcc?.first_name
+                          |slice:0:1}}{{multipleAcc?.last_name
+                          |slice:0:1}}</span>
+                  </div>
+                </span>
+                <div class="ml-3 w-[100%-3.1rem]">
+                  <p class="font-medium text-secondary dark:text-base-100">{{multipleAcc.first_name}}
+                    {{multipleAcc.last_name}} ({{multipleAcc.profile.ishort}})
+                  </p>
+                  <p class="text-sm">{{multipleAcc.email}}</p>
+                </div>
+              </div>
+              <span class="font-semibold text-neutral cursor-pointer"
+                (click)="removeUser(multipleAcc._id.$oid)">{{"remove"|translate}} </span>
+            </ng-container>
+          </div>
+        </ng-container>
+        <button class="table ml-auto mt-4 cursor-pointer text-primary dark:text-accent font-semibold "
+          (click)="navigateToAccountScreen()">+
+          {{"addAccount"|translate}}</button>
+      </div>
+    </div>
+  </div>
+</ng-container>
+
+<input type="checkbox" id="serviceTeamNotifications" class="modal-toggle"/>
+<div class="modal bg-black/70">
+  <div
+    class="modal-box max-w-xl bg-white dark:bg-black rounded p-0 relative overflow-y-hidden dark:border-primary/60 dark:border dark:shadow-xl dark:shadow-primary/20">
+    <div class="flex justify-between text-white items-center bg-primary p-3">
+      <h3 class="font-bold dark:text-white">{{'serviceTeamNotifications' | translate}}</h3>
+      <label for="serviceTeamNotifications" class="w-7 h-7" (click)="closeSTNotificationPopup()">
+        <em class="ph-bold ph-x cursor-pointer text-xl hover:text-accent"></em>
+      </label>
+    </div>
+    <div class="max-h-[65vh] overflow-y-auto text-gray-600 dark:text-base-100">
+      <ng-container *ngIf="showServiceTeamNotification.length; else noServiceTeamText">
+        <ng-container *ngFor="let serviceTeamNotification of showServiceTeamNotification">
+        <p class="px-4 py-3 border-b dark:border-gray-700" *ngIf="serviceTeamNotification.event==='added'" >
+          {{"addedOrScheduledInto"|translate}} {{serviceTeamNotification.event}} {{"scheduledInto"|translate}} <strong>{{ serviceTeamNotification?.sname}}</strong>
+          {{"serviceTeamsBy"|translate}}
+          {{serviceTeamNotification?.admin_first_name }}
+          {{serviceTeamNotification?.admin_last_name}}
+          {{"on" | translate}} {{serviceTeamNotification?.date?.$date | date: 'MMMM dd y, h:mm:ss a' }}.{{"checkServiceTeamDetail"|translate}}
+        </p>
+        <p class="px-4 py-3 border-b dark:border-gray-700" *ngIf="serviceTeamNotification.event==='removed'">
+          {{"addedOrScheduledInto"|translate}} {{serviceTeamNotification.event}} {{"From" | translate}} <strong>{{ serviceTeamNotification?.sname}}</strong>
+          {{"serviceTeamsBy"|translate}}
+          {{serviceTeamNotification?.admin_first_name }}
+          {{serviceTeamNotification?.admin_last_name}}
+          {{"on" | translate}} {{serviceTeamNotification?.date?.$date | date: 'MMM dd y, h:mm:ss a' }}
+        </p>
+        <p class="px-4 py-3 border-b dark:border-gray-700" *ngIf="serviceTeamNotification.event === 'integrated-updated'"
+          [innerHtml]="getIntegrationEventUpdatedText(serviceTeamNotification)"></p>
+      </ng-container>
+      </ng-container>
+      <ng-template #noServiceTeamText>
+        <p class="px-4 py-3">{{showNoServiceTeamText ? showNoServiceTeamText : 'noServiceTeam'|translate }}
+        </p>
+      </ng-template>
+
+    </div>
+  </div>
+</div>
+
+<web-messenger-scheduled-status-popup *ngIf="showScheduledStatus"></web-messenger-scheduled-status-popup>
+<web-messenger-user-profile-modal *ngIf="showProfileModal" [showUserProfileModal]="showProfileModal"
+[userId]="selectedUserIdDetails" (sendCoverageIdToCompose)="addComposeQueryParamsForCoverageId($event)" (sendUserIdToCompose)="addComposeQueryParamsForUserId($event)" (showUserProfile)="showUserProfile($event)"
+></web-messenger-user-profile-modal>

@@ -1,0 +1,102 @@
+<form [formGroup]="eventSearchForm">
+  <div class="md:grid md:grid-cols-12 flex flex-wrap gap-6 mt-2 bg-gray-50 dark:bg-gray-900 p-3 rounded dark:text-base-100">
+
+    <span class="flex items-center gap-2 md:col-span-3">
+      <label>{{'from' | translate}}</label>
+      <input type="date" formControlName="fromDate" [max]="currentDate" class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1.5 px-3">
+    </span>
+
+    <span class="flex items-center gap-2 md:col-span-3">
+      <label>{{'to' | translate}}</label>
+        <input type="date" formControlName="toDate" [max]="currentDate" class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1.5 px-3">
+    </span>
+
+    <span class="flex items-center gap-2 md:col-span-6">
+      <label class="whitespace-nowrap"> {{'eventName' | translate}}</label>
+      <div class="flex gap-x-3 w-full md:flex-nowrap flex-wrap">
+        <div class="flex items-center w-full gap-x-3">
+            <div class="relative w-full">
+                <input
+                    class="border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-2 px-3"
+                    type="text" formControlName="eventName" [placeholder]="'optional' | translate"
+                    (focus)="eventNameSearch(eventSearchForm.get('eventName')?.value); isEventNameInputFocused = true"
+                    (blur)="handleEventNameInputBlurEvent()"
+                    (keyup)="eventNameSearch(eventSearchForm.get('eventName')?.value)" />
+
+                    <span *ngIf="eventSearchForm.get('eventName')?.value" class="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer">
+                      <em class="ph ph-x dark:text-white" (click)="clearSelection()"></em>
+                    </span>
+
+                    <span *ngIf="!eventSearchForm.get('eventName')?.value" class="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer">
+                      <em class="absolute right-2 top-1 ph ph-caret-down"></em>
+                    </span>
+
+
+                <div *ngIf="isEventNameInputFocused"
+                    class="absolute z-10 w-full py-1.5 px-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded mt-1 max-h-60 overflow-auto">
+                    <div *ngFor="let eventName of filteredEventNamesData;">
+                        <div class="hover:bg-gray-100 dark:hover:bg-gray-900 px-3 py-2 cursor-pointer"
+                            (pointerdown)="selectedEventName($event,eventName)">
+                            <p class="text-secondary dark:text-base-100"
+                                [innerHTML]="eventName['value'] | highlightSearchTxt:eventSearchForm.get('eventName')?.value"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+      <button class="btn btn-primary text-white ml-4" (click)="searchUserEvents(false)">{{'searchEvents' | translate}}</button>
+    </span>
+  </div>
+  <!-- Error Message for Date Range Validation -->
+  <div  *ngIf="eventSearchForm.errors?.['dateRangeInvalid']" class="dark:text-neutral">
+    {{'dateRangeValidationMsg' | translate}}
+  </div>
+</form>
+<div class="mt-6 overflow-auto sm:h-[calc(100vh-15rem)] h-[calc(100vh-20rem)]">
+  <table class="table w-full">
+    <!-- head -->
+    <thead class="sticky top-0">
+      <tr>
+        <th>{{'eventTime' | translate}}</th>
+        <th>{{'event' | translate}}</th>
+        <th>{{'actor' | translate}}</th>
+        <th>{{'actorIP' | translate}}</th>
+        <th>{{'eventData' | translate}}</th>
+      </tr>
+    </thead>
+    <tbody>
+      <ng-container *ngIf="eventLogsData.length; else noEventDataFound">
+        <tr *ngFor="let event of eventLogsData">
+          <td>{{dateUtilSvc.convertUtcToLocalTime(event?.tc) | date: 'MMM d, y, h:mm:ss a'}}</td>
+          <td>{{eventNamesData[event.et] }}</td>
+          <td>{{getNameById(event.aid)}}</td>
+          <td>{{event.ip}}</td>
+          <!-- <td> -->
+          <td>
+            <span *ngIf="event?.target">Target: {{event.target}}</span><br>
+            <span>{{event.eventDataDisplay}}</span>
+            <ng-container *ngIf="event?.isLongEventData">
+              ... <button class="btn btn-primary text-white ml-4" (click)="openEventDataModal(event.fullEventData)">{{'seeAll' | translate}}</button>
+            </ng-container>
+          </td>
+        </tr>
+      </ng-container>
+      <tr *ngIf="showLoader">
+        <td colspan="5" class="text-center dark:text-base-100 text-2xl"><web-messenger-loader-model></web-messenger-loader-model></td>
+      </tr>
+      <ng-template #noEventDataFound>
+        <tr *ngIf="!showLoader">
+          <td colspan="5" class="text-center dark:text-base-100 text-2xl">{{'noDataFound' | translate}}!</td>
+        </tr>
+      </ng-template>
+    </tbody>
+  </table>
+  <button class="m-5 btn btn-primary text-white ml-4" *ngIf="eventLogResultsLimited" (click)="searchUserEvents(true)">{{'loadMore' | translate}}</button>
+</div>
+
+
+<!-- Modal for displaying full eventData -->
+<web-messenger-modal *ngIf="showFullEventData" [modalId]="'seeAllEventData'" [modalTitle]="'Event Data'"
+  [modalMessage]="fullEventData" (closePopup)="closeFullEventDataModal()" (cancelPopup)="closeFullEventDataModal()"
+  [modalCloseText]="'Close'"></web-messenger-modal>

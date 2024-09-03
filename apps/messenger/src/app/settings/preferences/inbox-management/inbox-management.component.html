@@ -1,0 +1,24 @@
+<div class="text-base text-gray-600 dark:text-base-100 px-6 h-full overflow-y-auto">
+  <h2 class="text-secondary text-xl font-medium dark:text-white mb-4">{{ "inboxManagement" | translate }}</h2>
+  <h4 class="font-bold dark:text-white">{{ "messages" | translate }}</h4>
+  <!-- Inbox management form start-->
+  <form [formGroup]="inboxManagementForm" (ngSubmit)="saveMessagesAndEvents()">
+    <label class="cursor-pointer label justify-start py-0 gap-x-2 my-3">
+      <input type="checkbox" id="InboxCheckbox" class="checkbox checkbox-xs checkbox-primary dark:checkbox-accent rounded" formControlName="isSortInbox">
+      <em class="ph-fill ph-check-fat text-primary dark:text-accent hidden"></em> 
+      {{ "sortIndex" | translate }}
+    </label>
+    <label class="cursor-pointer label justify-start py-0 gap-x-2 my-3">
+      <input type="checkbox" id="TimestampCheckbox" class="checkbox checkbox-xs checkbox-primary dark:checkbox-accent rounded" formControlName="isShowTimestamp">
+      <em class="ph-fill ph-check-fat text-primary dark:text-accent hidden"></em> 
+      {{ "showTimestamp" | translate }}
+    </label>
+    <label class="cursor-pointer label justify-start py-0 gap-x-2 my-3">
+      <input type="checkbox" id="EnterCheckbox" class="checkbox checkbox-xs checkbox-primary dark:checkbox-accent rounded" formControlName="isPressEnter">
+      <em class="ph-fill ph-check-fat text-primary dark:text-accent hidden"></em>
+      {{ "pressEnter" | translate }}
+    </label>
+    <button type="submit" class="btn btn-primary mt-4 text-white px-6" [disabled]="!inboxManagementForm.dirty">{{ "SaveChanges" | translate }}</button>
+  </form>
+  <!-- Inbox management form end -->
+</div>

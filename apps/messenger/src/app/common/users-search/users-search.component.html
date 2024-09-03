@@ -1,0 +1,122 @@
+<div tabindex="0"
+          class="collapse rounded bg-base-100/[0.3] dark:border dark:border-gray-700 dark:bg-transparent mb-2">
+          <div class="flex flex-wrap gap-1 items-center m-2">
+            <span *ngFor="let user of selectedUsers"
+              class="px-2 py-1 rounded text-xs bg-blue-100 text-secondary flex items-center cursor-pointer">
+                <span *ngIf="user.type === userType.Cureatr"
+                  (click)="openProfilePopUp($event,user.id,user)">
+                  {{user?.data?.first_name}} {{user?.data?.last_name}}{{user?.data?.flag_basic === true ? ('(' + ('basicSelectedUser' | translate) + ')')  : ''}}</span>
+                <span *ngIf="user.type === userType.Role" (click)="openServiceProfilePopUp($event, user)"
+                  class="cursor-pointer">{{user?.data?.description}}</span>
+              <span *ngIf="user.type === userType.Group" (click)="openGroupProfilePopUp($event, user)"
+                class="cursor-pointer">{{user?.data?.name}}</span>
+              <em (mousedown)="removeUser(user); $event.preventDefault()" class="ph ph-x ml-1 cursor-pointer"></em>
+            </span>
+            <input #toSearchInput
+              class="bg-transparent outline-none focus:ring-0 border-0 dark:text-base-100 text-gray-600 rounded w-full"
+              type="text" name="" id="toSearchInput"
+              [placeholder]="selectedUsers.length > 0 ? '' : ('toMessagePlaceholder' | translate)"
+              (focus)="isInputFocused = true; getSearchedUsersList()"
+              (blur)="isInputFocused = false"
+              (keyup)="getSearchedUsersList(); checkEventType()"
+              (keydown)="handleBackspace($event, toSearchInput.value)" />
+          </div>
+          <div  class="h-48 overflow-y-auto p-0 pr-4">
+            <div class="p-3 pr-0">
+              <!-- users list data here -->
+              <span *ngFor="let user of usersDataList">
+                <!-- For user type "cureatr" -->
+                <div *ngIf="user.type === userType.Cureatr">
+                  <div (click)="selectUser(user)"
+                    class="hover:bg-accent/[0.08] px-3 py-2 bg-white dark:bg-gray-900 rounded flex items-center text-gray-600 cursor-pointer mb-1">
+                    <!-- If image_id is available -->
+                    <ng-container *ngIf="user.data.type !== userType.oneway;else isOneway">
+                      <img *ngIf="user.data.image_id as image_id" class="w-12 h-12 rounded-full"
+                        [src]="getImageUrl(image_id)" alt="Profile-img" (click)="openProfilePopUp($event,user.id,user)">
+                    <!-- If image_id is not available, use the initials -->
+                      <span *ngIf="!user.data.image_id"
+                        class="w-12 h-12 rounded-full bg-base-100 flex items-center justify-center text-primary"
+                        (click)="openProfilePopUp($event,user.id,user)">
+                        {{(user.data.first_name | slice:0:1) | uppercase}}{{(user.data.last_name | slice:0:1) |
+                        uppercase}}
+                      </span>
+                    </ng-container>
+                    <ng-template #isOneway>
+                      <span class="w-12 h-12 flex items-center justify-center rounded-full bg-base-100"><em class="ph-light ph-user text-4xl text-blue-400"></em></span>
+
+                    </ng-template>
+                    <div class="w-[calc(100%-3.1rem)] ml-3 dark:text-base-100">
+                      <p class="font-medium text-secondary dark:text-base-100">{{user?.data?.first_name}}
+                        {{user?.data?.last_name}} ({{user?.data?.profile?.ishort}})
+                          <ng-container *ngIf="user?.data?.status?.is_signed_out">
+                            <em class="ph-duotone ph-circle"></em>
+                          </ng-container>
+                          <ng-container *ngIf="user?.data?.status?.s && !user?.data?.status?.is_signed_out">
+                            <em *ngIf="user?.data?.status?.s === 'available'; else busyAndOff"
+                              class="ph-duotone ph-check-circle text-green-500"></em>
+                            <ng-template #busyAndOff>
+                              <em *ngIf="user?.data?.status?.s === 'busy'; else offOnly"
+                                class="ph-duotone ph-prohibit text-neutral"></em>
+                              <ng-template #offOnly>
+                                <em *ngIf="user?.data?.status?.s === 'off'" class="ph-duotone ph-minus-circle text-base-300"></em>
+                              </ng-template>
+                            </ng-template>
+                          </ng-container>
+                      </p>
+                      <p class="text-sm">{{user?.data?.profile?.dept}}</p>
+                      <p class="text-sm">
+                        <span *ngIf="user?.data?.status?.r as serviceTeam">
+                            <span *ngIf="serviceTeam.length" >{{serviceTeam[serviceTeam.length - 1]}}</span> 
+                            <span *ngIf="serviceTeam.length > 1">, +{{serviceTeam.length - 1}}</span>
+                        </span> 
+                        {{user?.data?.profile?.title}}
+                    </p>
+                    </div>
+                  </div>
+                </div>
+                <!-- for services -->
+                <div *ngIf="user.type === userType.Role">
+                  <div (click)="selectUser(user)"
+                    [ngClass]="{ 'opacity-50': !user.data.user_ids?.length, 'pointer-events-none': !user.data.user_ids?.length }"
+                    class="hover:bg-accent/[0.08] px-3 py-2 bg-white dark:bg-gray-900 rounded flex items-center text-gray-600 cursor-pointer mb-1">
+                    <span class="w-12 h-12 flex items-center justify-center rounded-full bg-base-100"><em class="ph-light ph-users-three text-4xl text-pink-400"></em></span>
+                    <div class="w-[calc(100%-3.2rem)] ml-3 dark:text-base-100">
+                      <p class="font-medium text-secondary dark:text-base-100">{{user?.data?.description}} <span *ngIf="user.data.tag && user?.data?.role_type === role_type.integrated" class="ml-2 text-xs font-bold bg-accent rounded p-1 dark:text-black">{{user?.data?.tag}}</span></p>
+                      <p class="text-sm"*ngIf="user.data.user_ids?.length; else servicePeople">{{'serviceWith' | translate}} {{user.data.user_ids?.length}} {{'people' | translate}} </p>
+                      <ng-template #servicePeople> <p class="text-sm" >{{'serviceWithPeople' | translate}}  </p></ng-template>
+                      <ng-container *ngIf="user.data.user_ids?.length">
+                        <span class="text-sm">{{formatNames(user?.matchedProfiles, 'service')}}</span>
+                      </ng-container>
+                    </div>
+                  </div>
+                </div>
+                <!-- For groups  -->
+                <div *ngIf="user.type === userType.Group">
+                  <div (click)="selectUser(user)"
+                    class="hover:bg-accent/[0.08] px-3 py-2 bg-white dark:bg-gray-900 rounded flex items-center text-gray-600 cursor-pointer mb-1">
+                    <span class="w-12 h-12 flex items-center justify-center rounded-full bg-base-100"><em class="ph-light ph-users-three text-4xl text-blue-400"></em></span>
+                    <div class="w-[calc(100%-3.2rem)] ml-3 dark:text-base-100">
+                      <p class="font-medium text-secondary dark:text-base-100">{{user?.data?.name}}</p>
+                      <span class="text-sm">{{'recipientGrp' | translate}}</span>
+                      <ng-container *ngIf="user.data?.recipient_ids?.length">
+                        <p class="text-sm">{{formatNames(user?.matchedProfiles, 'service')}}</p>
+                      </ng-container> 
+                    </div>
+                  </div>
+                </div>
+              </span>
+              <div *ngIf = "storeUsersName" class="w-[calc(100%-3.1rem)] ml-3 dark:text-base-100 justify-center">
+                <h2 class="font-semibold text-secondary text-2xl dark:text-white">{{"noResultsFound" | translate}}</h2>
+                <p>{{"noUsersFound" | translate}} "{{storeUsersName}}"</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+<web-messenger-modal  *ngIf="userNotActivatedDescription" [modalId]="'error-modal'" 
+    [modalTitle]="userNotActivatedDescription"
+    [modalMessage]="'userNotActivatedDescription'|translate" 
+    [modalCloseText]="'close' | translate" 
+    (closePopup)="closeNonActiveUserModal()" 
+    (cancelPopup)="closeNonActiveUserModal()">
+</web-messenger-modal>

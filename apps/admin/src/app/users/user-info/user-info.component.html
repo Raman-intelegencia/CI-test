@@ -1,0 +1,393 @@
+<div class="flex justify-between items-center mb-3">
+    <h2 class="font-semibold text-base text-secondary dark:text-white">{{'userInformation' | translate}}</h2>
+    <div class="flex gap-3">
+      <button *ngIf="!showWebhooksForm && isApi" (click)="addWebhooks()" class="btn btn-outline btn-primary dark:btn-accent dark:btn-outline">
+        {{'addWebhook' | translate}}
+      </button>
+      <button *ngIf="!showSftpForm" (click)="addSftpAccess()" class="btn btn-outline btn-primary dark:btn-accent dark:btn-outline">
+        {{'addSftp' | translate}}
+      </button>
+    </div>
+  </div>
+  <div class="h-[calc(100vh-12rem)] overflow-y-auto">
+    <div class="grid xl:grid-cols-2 grid-cols-1 gap-8">
+      <div class="p-4 border dark:border-gray-700 rounded grid sm:grid-cols-2 grid-cols-1 gap-4 w-full shadow-sm">
+        <span>
+          <label class="font-semibold">{{'status' | translate}}:</label>
+          <ng-container *ngIf="userApiorNot === false">
+            <ng-container *ngIf="userInfoData?.flag_active; else notActive">
+              <p>{{'active' | translate}}</p>
+            </ng-container>
+            <ng-template #notActive>
+              <p>{{'notActive' | translate}}</p>
+            </ng-template>
+          </ng-container>
+
+          <ng-container *ngIf="userApiorNot === true">
+            <ng-container *ngIf="userInfoData?.api_key; else notActive">
+              <p>{{'active' | translate}}</p>
+            </ng-container>
+            <ng-template #notActive>
+              <p>{{'notActive' | translate}}</p>
+            </ng-template>
+          </ng-container>
+          
+        </span>
+        <span>
+          <label class="font-semibold">{{'uid' | translate}}:</label>
+          <p class="break-all">{{userInfoData?.uid?.iid}}:{{userInfoData?.uid?.id}}</p>
+        </span>
+        <span>
+          <label class="font-semibold">{{'institutionID' | translate}}:</label>
+          <p>{{userInfoData?.profile?.iid}}</p>
+        </span>
+        <span>
+          <label class="font-semibold">{{'title' | translate}}:</label>
+          <p>{{userInfoData?.profile?.title}}</p>
+        </span>
+        <span>
+          <label class="font-semibold">{{'speciality' | translate}}:</label>
+          <p>{{userInfoData?.profile?.dept}}</p>
+        </span>
+        <span>
+          <label class="font-semibold">{{'useForCommunication' | translate}}:</label>
+          <div class="flex space-x-4">
+            <span class="flex items-center space-x-2">
+                <em *ngIf="userInfoData?.email_comm; else notEmailComm" class="ph-fill ph-check-fat text-green-500"></em>
+                <ng-template #notEmailComm>
+                  <em class="ph-bold ph-x-circle text-neutral"></em>
+                </ng-template>
+                <span>{{'email' | translate}}</span>
+            </span>
+            <span class="flex items-center space-x-2">
+                <em *ngIf="userInfoData?.sms_comm; else notSmsComm" class="ph-fill ph-check-fat text-green-500"></em>
+                <ng-template #notSmsComm>
+                  <em class="ph-bold ph-x-circle text-neutral"></em>
+                </ng-template>
+                <span>{{'cellPhone' | translate}}</span>
+            </span>
+          </div>
+        </span>
+        <span *ngIf="userInfoData?.tags?.length">
+          <label class="font-semibold">{{'reportingTags' | translate}}</label>
+          <p class="break-all">{{userInfoData?.tags?.join(', ')}}</p>
+        </span>
+        <ng-container *ngIf="userInfoData?.site">
+          <span *ngIf="userInfoData?.site?.location">
+            <label class="font-semibold">{{'location' | translate}}:</label>
+            <p>{{userInfoData?.site?.location}}</p>
+          </span>
+          <span *ngIf="userInfoData?.site?.detail">
+            <label class="font-semibold">{{'locationDetail' | translate}}:</label>
+            <p>{{userInfoData?.site?.detail}}</p>
+          </span>
+          <span *ngIf="userInfoData?.site?.city">
+            <label class="font-semibold">{{'city' | translate}}:</label>
+            <p>{{userInfoData?.site?.city}}</p>
+          </span>
+          <span *ngIf="userInfoData?.site?.state">
+            <label class="font-semibold">{{'state' | translate}}:</label>
+            <p>{{userInfoData?.site?.state}}</p>
+          </span>
+        </ng-container> 
+
+        <span *ngIf="userInfoData?.status?.r && userInfoData?.status?.r?.length">
+          <label class="font-semibold">{{'Service' | translate}}:</label>
+          <p>{{userInfoData?.status?.r?.join(', ')}}</p>
+        </span>
+      </div>
+      <div class="p-4 border dark:border-gray-700 rounded grid sm:grid-cols-2 grid-cols-1 gap-4 w-full shadow-sm">
+        <span *ngIf="userInfoData?.cellphone_verify_time && userInfoData?.cellphone_verify">
+          <label class="font-semibold">{{'cellphoneVerifiedDateTime' | translate}}:</label>
+          <p>{{userInfoData?.cellphone_verify_time?.$date | humanziedDate}}</p>
+        </span>
+        <span>
+          <label class="font-semibold">{{'created' | translate}}:</label>
+          <p>{{userInfoData?.time_created?.$date | humanziedDate}}</p>
+        </span>
+        <span *ngIf="userInfoData?.app_version && userInfoData?.app_platform">
+          <label class="font-semibold">{{'app' | translate}}:</label>
+          <p>{{userInfoData?.app_version}} ({{userInfoData?.app_platform}})</p>
+        </span>
+        <span *ngIf="userInfoData?.num_good_logins && userInfoData?.num_good_logins !== 0">
+          <label class="font-semibold">{{'signIns' | translate}}:</label>
+          <p>{{userInfoData?.num_good_logins}}</p>
+        </span>
+        <span *ngIf="userInfoData?.time_last_login">
+          <label class="font-semibold">{{'lastSignIn' | translate}}:</label>
+          <p>{{userInfoData?.time_last_login?.$date | humanziedDate}}</p>
+        </span>
+        <span *ngIf="userInfoData?.time_password_set">
+          <label class="font-semibold">{{'pwdSet' | translate}}:</label>
+          <p>{{userInfoData?.time_password_set?.$date | humanziedDate}}</p>
+        </span>
+        <span>
+          <label class="font-semibold">{{ 'legalAgreement' | translate }}:</label>
+          <!-- Display legal agreement details if available -->
+          <ng-container *ngIf="userInfoData?.legal_agreement?.document; else noLegalAgreement">
+            <p>
+              <a (click)="openLegalAggrement()" style="cursor: pointer;">
+                {{ userInfoData?.legal_agreement?.document }} {{ userInfoData?.legal_agreement?.version }} ({{ userInfoData?.legal_agreement?.iid }})
+              </a>
+              <!-- Check if the legal agreement is complete -->
+              <span *ngIf="userInfoData?.legal_agreement?.is_complete; else notCompleted" class="text-green-600 items-center">{{ 'completed' | translate }}</span>
+              <!-- Display if not complete -->
+              <ng-template #notCompleted>
+                <span class="text-red-600 items-center">{{ 'inComplete' | translate }}</span>
+              </ng-template>
+            </p>
+          </ng-container>
+          <!-- Display if no legal agreement is required -->
+          <ng-template #noLegalAgreement>
+            <p>{{ 'noneRequired' | translate }}</p>
+          </ng-template>
+        </span>
+        
+      </div>
+    </div>
+    <div class="flex justify-between flex-wrap items-center my-6">
+    <div>
+        <p *ngIf="userInfoData?.api_key;else noUserInfoDataAPIKey">
+          <ng-container *ngIf="getALLCurrentUserPermissionList.client_api_key_modify === true; else noAPIKeyShow">
+            <span class="font-semibold">{{'api' | translate}}: <b>{{userInfoData?.api_key}}</b></span>
+            <span class="pl-2 text-primary dark:text-accent cursor-pointer" (click)="removeApiKeyPopUp()">({{'remove' | translate}})</span>
+          </ng-container>
+          <ng-template #noAPIKeyShow>
+            <span class="font-semibold">{{'api' | translate}}: <b>{{ 'hidden' | translate}}</b></span>
+          </ng-template>
+        </p>
+        
+        <ng-template #noUserInfoDataAPIKey>
+          <p *ngIf="userApiorNot">
+            <span class="font-semibold">{{'api' | translate}}:</span>
+            <span class="pl-2 text-primary dark:text-accent cursor-pointer" (click)="generateApiKey()">({{'generate' | translate}})</span>
+          </p>
+        </ng-template>
+        <ng-container *ngIf="userApiInfoData?.api_key">
+          <div class="flex justify-start flex-wrap mt-3 mb-2 gap-x-2  text-secondary dark:text-base-100 text-sm">
+            <label class="cursor-pointer label justify-start py-0 gap-x-1">
+                <input type="checkbox" 
+                [(ngModel)]="isCheckboxChecked"
+                class="checkbox checkbox-xs checkbox-primary rounded" 
+                (change)="handleCheckboxChange(isCheckboxChecked)"/>
+                {{'canBeMessed' | translate}}
+            </label>
+        </div>
+        </ng-container>
+        
+        <!-- Email subscription-->
+        <span *ngIf="userEmailSubscriptionData">
+          <p *ngIf="hasEmailSubscriptionProperty(userEmailSubscriptionData, 'idle_email')">
+            {{ 'InactivityEmailSubscriptionStatus' | translate }}: 
+            <b>{{ userEmailSubscriptionData.idle_email ? 'subscribed' : 'unSubscribed' | translate }}</b>
+            <span class="pl-2 text-primary dark:text-accent cursor-pointer" 
+                 (click)="userEmailSubUpdate('idle_email', !userEmailSubscriptionData.idle_email)">
+              ({{ (userEmailSubscriptionData.idle_email ? 'unSubscribe' : 'reSubscribe') | translate }})
+            </span>
+          </p>
+          <p *ngIf="hasEmailSubscriptionProperty(userEmailSubscriptionData, 'second_channel')">
+            {{ 'secondChannelEmailSubscriptionStatus' | translate }}: 
+            <b>{{ userEmailSubscriptionData.second_channel ? 'subscribed' : 'unSubscribed' | translate }}</b>
+            <span class="pl-2 text-primary dark:text-accent cursor-pointer" 
+                 (click)="userEmailSubUpdate('second_channel', !userEmailSubscriptionData.second_channel)">
+              ({{ (userEmailSubscriptionData.second_channel ? 'unSubscribe' : 'reSubscribe') | translate }})
+            </span>
+          </p>
+        </span>
+        
+    </div>
+      <div class="text-sm font-medium flex justify-start gap-2  py-1">
+        <!-- check if admin then display this -->
+        <span *ngIf="isAdmin(userInfoData?.admin)" class="m-1 ml-0 bg-green-600 rounded px-2  text-white">{{'admin' | translate}}</span>
+        <!-- check if the user has phi permission -->
+        <span *ngIf="userInfoData?.phi_iids?.length" class="m-1 ml-0 bg-primary rounded px-2 text-white">{{'canViewPhi' | translate}}</span>
+        <!-- check if the user is super admin -->
+        <span *ngIf="isSuperAdmin(userInfoData?.admin)" class="m-1 ml-0 bg-neutral rounded px-2 text-white">{{'superAdmin' | translate}}</span>
+        <!-- check if the user has managed flag -->
+        <span *ngIf="userInfoData?.flag_managed" class="m-1 ml-0 bg-neutral rounded px-2 text-white">{{'userManaged' | translate}}</span>
+        <!-- check if the user is SSO by checking the has_password flag of the user data -->
+        <span *ngIf="!userInfoData?.has_password" class="m-1 ml-0 bg-base-300 rounded px-2 text-black">{{'sso' | translate}}</span>
+        <!-- check if its API user by checking if the user has api token in user data of api response-->
+        <span *ngIf="isApi" class="m-1 ml-0 bg-primary rounded px-2 text-white">{{'apiUser' | translate}}</span>
+        <!-- check if the temporary password was generated for the user -->
+        <span *ngIf="userInfoData?.is_temp_password" class="m-1 ml-0 bg-neutral rounded px-2 text-white">{{'tempPassword' | translate}}</span>
+        <!-- check if the user is locked -->
+        <span *ngIf="userInfoData?.flag_locked" class="m-1 ml-0 bg-neutral rounded px-2 text-white">{{'locked' | translate}}</span>
+         <!-- check if the user has basic flag -->
+         <span *ngIf="userInfoData?.flag_basic" class="m-1 ml-0 bg-yellow-500 rounded px-2 text-white">{{'basicUser' | translate}}</span>
+        <!-- check if the user has reset token in the user response data -->
+        <span *ngIf="userInfoData?.has_reset_token" class="m-1 ml-0 bg-neutral rounded px-2 text-white">{{'hasResetToken' | translate}}</span>
+        <ng-container *ngIf="userApiorNot">
+          <span *ngIf="!isApi" class="m-1 ml-0 bg-yellow-500 rounded px-2 text-white">{{'oneWayUser' | translate}}</span>
+        </ng-container>
+        <span *ngIf="userInfoData?.has_pin" class="m-1 ml-0 bg-yellow-500 rounded px-2 text-white">{{'pinSET' | translate}}</span>
+      </div>
+    </div>
+
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 mt-4 gap-4">
+      <!-- Notification UI -->
+      <div *ngIf="userInfoData?.notification_token?.token" class="p-4 border dark:border-gray-700 rounded w-full shadow-sm">
+        <h4 class="font-semibold text-secondary dark:text-white mb-3">
+          {{'notificationToken' | translate}}
+        </h4>
+        <div class="text-sm">
+          <p class="border-t dark:border-gray-700 py-2 flex gap-2">
+            <label class="font-semibold">{{'id' | translate}}:</label>
+            <span class="break-all"> {{userInfoData?.notification_token?._id?.$oid}}</span>
+          </p>
+          <p class="border-t dark:border-gray-700 py-2 flex gap-2">
+            <label class="font-semibold">{{'token' | translate}}:</label>
+            <span class="break-all">
+              {{userInfoData?.notification_token?.token}}
+            </span>
+          </p>
+          <p class="border-t dark:border-gray-700 py-2 flex gap-2">
+            <label class="font-semibold">{{'type' | translate}}:</label>
+            {{userInfoData?.notification_token?.type}}
+          </p>
+          <p class="border-t dark:border-gray-700 py-2 flex gap-2">
+            <label class="font-semibold">{{'saved' | translate}}:</label>
+            {{userInfoData?.notification_token?.time_saved?.$date | humanziedDate}}
+          </p>
+          <p class="border-t dark:border-gray-700 pt-2 flex gap-2">
+            <label class="font-semibold">{{'created' | translate}}:</label>
+            {{userInfoData?.notification_token?.time_created?.$date | humanziedDate}}
+          </p>
+          <p class="border-t dark:border-gray-700 pt-2 flex gap-2">
+            <label class="font-semibold">{{'sns' | translate}}:</label>
+            <span class="break-all">{{userInfoData?.notification_token?.sns}}</span>
+          </p>
+        </div>
+      </div>
+      <!-- sftp UI -->
+      <div *ngIf="showSftpForm" class="p-4 border rounded w-full shadow-sm">
+        <h4 class="font-semibold text-secondary dark:text-white mb-3">
+          {{'sftpAccess' | translate}}
+        </h4>
+        <form [formGroup]="sftpForm" (ngSubmit)="setSftpCredentials()">
+          <div class="text-sm">
+            <!-- Sftp username -->
+            <div class="border-t dark:border-gray-700 py-2 flex gap-2">
+              <label class="font-semibold">{{'SftpUsername' | translate}}:</label>
+              <ng-container *ngIf="!isEditSftpMode; else editUsername">
+                <span class="break-all">{{ userInfoData?.username }}</span>
+              </ng-container>
+              <ng-template #editUsername>
+                <input type="text" formControlName="username">
+              </ng-template>
+            </div>
+            <!-- Sftp public ssh key -->
+            <div class="border-t dark:border-gray-700 py-2 flex gap-2">
+              <label class="font-semibold">{{'token' | translate}}:</label>
+              <ng-container *ngIf="!isEditSftpMode; else editPublicKey">
+                <span class="break-all">{{ userInfoData?.public_key }}</span>
+              </ng-container>
+              <ng-template #editPublicKey>
+                <input type="text" formControlName="public_key">
+              </ng-template>
+            </div>
+  
+          </div>
+          <div class="mt-4">
+            <button type="button" (click)="toggleSftpEditMode()" class="text-blue-600 mr-2">
+              <span *ngIf="isEditSftpMode; else showSftpEdit">
+                {{'cancel' | translate}}
+              </span>
+              <ng-template #showSftpEdit>
+                {{'editSftpAccess' | translate}}
+              </ng-template>
+            </button>
+            <button *ngIf="!isEditSftpMode" type="button" (click)="removeSftpCredentials()" class="text-blue-600 mr-2">
+              {{'removeSftpAccess' | translate}}
+            </button>
+            <button *ngIf="isEditSftpMode" type="submit" class="btn btn-primary">
+              {{'save' | translate}}
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Webhook Ui -->
+      <div *ngIf="showWebhooksForm" class="p-4 border dark:border-gray-700 rounded w-full shadow-sm">
+        <h4 class="font-semibold text-secondary dark:text-white mb-3">
+          {{'webhooks' | translate}}
+        </h4>
+        <form [formGroup]="webhookForm" (ngSubmit)="setWebhooks()">
+          <div class="text-sm">
+            <!-- Message Sent Webhook -->
+            <div class="border-t dark:border-gray-700 py-2 flex gap-2">
+              <label class="font-semibold md:w-32">{{'messageSent' | translate}}:</label>
+              <ng-container *ngIf="!isEditMode; else editMessageSent">
+                <span class="break-all">{{ userInfoData?.webhooks?.message_sent }}</span>
+              </ng-container>
+              <ng-template #editMessageSent>
+                <input type="text" formControlName="message_sent">
+              </ng-template>
+            </div>
+
+            <!-- Message read webHook -->
+            <div class="border-t dark:border-gray-700 py-2 flex gap-2">
+              <label class="font-semibold md:w-32">{{'messageRead' | translate}}:</label>
+              <ng-container *ngIf="!isEditMode; else editMessageRead">
+                <span class="break-all">{{ userInfoData?.webhooks?.message_read }}</span>
+              </ng-container>
+              <ng-template #editMessageRead>
+                <input type="text" formControlName="message_read">
+              </ng-template>
+            </div>
+
+            <!-- user status webhook -->
+            <div class="border-t dark:border-gray-700 py-2 flex gap-2">
+              <label class="font-semibold md:w-32">{{'userStatus' | translate}}:</label>
+              <ng-container *ngIf="!isEditMode; else editUserStatus">
+                <span class="break-all">{{ userInfoData?.webhooks?.user_status }}</span>
+              </ng-container>
+              <ng-template #editUserStatus>
+                <input type="text" formControlName="user_status">
+              </ng-template>
+            </div>
+
+            <!-- user provisioning webhook -->
+            <div class="border-t dark:border-gray-700 py-2 flex gap-2">
+              <label class="font-semibold md:w-32">{{'userProvisioning' | translate}}:</label>
+              <ng-container *ngIf="!isEditMode; else editUserProvisioning">
+                <span class="break-all">{{ userInfoData?.webhooks?.user_provisioning }}</span>
+              </ng-container>
+              <ng-template #editUserProvisioning>
+                <input type="text" formControlName="user_provisioning">
+              </ng-template>
+            </div>
+          </div>
+
+          <div class="mt-4 flex flex-wrap gap-2">
+            <button type="button" (click)="toggleEditMode()" class="btn btn-primary border-black bg-white text-black hover:text-white">
+              <span *ngIf="isEditMode; else showWebhookEdit">
+                {{'cancel' | translate}}
+              </span>
+              <ng-template #showWebhookEdit>
+                {{'editWebhooksAccess' | translate}}
+              </ng-template>
+            </button>
+            <button *ngIf="!isEditMode" type="button" (click)="confirmRemoveWebHook()" class="btn btn-primary border-black bg-white text-black hover:text-white">
+              {{'removeWebhooksAccess' | translate}}
+            </button>
+            <button *ngIf="isEditMode" type="submit" class="btn btn-primary text-white">
+              {{'save' | translate}}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <web-messenger-success-modal *ngIf="showConfirmRemoveWebHook" [showSuccessModal]="showConfirmRemoveWebHook"
+  [showConfirmRemoveWebHook]="showConfirmRemoveWebHook" (removeWebHook)="removeWebHook()" (resetPopupvalue)="resetPopupvalue()"
+  ></web-messenger-success-modal>
+
+<web-messenger-modal *ngIf="showErrorPopup" 
+[modalId]="'error-modal'" 
+[modalTitle] ="modalTitleMessage"
+[modalMessage]="successError" 
+(closePopup)="removeApiKeyConfirmation(modalTitleMessage)" 
+(cancelPopup)="closepopup()"
+[modalCloseText]="'ok' | translate">
+</web-messenger-modal>

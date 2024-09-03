@@ -1,0 +1,35 @@
+{
+  "name": "external-messenger-e2e-external-messenger-e2e",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/external-messenger-e2e/external-messenger-e2e/src",
+  "projectType": "application",
+  "targets": {
+    "e2e": {
+      "executor": "@nx/cypress:cypress",
+      "options": {
+        "cypressConfig": "apps/external-messenger-e2e/external-messenger-e2e/cypress.config.ts",
+        "devServerTarget": "extmsg:serve:development",
+        "testingType": "e2e"
+      },
+      "configurations": {
+        "production": {
+          "devServerTarget": "extmsg:serve:production"
+        },
+        "ci": {
+          "devServerTarget": "extmsg:serve-static"
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": [
+          "apps/external-messenger-e2e/external-messenger-e2e/**/*.{js,ts}"
+        ]
+      }
+    }
+  },
+  "tags": [],
+  "implicitDependencies": ["extmsg"]
+}

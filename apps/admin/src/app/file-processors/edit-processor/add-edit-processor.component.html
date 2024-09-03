@@ -1,0 +1,69 @@
+<div
+    class="w-full md:px-12 px-4 bg-gray-100 dark:bg-gray-700/20 dark:border-b dark:border-gray-700 dark:text-white py-4">
+    <h2 class="text-secondary text-xl font-bold dark:text-white">
+        {{ id == undefined ? 'Add Processor' : 'Edit Processor' }}  
+    </h2>
+</div>
+
+<div
+    class="w-full md:h-[calc(100vh-7rem)] h-[calc(100vh-9.5rem)] py-4 md:px-12 px-4 text-gray-600 dark:text-base-100 overflow-y-auto ">
+
+    <form [formGroup]="addProcessorForm"  class="lg:w-3/6 md:w-4/6 mt-4" >
+        <div class="mb-4">
+            <label class="mb-1 block font-semibold text-secondary text-sm dark:text-base-100">{{ "type" | translate }}</label>
+            <input type="text" name="typeofProcessor" id="typeofProcessor" formControlName="typeofProcessor"
+                class="border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-2 px-3" />
+        </div>
+        <div class="mb-4">
+            <label class="mb-1 block font-semibold text-secondary text-sm dark:text-base-100">{{ "url" | translate }}</label>
+            <input type="text" name="uRLProcessor" id="uRLProcessor" formControlName="uRLProcessor"
+                class="border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-2 px-3" />
+        </div>
+        <div class="mb-4">
+            <web-messenger-institution-search [institutionId]="instituteId" [isInstituteMatchbyId]="true"
+              (searchedInstituteData)="receiveInstituteNameID($event)"></web-messenger-institution-search>
+        </div>
+        <div class="mb-3">
+            <label  class="mb-1 block font-semibold text-secondary text-sm dark:text-base-100">{{ "notificationEmails" | translate }}</label>
+            <div
+                class="border flex justify-between bg-transparent border-base-300 dark:border-gray-600 block dark:text-white text-gray-600 rounded w-full py-1 px-3">
+                <span>{{tags.length}}</span>
+                
+                <label for="adEditTags" class="tooltip tooltip-primary cursor-pointer " data-tip="Edit" (click)="openReportingTags()"> <em
+                        class="text-primary text-base ph-bold ph-note-pencil"></em>
+                </label>
+            </div>
+            <p *ngIf="isEmailValidOrNotCheck == true" class="text-neutral text-xs mt-0.5">
+                {{ "shouldBeEmail" | translate }}
+            </p>
+        </div>
+        <div class="mb-3">
+            <label class="mb-1 block font-semibold text-secondary text-sm dark:text-base-100">{{ "notifyFAAdmins" | translate }}</label>
+            <span class="flex gap-4">
+                <label class="label cursor-pointer justify-start">
+                    <input type="radio" formControlName="notifyAllFAAdmins" [value]="true"
+                        class="radio radio-primary dark:radio-accent radio-xs mr-2" />
+                    {{ "yes" | translate }}
+                </label>
+                <label class="label cursor-pointer justify-start">
+                    <input type="radio" formControlName="notifyAllFAAdmins" [value]="false"
+                        class="radio radio-primary dark:radio-accent radio-xs mr-2" />
+                    {{ "no" | translate }}
+                </label>
+            </span>
+        </div>
+        <div class="mb-4">
+            <label class="mb-1 block font-semibold text-secondary text-sm dark:text-base-100">{{ "pollInterval" | translate }}</label>
+            <input type="text" placeholder="Interval (seconds)" name="pollInterval" id="pollInterval" formControlName="pollInterval"
+            (keypress)="keyPress($event)" class="border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-2 px-3" />
+        </div>
+        <div class="flex gap-3 mt-4">
+            <button  type="button" (click)="addProcessorSubmit()" [disabled]="!disabledFormChanged" class="btn btn-primary text-white px-6" >{{ "save" | translate }}</button>
+            <button type="button" (click)="navigateToViewPage()" class="btn bg-gray-300 hover:bg-gray-400 border-0 text-secondary" >{{ "cancel" | translate }}</button>
+        </div>
+    </form>
+
+</div>
+
+<web-messenger-reporting-tags (tagsDataEvent)="reportingTagsValue($event)" [isReportingTag]="isReportingTag"
+  [serviceTags]="tags" (isReportingTags)="isreportingTags($event)"></web-messenger-reporting-tags>

@@ -1,0 +1,57 @@
+<input type="checkbox" id="scheduled-status" class="modal-toggle" />
+<div class="modal bg-black/70">
+  <div
+    class="modal-box max-w-2xl bg-white dark:bg-black rounded p-0 relative overflow-y-hidden dark:border-primary/60 dark:border dark:shadow-xl dark:shadow-primary/20">
+    <div class="flex justify-between text-white items-center bg-primary p-3">
+      <h3 class="font-bold dark:text-white">{{showScheduleStatusHeading}}</h3>
+      <label for="scheduled-status" class="w-7 h-7">
+        <em class="ph-bold ph-x cursor-pointer text-xl hover:text-accent"></em>
+      </label>
+    </div>
+    <div class="max-h-[65vh] overflow-y-auto text-gray-600 dark:text-base-100 p-4">
+      <div class="pb-1 flex justify-between items-center">
+        <h4 class="font-bold text-secondary text-lg dark:text-white">
+          {{"scheduledStatus"|translate}}
+        </h4>
+        <label class="font-bold text-sm cursor-pointer text-primary dark:text-accent"
+          (click)="openScheduleNewStatus()">
+          <em class="ph-bold ph-plus"></em> {{"scheduleNewStatus"|translate}}
+        </label>
+      </div>
+      <div class="py-6" *ngIf="showLoader">
+        <web-messenger-loader-model></web-messenger-loader-model>
+      </div>
+      <div *ngIf="showScheduledStatus; else emptyWindow">
+        <div class="rounded bg-gray-50 dark:bg-gray-900 mt-3" *ngFor="let userStatus of scheduledStatus">
+          <div
+            class="flex justify-between items-center border-b border-gray-300 dark:border-gray-700 px-4 py-3 last:border-0">
+            <div class="mr-2">
+              <p><strong class="text-secondary dark:text-white pr-2">{{"status"|translate}} :
+                </strong>{{userStatus.status}}</p>
+              <p><strong class="text-secondary dark:text-white pr-2">{{"duration"|translate}} :
+                </strong>{{formatDate(userStatus.start_date)}} to {{formatDate(userStatus.end_date)}}
+              </p>
+              <p><strong
+                  class="text-secondary dark:text-white pr-2">{{"Coverage"|translate}}:</strong>{{userStatus.coverage_user_name}}
+              </p>
+              <p><strong
+                  class="text-secondary dark:text-white pr-2">{{"autoResponse"|translate}}:</strong>{{userStatus.away_message}}
+              </p>
+            </div>
+            <button type="button" class="tooltip p-0" data-tip="Delete"
+              (click)="deleteScheduledStatus($event,userStatus.object_id)">
+              <em class="ph-fill ph-trash text-neutral cursor-pointer" title="Delete"></em>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<ng-template #emptyWindow>
+  <div class="text-center flex h-full items-center justify-center py-5" *ngIf="!showLoader">
+    <p class="text-secondary text-xl dark:dark:text-base-100">{{"noStatus"|translate}}</p>
+  </div>
+</ng-template>
+<web-messenger-schedule-new-status-popup
+  [showScheduledNewStatus]="showScheduledNewStatus" (showScheduledNewStatusEvent)="showScheduledNewStatusValue($event)"></web-messenger-schedule-new-status-popup>

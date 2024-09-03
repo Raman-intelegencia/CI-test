@@ -1,0 +1,51 @@
+@import '../style/_util.scss';
+
+.title {
+    position: relative;
+    color: $color-black;
+    font-size: 16px;
+    padding: 10px;
+    background: #f6f7f9;
+    border-bottom: $border-default;
+    @media (prefers-color-scheme: dark) {
+        background: $color-darkgray;
+        border-bottom: 1px solid $color-darkgray;
+        color: $color-white;
+    }
+}
+
+.title__content {
+    line-height: 18px;
+    text-align: center;
+    // keep away from actions
+    margin: 0 70px;
+}
+
+.title__actions {
+    position: absolute;
+    height: 100%;
+    top: 0;
+    right: $gutter * 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.title__text,
+.title__subtext {
+    margin: 0;
+    font-size: 14px;
+    line-height: 18px;
+}
+
+.title__subtext {
+    font-weight: $weight-light;
+}
+
+.title__button {
+    @include visualbutton();
+    background: transparent;
+    @media (prefers-color-scheme: dark) {
+        img{filter: brightness(2);}
+    }
+}

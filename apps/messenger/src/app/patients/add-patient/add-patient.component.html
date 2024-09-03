@@ -1,0 +1,90 @@
+<div
+  class="text-gray-600 dark:text-base-100 p-4 px-6 h-full bg-white dark:bg-black border border-base-100 dark:border-gray-600 rounded overflow-y-auto" *ngIf="isPatientCreate===true">
+  
+  <h2 class="text-secondary dark:text-base-100 font-bold text-xl">
+    <label (click)="navigatetoBack()"> <em class="ph-bold ph-arrow-left text-primary dark:text-accent text-lg inline-block md:hidden cursor-pointer"></em></label> {{ "newPatient" | translate }}
+  </h2>
+  <p class=" text-base">{{ "isPatientSearch" | translate }}</p>
+  <form name="add-patient" class="mt-6 md:w-6/12" [formGroup]="addPatient" ngNativeValidate>
+    <div class="mb-4">
+      <label class="mt-0.5 font-semibold text-secondary text-sm dark:text-base-100" for="mrnValue">
+        {{ "mrn" | translate }}
+      </label>
+      <input type="text" class="border bg-transparent dark:text-white dark:border-base-300 text-gray-600 rounded w-full py-1 px-3" name="mrn"
+        id="mrnValue" formControlName="pid" placeholder="Enter MRN (optional)" />
+    </div>
+    <div class="mb-4">
+      <label class="mt-0.5 font-semibold text-secondary text-sm dark:text-base-100" for="firstname">
+        {{ "firstName" | translate }}
+      </label>
+      <input type="text" class="border bg-transparent dark:text-white dark:border-base-300 text-gray-600 rounded w-full py-1 px-3"
+        name="firstname" id="firstname" placeholder="Enter first name" formControlName="given" required />
+    </div>
+    <div class="mb-4">
+      <label class="mt-0.5 font-semibold text-secondary text-sm dark:text-base-100" for="lastname">
+        {{ "lastName" | translate }}
+      </label>
+      <input type="text" class="border bg-transparent dark:text-white dark:border-base-300 text-gray-600 rounded w-full py-1 px-3"
+        name="lastname" id="lastname" placeholder="Enter last name" formControlName="family" required />
+    </div>
+
+    <div class="mb-4">
+      <label class="mt-0.5 font-semibold text-secondary text-sm dark:text-base-100" for="Dob">
+        {{ "dob" | translate }}
+      </label>
+      <!-- dob input -->
+      <input 
+        type="date"  
+        class="border bg-transparent dark:text-white dark:border-base-300 text-base text-gray-600 rounded w-full py-1 px-3"
+        [ngClass]="{ 'is-invalid': submitted && addPatient.controls['dob'].errors }" 
+        formControlName="dob"
+        [max]="currentDate"
+        >
+      <span class="text-danger text-xs text-neutral"
+      *ngIf="(addPatient.controls['dob'].touched || submitted) && addPatient.controls['dob'].errors?.['required']">
+       {{ "dobReq" | translate}}
+    </span>
+    <span class="text-danger text-xs text-neutral" *ngIf="addPatient.controls['dob'].hasError('PastDate')">
+      {{ "MinValidation" | translate}}
+    </span>
+    <span class="text-danger text-xs text-neutral invalid-feedback"
+      *ngIf="addPatient.get('dob')?.hasError('maxDateExceeded')">{{ "MaxValidation" | translate}}</span>
+    </div>
+    
+    <div class="mb-4">
+      <label class="mt-0.5 font-semibold text-secondary text-sm dark:text-base-100" for="zip">
+        {{ "zip" | translate }} :
+      </label>
+      <input type="text" class="border bg-transparent dark:text-white dark:border-base-300 text-gray-600 rounded w-full py-1 px-3" name="zip"
+        placeholder="Enter zip code" id="zip" pattern="[0-9]*" formControlName="zip" required />
+    </div>
+    <div class="mb-4 flex items-center">
+      <label class="w-28 mt-0.5 font-semibold text-secondary text-sm dark:text-base-100" for="gender">
+        {{ "sex" | translate }}:
+      </label>
+      <div class="w-full flex gap-4">
+        <label class="label cursor-pointer dark:text-base-100">
+          <input type="radio" name="sex" id="gender" class="radio radio-xs radio-primary dark:radio-accent mr-1" formControlName="sex"
+            value="f" required />
+          {{ "female" | translate }}
+        </label>
+        <label class="label cursor-pointer dark:text-base-100">
+          <input type="radio" name="sex" id="gender" class="radio radio-xs radio-primary dark:radio-accent mr-1" formControlName="sex"
+            value="m" />
+          {{ "male" | translate }}
+        </label>
+        <label class="label cursor-pointer dark:text-base-100">
+          <input type="radio" name="sex" id="gender" class="radio radio-xs radio-primary dark:radio-accent mr-1" formControlName="sex"
+            value="u" />
+          {{ "unknown" | translate }}
+        </label>
+      </div>
+    </div>
+    
+    <input type="submit" class="btn btn-primary mt-6 text-white" value="Add New Patient" [disabled]="!verifyCreateButton()" (click)="addNewPatient()" />
+  </form>
+</div>
+
+<web-messenger-modal *ngIf="showErrorMessage" [modalId]="'zip'" [modalTitle]="'error' | translate"
+  [modalMessage]="showErrorMessage" (closePopup)="closeErrorPopup()" (cancelPopup)="cancelErrorpopup()"
+  [modalCloseText]="'close' | translate"></web-messenger-modal>

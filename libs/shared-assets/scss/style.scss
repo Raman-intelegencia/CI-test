@@ -1,0 +1,55 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* You can add global styles to this file, and also import other style files */
+
+html,
+body {
+  font-family: "Helvetica Neue", helvetica, arial, sans-serif;
+  @apply h-full;
+
+  ::-webkit-scrollbar {
+    @apply h-2 w-2;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-base-100 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gray-600 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-700;
+  }
+}
+
+input {
+  &:focus {
+    @apply outline-0;
+  }
+}
+
+.btn {
+  @apply normal-case py-1 h-10 min-h-0 rounded font-normal;
+}
+@media (prefers-color-scheme: light){
+  .logo {
+    content: url(/assets/images/ams-dark-logo.svg);
+    }
+}
+@media (prefers-color-scheme: dark){
+  .logo {
+    content: url(/assets/images/ams-white-logo.svg);
+    }
+}
+
+.login-img {
+  background-image: url(/assets/AMSConnect_WebLogin.jpg);
+}
+
+.main-body {
+  height: calc(100vh - 10rem);
+}

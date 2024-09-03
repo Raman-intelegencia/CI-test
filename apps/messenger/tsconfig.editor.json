@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "src/**/*.ts"
+, "../../libs/shared/src/lib/models/manage-group.model.ts", "../../libs/shared/src/lib/services/messenger-services/thread-helper.service.ts"  ],
+  "compilerOptions": {
+    "types": [
+      "jest",
+      "node"
+    ]
+  }
+}

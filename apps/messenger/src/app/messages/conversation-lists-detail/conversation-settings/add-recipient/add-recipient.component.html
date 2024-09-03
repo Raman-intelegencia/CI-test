@@ -1,0 +1,227 @@
+<input type="checkbox" id="add-recipient-modal" class="modal-toggle" />
+<div class="modal bg-black/70">
+    <div class="modal-box max-w-2xl bg-white dark:bg-black rounded p-0 relative overflow-y-hidden dark:border-primary/60 dark:border dark:shadow-xl dark:shadow-primary/20">
+      <div class="flex justify-between text-white items-center bg-primary p-3">
+      <h3 class="font-bold"> {{ "addRecipient" | translate }}</h3>
+      <label for="add-recipient-modal" class="w-7 h-7" (click)="closeAddRecipientModal()">
+        <em class="ph-bold ph-x cursor-pointer text-xl hover:text-accent"></em>
+      </label>
+    </div>
+    
+    <form autocomplete="off" class="message-body p-4 bg-white dark:bg-black " [formGroup]="conversationSettingsForm">
+      <div class="max-h-[60vh] overflow-y-auto">
+      <label class="mb-2 text-secondary text-base dark:text-base-100">{{"addRecipient" | translate}}</label>
+      <div tabindex="0" class="collapse rounded bg-base-100/[0.3] dark:border dark:bg-base-100/[0.02] dark:border-gray-600 mb-2 px-3">
+        <div class="flex flex-wrap gap-1 items-center py-2">
+          <input #addRecipient class="bg-transparent flex-grow outline-none dark:text-white focus:ring-0 border-0" type="text"
+            name="addRecipient" id="addRecipient" formControlName="addRecipient"
+            [placeholder]="recipientData.selectedUsers.length > 0 ? '' : ('addRecipientToConversation' | translate)"
+            (focus)="formStates.isInputFocused = true; getProfileSearchList()" (keyup)="getProfileSearchList()"
+            (blur)="formStates.isInputFocused = false" /> 
+            <em class="ph-bold ph-x cursor-pointer text-xl hover:text-accent dark:text-base-300" (click)="clearRecipientsLists()"></em>
+          </div>
+        <div *ngIf="formStates.isSearchDivOpen">
+          <div *ngFor="let recipient of recipientData.usersProfileList;trackBy: trackByRecipientId"
+            class="hover:bg-accent/[0.08] dark:hover:bg-gray-600/30 p-3 flex items-center text-gray-600 dark:text-base-100 bg-white dark:bg-gray-600/20 mb-2">
+           <ng-container *ngIf="recipient.type !== userType.Group && recipient.type !== userType.Role">
+              <img *ngIf="recipient.data.image_id as image_id" class="w-12 h-12 rounded-full" [src]="getImageUrl(image_id)" alt="Profile-img" (click)="openProfilePopUp($event,recipient.id)">
+            <!-- If image_id is not available, use the initials -->
+              <span *ngIf="!recipient.data.image_id"
+                class="w-12 h-12 rounded-full bg-base-100 flex items-center justify-center text-primary" (click)="openProfilePopUp($event,recipient.id)">
+                {{(recipient.data.first_name | slice:0:1) | uppercase}}{{(recipient.data.last_name | slice:0:1) | uppercase}}
+              </span>
+              <img *ngIf="recipient?.type === userType.External" class="w-12 h-12 rounded-full bg-base-100 p-2"
+              src="assets/icons/user_external.svg"  
+              alt="Profile-img">  
+           </ng-container>
+           <ng-container *ngIf="recipient.type === userType.Group">
+            <span class="w-12 h-12 flex items-center justify-center rounded-full bg-base-100"><em class="ph-light ph-users-three text-4xl text-blue-400"></em></span>
+           </ng-container>
+           <ng-container *ngIf="recipient.type === userType.Role"
+           class="flex items-center ">
+           <span class="w-12 h-12 flex items-center justify-center rounded-full bg-base-100"><em class="ph-light ph-users-three text-4xl text-pink-400"></em></span>
+           </ng-container>
+            <div class="flex justify-between text-sm ml-3 w-[calc(100%-3.1rem)]" *ngIf="recipient.type !== userType.Group && recipient.type !== userType.Role">
+              <div class="w-full">
+                <p class="font-medium text-base text-secondary dark:text-white" *ngIf="recipient?.data?.first_name">
+                  {{recipient?.data?.first_name}}
+                  {{recipient?.data?.last_name}} ({{recipient?.data?.profile?.ishort}}) 
+                  <ng-container *ngIf="recipient?.data?.status?.s">
+                    <em *ngIf="recipient?.data?.status?.s === 'available'; else busyAndOff"
+                      class="ph-duotone ph-check-circle text-green-500"></em>
+                    <ng-template #busyAndOff>
+                      <em *ngIf="recipient?.data?.status?.s === 'busy'; else offOnly"
+                        class="ph-duotone ph-prohibit text-neutral"></em>
+                      <ng-template #offOnly>
+                        <em *ngIf="recipient?.data?.status?.s === 'off'"
+                          class="ph-duotone ph-minus-circle text-base-300"></em>
+                      </ng-template>
+                    </ng-template>
+                  </ng-container>
+                  <span class="text-sm" *ngIf="recipient?.coverageProfile as coverage">
+                    <span class="font-normal text-base-300">{{'coveredBy' | translate}}:</span> 
+                    {{coverage?.data?.first_name}} {{coverage?.data?.last_name}}
+                </span>
+                </p>
+                <p *ngIf="recipient?.data?.name" class="font-medium text-base text-secondary dark:text-white" >{{recipient?.data?.name}}</p>
+                <p class="text-sm">{{recipient?.data?.profile?.dept}}</p>
+                  <p *ngIf="recipient?.data?.status?.r !== undefined || recipient?.data?.profile?.title" class="text-sm">
+                    {{ recipient?.data?.status?.r || [] | formatServiceTeam: maxLength }}
+                    <ng-container *ngIf="recipient?.data?.status?.r"> &middot; </ng-container>
+                    {{ recipient?.data?.profile?.title }}
+                  </p>   
+              </div>
+              <button class="text-primary dark:text-accent font-bold" (click)="addRecipientToList(recipient)">{{"addText"|translate}}</button>
+            </div>
+            <div class="flex justify-between text-sm ml-3 w-[calc(100%-3.1rem)]" *ngIf="recipient.type === userType.Group">
+              <div class="w-full">
+                    <div >
+                        <p class="font-medium text-secondary dark:text-base-100">{{recipient?.data?.description}}</p>
+                        <p *ngIf="recipient?.data?.name" class="font-medium text-base text-secondary dark:text-white" >{{recipient?.data?.name}}</p>
+                        <p> {{'recipientGrp'|translate}}</p>
+                        <ng-container *ngIf="recipient.data?.recipient_ids?.length">
+                          <span class="text-sm">{{formatNames(recipient?.matchedProfiles, 'group')}}</span>
+                      </ng-container>
+                    </div>
+                <p class="text-sm">{{recipient?.data?.profile?.dept}}</p>
+              </div>
+              <button  class="text-primary dark:text-accent font-bold" (click)="addRecipientToList(recipient)">{{"addText"|translate}}</button>
+            </div>
+            <div class="flex justify-between text-sm ml-3 w-[calc(100%-3.1rem)]" *ngIf="recipient.type === userType.Role">
+              <div class="w-full">
+                    <div >
+                        <p class="font-medium text-secondary dark:text-base-100">{{recipient?.data?.description}}</p>
+                          <p class="text-sm">Service with {{ recipient.data.user_ids?.length || 0 }} people</p>
+                          <span class="text-sm">{{formatNames(recipient?.matchedProfiles, 'service')}}</span>
+                    </div>
+                <p class="text-sm">{{recipient?.data?.profile?.dept}}</p>
+              </div>
+              <button *ngIf="recipient && recipient?.data &&  recipient.data.user_ids?.length" class="text-primary dark:text-accent font-bold" (click)="addRecipientToList(recipient)">{{"addText"|translate}}</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="mb-4">
+        <div
+          class="hover:bg-accent/[0.08] p-3 flex items-center text-gray-600 dark:text-base-100 dark:hover:bg-gray-600/30 border-base-100 dark:border-gray-600 border-b"
+          *ngFor="let profileData of storeRecipients; let i = index;trackBy: trackByStoreRecipientId">
+          <ng-container *ngIf="profileData?.first_name">
+            <div class="w-full flex items-center gap-3">
+          <img *ngIf="profileData?.image_id as image_id"  width="12" class="w-12 h-12 rounded-full"
+          height="12" loading="lazy" [ngSrc]="getImageUrl(image_id)" alt="Profile-img" (click)="openProfilePopUp($event,profileData._id.$oid)">
+          <!-- If image_id is not available, use the initials -->
+            <span *ngIf="!profileData?.image_id && profileData?.type !== userType.External"
+              class="w-12 h-12 rounded-full bg-base-100 flex items-center justify-center text-primary cursor-pointer" (click)="openProfilePopUp($event,profileData._id.$oid)">
+              {{(profileData?.first_name | slice:0:1) | uppercase}}{{(profileData?.last_name | slice:0:1) | uppercase}}
+            </span>
+            <img *ngIf="profileData?.type === userType.External" class="w-12 h-12 rounded-full bg-base-100 p-2"
+            src="assets/icons/user_external.svg"  
+            alt="Profile-img">  
+            <div class="w-[calc(100%-3.1rem)]">
+              <p class="font-medium text-base text-secondary dark:text-white" *ngIf="profileData?.first_name">
+                {{profileData?.first_name}}
+                {{profileData?.last_name}} ({{profileData?.profile?.ishort}})
+                <ng-container *ngIf="profileData.status?.s && profileData.type !== isExternal.External">
+                  <em *ngIf="profileData.status?.s === 'available'; else busyAndOff"
+                    class="ph-duotone ph-check-circle text-green-500"></em>
+                  <ng-template #busyAndOff>
+                    <em *ngIf="profileData.status?.s === 'busy'; else offOnly"
+                      class="ph-duotone ph-prohibit text-neutral"></em>
+                    <ng-template #offOnly>
+                      <em *ngIf="profileData.status?.s === 'off'" class="ph-duotone ph-minus-circle text-base-300"></em>
+                    </ng-template>
+                  </ng-template>
+                </ng-container>
+              </p>
+              <ng-container *ngIf="profileData?.data?.description">
+                <p class="font-medium text-base text-secondary dark:text-white"> {{profileData.data?.description}} </p>
+                <p *ngIf="profileData?.data?.user_ids"> {{'serviceWith'|translate}} {{ profileData.data?.user_ids?.length }} {{"people"|translate}}
+                </p>
+              </ng-container>
+              <p class="text-sm">{{profileData?.profile?.dept}}</p>
+               <p *ngIf="profileData?.status?.r || profileData?.profile?.title" class="text-sm">
+                {{ profileData?.status?.r || [] | formatServiceTeam: maxLength }}
+                <ng-container *ngIf="profileData?.status?.r"> &middot; </ng-container>
+                {{ profileData.profile.title }}
+              </p>   
+            </div>
+           </div>
+          </ng-container>
+          <ng-container *ngIf="profileData?.data">
+            <div class="w-full flex items-center gap-3 ">
+              <ng-container *ngIf="profileData?.data?.first_name">
+            <img *ngIf="profileData?.data?.image_id as image_id"  width="12" class="w-12 h-12 rounded-full"
+            height="12" loading="lazy"  [ngSrc]="getImageUrl(image_id)" alt="Profile-img" (click)="openProfilePopUp($event,profileData?.data?._id?.$oid ?? '')">
+            <!-- If image_id is not available, use the initials -->
+              <span *ngIf="!profileData?.data?.image_id && profileData?.type !== userType.External"
+                class="w-12 h-12 rounded-full bg-base-100 flex items-center justify-center text-primary cursor-pointer" (click)="openProfilePopUp($event,profileData?.data?._id?.$oid ?? '')">
+                {{(profileData?.data?.first_name | slice:0:1) | uppercase}}{{(profileData?.data?.last_name | slice:0:1) | uppercase}}
+              </span>
+              <img *ngIf="profileData?.type === userType.External" class="w-12 h-12 rounded-full bg-base-100 p-2"
+            src="assets/icons/user_external.svg"  
+            alt="Profile-img">  
+            </ng-container>
+          <span *ngIf="profileData?.data?.description" class="w-12 h-12 flex items-center justify-center rounded-full bg-base-100"><em class="ph-light ph-users-three text-4xl text-pink-400"></em></span>
+          <span  *ngIf="profileData?.data?.name" class="w-12 h-12 flex items-center justify-center rounded-full bg-base-100"><em class="ph-light ph-users-three text-4xl text-blue-400"></em></span>
+            <div class="w-[calc(100%-3.1rem)]">
+              <ng-container *ngIf="profileData?.data?.first_name && profileData.type !== isExternal.External">
+              <p class="font-medium text-base text-secondary dark:text-white" >
+                {{profileData?.data?.first_name}}
+                {{profileData?.data?.last_name}} ({{profileData?.data?.profile?.ishort}})
+                  <ng-container [ngSwitch]="profileData?.data?.status?.s">
+                    <em *ngSwitchCase="UserStatus.Available" class="ph-duotone ph-check-circle text-green-500"></em>
+                    <em *ngSwitchCase="UserStatus.Busy" class="ph-duotone ph-prohibit text-neutral"></em>
+                    <em *ngSwitchCase="UserStatus.Off" class="ph-duotone ph-minus-circle text-base-300"></em>
+                  </ng-container>
+              </p>
+            </ng-container>
+              <ng-container *ngIf="profileData?.data?.description">
+                <p class="font-medium text-base text-secondary dark:text-white"> {{profileData.data?.description}} </p>
+                <p *ngIf="profileData?.data?.user_ids"> {{'serviceWith'|translate}} {{ profileData.data?.user_ids?.length }} {{"people"|translate}}
+                </p>
+              </ng-container>
+              <ng-container *ngIf="profileData?.data?.name">
+              <p class="font-medium text-secondary dark:text-base-100">{{profileData?.data?.name}}</p>
+              <span class="text-sm">{{'recipientGrp' | translate}}</span>
+            </ng-container>
+              <p class="text-sm">{{formatNames(profileData?.matchedProfiles, 'group')}}</p>
+              <p class="text-sm">{{profileData?.data?.profile?.dept}}</p>
+               <p *ngIf="profileData?.data?.status?.r || profileData?.data?.profile?.title" class="text-sm">
+                {{ profileData?.data?.status?.r || [] | formatServiceTeam: maxLength }}
+                <ng-container *ngIf="profileData?.data?.status?.r"> &middot; </ng-container>
+                {{ profileData.data?.profile?.title }}
+              </p>   
+            </div>
+            </div>
+        </ng-container>
+      <button class="text-neutral font-bold cursor-pointer" *ngIf="profileData.type !== isExternal.External && selectedChatThread?.type !== isExternal.External && !showLeaveEndConversation.isBroadcast  && showLeaveEndConversation.isUserTypeBasic" (click)="removeExistingUser(profileData)">{{"remove"|translate}}</button>         
+      <button class="text-neutral font-bold cursor-pointer" *ngIf="selectedChatThread?.type === isExternal.External && profileData.type !== isExternal.External && !showLeaveEndConversation.isBroadcast  && showLeaveEndConversation.isUserTypeBasic && (profileData?._id?.$oid !== selectedChatThreadData.thread?.user_id?.$oid && selectedChatThreadData.thread?.user_id?.$oid !== selectedChatThreadData.userProfile?._id?.$oid)" (click)="removeExistingUser(profileData)">{{"remove"|translate}}</button>   
+      <button class="text-neutral font-bold cursor-pointer" *ngIf="selectedChatThread?.type === isExternal.External && profileData.type !== isExternal.External &&  !showLeaveEndConversation.isBroadcast  && showLeaveEndConversation.isUserTypeBasic && selectedChatThreadData.thread?.user_id?.$oid === selectedChatThreadData.userProfile?._id?.$oid" (click)="removeExistingUser(profileData)">{{"remove"|translate}}</button>   
+        </div>
+      </div>
+    </div>
+      <button class="btn btn-primary ml-auto table mt-3" [disabled]="!formStates.recipientsChanged"
+      (click)="addRecipientToConversation()">{{"save" | translate}}</button>
+    </form>
+  </div>
+</div>
+<ng-container *ngIf="formStates.showErrorMessage">
+  <web-messenger-modal [modalId]="'error-modal'"
+    [modalTitle]="formStates.showErrorMessage ?('saveChangesToRecipients' | translate) :( 'error'|translate)"
+    (cancelPopup)="closeErrorPopup()" [cancelText]="'close'|translate"
+    [modalMessage]="'changesToRecipientsDesc'|translate"
+    (closePopup)="addRecipientToConversation()"
+    [showCancelButton]="formStates.showErrorMessage ? true : false "
+    [modalCloseText]="'save' | translate"></web-messenger-modal>
+</ng-container>
+<web-messenger-user-profile-modal *ngIf="showProfileModal" [userId]="selectedUserIdDetails" [showUserProfileModal]="showProfileModal" (sendCoverageIdToCompose)="addComposeQueryParamsForCoverageId($event)" 
+(sendUserIdToCompose)="addComposeQueryParamsForUserId($event)" (showUserProfile)="showUserProfile($event)"
+></web-messenger-user-profile-modal>
+
+<web-messenger-modal  *ngIf="userNotActivatedDescription" [modalId]="'error-modal'" 
+    [modalTitle]="userNotActivatedDescription"
+    [modalMessage]="'userNotActivatedDescription'|translate" 
+    [modalCloseText]="'close' | translate" 
+    (closePopup)="closeNonActiveUserModal()" 
+    (cancelPopup)="closeNonActiveUserModal()">
+</web-messenger-modal>

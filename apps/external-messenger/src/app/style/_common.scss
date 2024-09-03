@@ -1,0 +1,17 @@
+// ---
+// VARIABLES
+// ---
+
+$stripeWidth: 8px;
+$stripeAngle: -35deg;
+
+// colors
+$color-timelineGreen: #85c1b2;
+
+// ---
+// FUNCTIONS
+// ---
+
+@function candystripe($color1, $color2, $angle: $stripeAngle) {
+    @return repeating-linear-gradient($angle, $color1, $color1 $stripeWidth, $color2 ($stripeWidth+1), $color2 ($stripeWidth*2), $color1 ($stripeWidth*2+1));
+}

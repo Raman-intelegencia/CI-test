@@ -1,0 +1,199 @@
+<input type="checkbox" class="modal-toggle" [checked]="formStates.showSaveAsMsgGrpModal"/>
+<div class="modal bg-black/70">
+  <div class="modal-box max-w-2xl bg-white dark:bg-black rounded p-0 relative overflow-y-hidden dark:border-primary/60 dark:border dark:shadow-xl dark:shadow-primary/20">
+    <div class="flex justify-between text-white items-center bg-primary p-3">
+      <h3 class="font-bold" *ngIf="selectedGroupProfile; else showMessageGroupMgmt">{{ "msgGrpMgmt" | translate }} . {{selectedGroupProfile.data.name}}</h3>
+      <ng-template #showMessageGroupMgmt>
+        <h3 class="font-bold">{{ "group" | translate }}</h3>
+      </ng-template>
+      <label for="messaging-modal" class="w-7 h-7" (click)="closeSaveAsMessagingGrpModal()">
+        <em class="ph-bold ph-x cursor-pointer text-xl hover:text-accent"></em>
+      </label>
+    </div>
+
+    <form autocomplete="off" class="message-body p-4" [formGroup]="conversationSettingsForm">
+      <a *ngIf="!formStates.showSaveAsGrpButton" class="mb-3 text-primary table text-sm dark:text-accent cursor-pointer" (click)="navigateToSeeAllMsgGrpScreen()">
+        {{ "seeAllMessagingGrp" | translate }}
+      </a>
+      <div class="max-h-[60vh] overflow-y-auto">
+      <div class="mb-4">
+        <label class="mb-2 block font-bold text-primary text-sm dark:text-base-100">
+          {{ "groupName" | translate }}
+        </label>
+        <input type="text" formControlName="groupName"
+          class="border bg-transparent border-base-300 dark:text-white dark:border-gray-600 text-gray-600 rounded w-full py-2 px-3"
+          name="groupName" id="groupName" placeholder="Name this Group" required />
+      </div>
+      <ng-container *ngIf="formStates.showMsgGrpCheckboxes && checkIfUserCreatedGroup">
+      <label class="mb-2 text-secondary text-sm dark:text-base-100">{{"addRecipient" | translate}}</label>
+      <div tabindex="0" class="collapse rounded bg-base-100/[0.3] dark:border dark:bg-base-100/[0.02] dark:border-gray-600 mb-2 px-3">
+        <div class="flex flex-wrap gap-1 items-center py-2">
+          <input #addRecipient class="bg-transparent flex-grow outline-none dark:text-white focus:ring-0 border-0" type="text"
+            name="addRecipient" id="addRecipient" formControlName="addRecipient"
+            [placeholder]="recipientData.selectedUsers.length > 0 ? '' : ('addRecipientToConversation' | translate)"
+            (focus)="formStates.isInputFocused = true; getSearchedUsersList()" (keyup)="getSearchedUsersList()"
+            (blur)="formStates.isInputFocused = false" /> 
+            <em class="ph-bold ph-x cursor-pointer text-xl hover:text-accent" (click)="clearRecipientsLists()"></em>
+          </div>
+        <div class="h-full overflow-y-auto" *ngIf="formStates.isSearchDivOpen">
+          <div *ngFor="let recipient of recipientData.usersProfileList; trackBy: trackByRecipientId"
+            class="hover:bg-accent/[0.08] dark:hover:bg-gray-600/30 p-3 flex items-center text-gray-600 dark:text-base-100 bg-white dark:bg-gray-600/20 mb-2">
+              <img *ngIf="recipient.data.image_id as image_id" class="w-12 h-12 rounded-full" [src]="getImageUrl(image_id)" alt="Profile-img" (click)="openProfilePopUp($event,recipient.id)">
+            <!-- If image_id is not available, use the initials -->
+              <span *ngIf="!recipient.data.image_id"
+                class="w-12 h-12 rounded-full bg-base-100 flex items-center justify-center text-primary" (click)="openProfilePopUp($event,recipient.id)">
+                {{(recipient.data.first_name | slice:0:1) | uppercase}}{{(recipient.data.last_name | slice:0:1) | uppercase}}
+              </span>
+              <div class="flex justify-between text-sm w-full ml-3">
+              <div class="w-full">
+                <p class="font-medium text-base text-secondary dark:text-white" *ngIf="recipient?.data?.first_name">
+                  {{recipient?.data?.first_name}}
+                  {{recipient?.data?.last_name}} ({{recipient?.data?.profile?.ishort}}) 
+                  <ng-container *ngIf="recipient?.data?.status?.s">
+                    <em *ngIf="recipient?.data?.status?.s === 'available'; else busyAndOff"
+                      class="ph-duotone ph-check-circle text-green-500"></em>
+                    <ng-template #busyAndOff>
+                      <em *ngIf="recipient?.data?.status?.s === 'busy'; else offOnly"
+                        class="ph-duotone ph-prohibit text-neutral"></em>
+                      <ng-template #offOnly>
+                        <em *ngIf="recipient?.data?.status?.s === 'off'"
+                          class="ph-duotone ph-minus-circle text-base-300"></em>
+                      </ng-template>
+                    </ng-template>
+                  </ng-container>
+                  <span class="text-sm" *ngIf="recipient?.coverageProfile as coverage">
+                    <span class="font-normal text-base-300">{{'coveredBy' | translate}}:</span> 
+                    {{coverage?.data?.first_name}} {{coverage?.data?.last_name}}
+                </span>
+                </p>
+                <p *ngIf="recipient?.data?.name" class="font-medium text-base text-secondary dark:text-white" >{{recipient?.data?.name}}</p>
+                <p *ngIf="recipient?.type === 'group'"> {{'recipientGrp'|translate}}</p>
+                <ng-container *ngIf="recipient?.data?.description">
+                  <p class="font-medium text-base text-secondary dark:text-white"> {{recipient.data.description}} </p>
+                  <p *ngIf="recipient?.data?.user_ids" > Service with {{ recipient.data.user_ids?.length }} people
+                  </p>
+                  <p></p>
+                </ng-container>
+                <p class="text-sm">{{recipient?.data?.profile?.dept}}</p>
+                  <p *ngIf="recipient?.data?.status?.r || recipient?.data?.profile?.title" class="text-sm">
+                    {{ recipient?.data?.status?.r || [] | formatServiceTeam: maxLength }}
+                    <ng-container *ngIf="recipient?.data?.status?.r"> &middot; </ng-container>
+                    {{ recipient?.data?.profile?.title }}
+                  </p>   
+              </div>
+              <a class="text-primary dark:text-accent font-bold cursor-pointer" (click)="addRecipientToList(recipient)">Add</a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </ng-container>
+    <ng-container *ngIf="formStates.showMsgGrpCheckboxes">
+      <div class="h-full overflow-y-auto mb-4">
+        <div
+          class="hover:bg-accent/[0.08] p-3 flex items-center text-gray-600 dark:text-base-100 dark:hover:bg-gray-600/30 border-base-100 dark:border-gray-600 border-b"
+          *ngFor="let profileData of storeCreateRecipientGroupReponse; trackBy: trackByRecipientGrpId">
+            <img *ngIf="profileData?.image_id as image_id" class="w-12 h-12 rounded-full" [src]="getImageUrl(image_id)" alt="Profile-img" (click)="openProfilePopUp($event,profileData._id.$oid)">
+          <!-- If image_id is not available, use the initials -->
+            <span *ngIf="!profileData?.image_id"
+              class="w-12 h-12 rounded-full bg-base-100 flex items-center justify-center text-primary cursor-pointer" (click)="openProfilePopUp($event,profileData._id.$oid)">
+              {{(profileData?.first_name | slice:0:1) | uppercase}}{{(profileData?.last_name | slice:0:1) | uppercase}}
+            </span>
+          <div class="flex justify-between text-sm w-full ml-3">
+            <div class="w-full">
+              <p class="font-medium text-base text-secondary dark:text-white" *ngIf="profileData?.first_name">
+                {{profileData?.first_name}}
+                {{profileData?.last_name}} ({{profileData?.profile?.ishort}})
+                <ng-container *ngIf="profileData.status?.s">
+                  <em *ngIf="profileData.status?.s === 'available'; else busyAndOff"
+                    class="ph-duotone ph-check-circle text-green-500"></em>
+                  <ng-template #busyAndOff>
+                    <em *ngIf="profileData.status?.s === 'busy'; else offOnly"
+                      class="ph-duotone ph-prohibit text-neutral"></em>
+                    <ng-template #offOnly>
+                      <em *ngIf="profileData.status?.s === 'off'" class="ph-duotone ph-minus-circle text-base-300"></em>
+                    </ng-template>
+                  </ng-template>
+                </ng-container>
+                <span class="text-sm" *ngIf="profileData?.coverageProfile as coverage">
+                    <span class="font-normal text-base-300">{{'coveredBy' | translate}}:</span> 
+                    {{coverage?.data?.first_name}} {{coverage?.data?.last_name}}
+                </span>
+              </p>
+              <ng-container *ngIf="profileData?.description">
+                <p class="font-medium text-base text-secondary dark:text-white"> {{profileData?.description}} </p>
+                <p *ngIf="profileData?.user_ids"> Service with {{ profileData?.user_ids?.length }} people
+                </p>
+                <p></p>
+              </ng-container>
+              <p class="text-sm">{{profileData?.profile?.dept}}</p>
+              <!-- Use a placeholder variable statusR to ensure the expression is of type string[] or [] -->
+              <p *ngIf="profileData?.status?.r || profileData?.profile?.title" class="text-sm">
+                {{ profileData?.status?.r || [] | formatServiceTeam: maxLength }}
+                <ng-container *ngIf="profileData?.status?.r"> &middot; </ng-container>
+                {{ profileData.profile.title }}
+              </p>   
+            </div>
+            <a class="text-neutral font-bold cursor-pointer" *ngIf="checkIfUserCreatedGroup" (click)="removeExistingUser(profileData)">Remove</a>
+          </div>
+        </div>
+      </div>
+        <ng-container *ngIf="checkIfUserCreatedGroup">
+          <div class="form-control">
+            <label class="label justify-start cursor-pointer text-gray-600 dark:text-base-100 py-0">
+              <input type="checkbox" class="checkbox checkbox-xs mr-2 rounded checkbox-primary dark:checkbox-accent"
+                formControlName="showMessagingGrpMsgCheckbox"
+                (click)="getshowMessagingGrpMsgCheckboxValue('showMessagingGrpMsgCheckbox')" />
+              {{"messagingGrpMsg"|translate}}
+            </label>
+          </div>
+          <div class="form-control">
+            <label class="label justify-start cursor-pointer text-gray-600 dark:text-base-100">
+              <input formControlName="messagingGrpCheckBoxVal" type="checkbox"
+                class="checkbox checkbox-xs mr-2 rounded checkbox-primary dark:checkbox-accent"
+                (click)="getshowMessagingGrpMsgCheckboxValue('messagingGrpCheckBoxVal')" />
+              {{"includeMessagingGrpText"|translate}}
+            </label>
+          </div>
+        </ng-container>
+      </ng-container>
+    </div>
+      <ng-container *ngIf="checkIfUserCreatedGroup">
+        <button [disabled]="!groupName.value" *ngIf="formStates.showSaveAsGrpButton" class="btn ml-auto table mt-3"
+          [ngClass]="{'save_as_group_disabled': !groupName.value, 'save_as_group_not_disabled': groupName.value}"
+          (click)="saveAsGroup()">{{"saveAsGroup" | translate}}</button>
+        <div class="flex justify-end items-center mt-4" *ngIf="!formStates.showSaveAsGrpButton">
+          <button class="btn mr-4" (click)="deleteGroup()">{{"deleteGroup" | translate}}</button>
+          <button class="btn-primary py-1 px-3 rounded inline-flex items-center"
+            (click)="updateButtonText=== 'Save' ? updatedMessagingGrp() : closeSaveAsMessagingGrpModal()">{{updateButtonText}}</button>
+        </div>
+      </ng-container>
+    </form>
+  </div>
+</div>
+<ng-container *ngIf="formStates.showErrorMessage || displayErrorMessage!==''">
+  <web-messenger-modal [modalId]="'error-modal'"
+    [modalTitle]="formStates.showErrorMessage ?('saveGrp' | translate) :( 'error'|translate)"
+    (cancelPopup)="displayErrorMessage ? closeErrorPopup() : updatedMessagingGrp()" [cancelText]="'save'|translate"
+    [modalMessage]="displayErrorMessage? displayErrorMessage : 'warningMsgForMsgGrp'|translate"
+    (closePopup)="closeErrorPopup()"
+    [showCancelButton]="displayErrorMessage ? false : true || formStates.showErrorMessage ? true : false "
+    [modalCloseText]="'close' | translate"></web-messenger-modal>
+</ng-container>
+<ng-container *ngIf="formStates.showDeleteModal">
+  <web-messenger-modal [modalId]="'error-modal'" [modalTitle]="'deleteWarningHeading' | translate"
+    (cancelPopup)="closeErrorPopup()" [cancelText]="'save'|translate"
+    [modalMessage]="'deleteWarningMsgDescription'|translate" (closePopup)="deleteConversationListsGroup()"
+    [modalCloseText]="'delete' | translate"></web-messenger-modal>
+</ng-container>
+<web-messenger-user-profile-modal *ngIf="showProfileModal" [showUserProfileModal]="showProfileModal" [userId]="selectedUserIdDetails" (sendCoverageIdToCompose)="addComposeQueryParamsForCoverageId($event)" (sendUserIdToCompose)="addComposeQueryParamsForUserId($event)"
+(showUserProfile)="showUserProfile($event)"
+></web-messenger-user-profile-modal>
+
+<web-messenger-modal  *ngIf="userNotActivatedDescription" [modalId]="'error-modal'" 
+    [modalTitle]="userNotActivatedDescription"
+    [modalMessage]="'userNotActivatedDescription'|translate" 
+    [modalCloseText]="'close' | translate" 
+    (closePopup)="closeNonActiveUserModal()" 
+    (cancelPopup)="closeNonActiveUserModal()">
+</web-messenger-modal>

@@ -1,0 +1,588 @@
+<div class="md:h-full h-[calc(100%-4rem)] md:overflow-hidden overflow-auto relative md:flex block md:gap-2"> 
+  <div class="md:w-72 bg-blue-50 dark:bg-gray-900  md:h-[calc(100%-4rem)] flex flex-col z-50 md:left-auto">
+    <div class="px-4 py-3 dark:text-base-100">
+      <div class="flex items-center gap-3 md:pr-0 pr-5">
+        <span class="relative">
+          <img [src]="userData?.image_id ? getImageUrl(userData?.image_id) : 'assets/images/user.svg'"
+            class="w-12 h-12 rounded-full border-2 border-base-100" />
+          <ng-container [ngSwitch]="userData?.status?.s">
+            <em *ngSwitchCase="userStatusType.Available"
+              class="ph-duotone ph-check-circle text-green-500 absolute right-0 top-0 bg-white rounded-full"></em>
+            <em *ngSwitchCase="userStatusType.Busy"
+              class="ph-duotone ph-prohibit text-neutral absolute right-0 top-0 bg-white rounded-full"></em>
+            <em *ngSwitchCase="userStatusType.Off"
+              class="ph-duotone ph-minus-circle text-base-300 absolute right-0 top-0 bg-white rounded-full"></em>
+          </ng-container>
+        </span>
+        <span>
+          <strong>{{userData?.first_name || ''}} {{userData?.last_name || ''}}</strong>
+          <ng-container *ngIf="userData?.status">
+            <ng-container [ngSwitch]="userData?.status?.s">
+              <p *ngSwitchCase="userStatusType.Available" (click)="showUserStatusModal = true" class="text-green-600 font-normal text-sm cursor-pointer">{{'available' |
+                translate}}</p>
+              <p *ngSwitchCase="userStatusType.Busy" (click)="showUserStatusModal = true" class="text-neutral font-normal text-sm cursor-pointer">{{'busy' | translate}}</p>
+              <p *ngSwitchCase="userStatusType.Off" (click)="showUserStatusModal = true" class="text-base-300 font-normal text-sm cursor-pointer">{{'offDuty' | translate}}</p>
+            </ng-container>
+          </ng-container>
+        </span>
+      </div>
+      <div class="py-2">
+        <label class="font-medium">{{'email' | translate}}</label>
+        <p class="text-sm">{{userData?.email}}</p>
+      </div>
+      <div *ngIf="userData?.cell_phone">
+        <label class="font-medium">{{'cellPhoneNumber' | translate}}</label>
+        <p class="text-sm">
+          <!-- phone number to be added here -->
+          {{ userData?.cell_phone?? '' | numeric }}
+        </p>
+      </div>
+      <div class="py-2" *ngIf="userData?.profile?.pager_number">
+        <label class="font-medium block">{{'pagerNo' | translate}}</label>
+        <p class="text-sm">{{userData?.profile?.pager_number}}</p>
+        <a class="cursor-pointer text-primary dark:text-accent text-sm" (click)="removePagerNumber()">({{'remove' |
+          translate}})</a>
+      </div>
+      <div class="py-2">
+        <label class="font-medium block">{{'institution' | translate}}</label>
+        <a class="cursor-pointer text-primary dark:text-accent" (click)="navigateToInstitutionPage(userData?.profile?.iid)">{{userData?.profile?.iname}}</a>
+      </div>
+    </div>
+    <span class="md:hidden block dark:text-accent text-2xl mt-0.5 cursor-pointer px-4 py-2 absolute right-0 top-0" (click)="sidepanelmobile=!sidepanelmobile"><em class="ph-fill ph-dots-three-outline-vertical"></em></span>
+    <div class="overflow-y-auto h-full border-t border-gray-200 dark:border-gray-800" [ngClass]="sidepanelmobile ? 'block absolute bg-blue-50 dark:bg-gray-900 rounded shadow right-6 top-10 max-h-[60vh] overflow-auto transition-all' : 'md:block hidden'">
+      <div class="border-b border-gray-200 dark:border-gray-800 flex flex-col gap-2 md:py-4 md:pl-4 md:p-0 p-2">
+        <a class="rounded-l md:rounded-r-0 rounded-r p-2 cursor-pointer" (click)="active_status = activeStatusValue.Info"
+          [class]="active_status === activeStatusValue.Info ? 'text-primary dark:text-accent bg-white dark:bg-black' : 'text-gray-800 dark:text-white'">
+          {{'userInfo' | translate}}</a>
+        <a class="rounded-l md:rounded-r-0 rounded-r p-2 cursor-pointer" (click)="active_status = activeStatusValue.Permissions"
+          [class]="active_status === activeStatusValue.Permissions ? 'text-primary dark:text-accent bg-white dark:bg-black' : 'text-gray-800 dark:text-white'">
+          {{'userPermissions' | translate}}</a>
+        <a class="rounded-l md:rounded-r-0 rounded-r p-2 cursor-pointer" (click)="active_status = activeStatusValue.Events"
+          [class]="active_status === activeStatusValue.Events ? 'text-primary dark:text-accent bg-white dark:bg-black' : 'text-gray-800 dark:text-white'">
+          {{'eventLog' | translate}}</a>
+          <ng-container  *ngIf="getALLCurrentUserPermissionList?.client_user_view_auditlog">
+            <a class="rounded-l md:rounded-r-0 rounded-r p-2 cursor-pointer" (click)="active_status = activeStatusValue.Audit"
+            [class]="active_status === activeStatusValue.Audit ? 'text-primary dark:text-accent bg-white dark:bg-black' : 'text-gray-800 dark:text-white'">
+            {{'auditUser' | translate}}</a>
+          </ng-container>
+          <ng-container *ngIf="userData?.api_key">
+            <a class="rounded-l md:rounded-r-0 rounded-r p-2 cursor-pointer" (click)="active_status = activeStatusValue.ApiLog"
+            [class]="active_status === activeStatusValue.ApiLog ? 'text-primary dark:text-accent bg-white dark:bg-black' : 'text-gray-800 dark:text-white'">
+            {{"apilog" | translate}}</a>
+          </ng-container>
+      </div>
+      <div class="py-4 md:px-7 px-4 flex flex-col gap-3 text-sm">
+        <ng-container *ngIf="getALLCurrentUserPermissionList?.client_user_info_update">
+        <ng-container *ngIf="checkUserCreatedFromAPI !== undefined; else notApiUser">
+          <label for="adLockUser" class="link link-primary dark:link-accent text-left link-hover">{{'editUser' |
+            translate}}</label>
+        </ng-container>
+        <ng-template #notApiUser>
+          <label for="adEditUser" (click)="openEditUser()" class="link link-primary dark:link-accent text-left link-hover">{{'editUser' |
+            translate}}</label>
+        </ng-template>
+      </ng-container>
+        <ng-container *ngIf="this.userData?.api_key; else toogleLockNonApiUser ">
+          <ng-container *ngIf="getALLCurrentUserPermissionList?.client_user_lock_unlock" >
+             <ng-container *ngIf="!userData?.flag_locked" >
+                <label class="link link-primary dark:link-accent text-left link-hover" (click)="lockResetSendPassword('lockUser')">{{'lockUser' |
+                  translate}}</label>
+             </ng-container>
+          <ng-container  *ngIf="userData?.flag_locked">
+              <label class="link link-primary dark:link-accent text-left link-hover" (click)="lockResetSendPassword('unlockUser')">{{'unLockUser' |
+                translate}}</label> 
+              </ng-container>
+          </ng-container>
+        </ng-container>
+        <ng-template #toogleLockNonApiUser>
+          <ng-container *ngIf="getALLCurrentUserPermissionList?.client_user_lock_unlock">
+            <label *ngIf="!userData?.flag_locked"class="link link-primary dark:link-accent text-left link-hover" (click)="lockResetSendPassword('lockUser')">{{'lockUser' |
+              translate}}</label>
+              <label *ngIf="userData?.flag_locked" class="link link-primary dark:link-accent text-left link-hover" (click)="lockResetSendPassword('unlockUser')">{{'unLockUser' |
+                translate}}</label> 
+          </ng-container>
+        </ng-template>
+        <ng-container *ngIf="getALLCurrentUserPermissionList?.client_user_manage_activation">
+          <button *ngIf="userData?.can_send_activation_email" class="link link-primary dark:link-accent text-left link-hover" (click)="sendActivationMail(userData?._id?.$oid)">
+            {{'resendActivationEmail' | translate}}
+          </button>
+          <ng-container *ngIf="userData?.has_password">
+          <button class="link link-primary dark:link-accent text-left link-hover" (click)="lockResetSendPassword('sendResetPasswordLink',userData?.email)">{{'sendResetPasswordLink' |
+            translate}}</button>
+          <button class="link link-primary dark:link-accent text-left link-hover" (click)="lockResetSendPassword('generateTemporaryPassword',userData?.email)">{{'generateTemporaryPassword' |
+            translate}}</button>
+          </ng-container>
+          <button class="link link-primary dark:link-accent text-left link-hover" (click)="performLockResetSendPassword('Notifications Sent')">{{'sendTestNotification' |
+            translate}}</button>
+         </ng-container>
+      </div>
+    </div>
+  </div>
+  <div class="p-6 w-full text-gray-600 dark:text-base-100">
+    <div class="text-sm breadcrumbs">
+      <ul>
+        <li class="link dark:text-accent">
+          <a routerLink="/search">
+            {{'searchResult' | translate}}
+          </a>
+        </li>
+        <li class="link dark:text-accent">
+          <a (click)="active_status = activeStatusValue.Info"> 
+            {{'userInfo' | translate}}
+          </a>
+        </li>
+      </ul>
+    </div>
+    <div [ngSwitch]="active_status">
+      <div *ngSwitchCase="'info'">
+        <web-messenger-user-info [userInfoData]="userData" [userApiInfoData]="userData" 
+          [userEmailSubscriptionData]="userEmailSubscriptionData" 
+          (getCurrentUserDataResp)="getCurrentUserDataRespWindow($event)" ></web-messenger-user-info>
+      </div>
+      <ng-container *ngSwitchCase="'permissions'">
+        <web-messenger-user-permissions [userId]="userId"></web-messenger-user-permissions>
+      </ng-container>
+      <ng-container *ngSwitchCase="'events'">
+        <web-messenger-event-logs [userId]="userId"></web-messenger-event-logs>
+      </ng-container>
+      <ng-container *ngSwitchCase="'audit'">
+        <web-messenger-audit-user [userId]="userId" [userName]="userName"></web-messenger-audit-user>
+      </ng-container>
+      <ng-container *ngSwitchCase="'apilog'">
+        <web-messenger-api-logs [userId]="userId" [userInfoData]="userData"></web-messenger-api-logs>
+      </ng-container>
+    </div>
+  </div>
+</div>
+
+<!-- Edit User Start here -->
+<input type="checkbox" id="adEditUser" class="modal-toggle" />
+<ng-container *ngIf="checkUserCreatedFromAPI == undefined">
+  <form [formGroup]="editUserDetailsForm" class="modal bg-black/70">
+    <div>
+      <div
+      class="modal-box max-w-3xl bg-white dark:bg-black rounded p-0 relative overflow-y-hidden dark:border-primary/60 dark:border dark:shadow-xl dark:shadow-primary/20" (click)="closetoggleDropdown()">
+        <div class="flex justify-between text-white items-center bg-primary p-3">
+          <h3 class="font-bold dark:text-white">Edit User - {{userData?.first_name}} {{ userData?.last_name}}
+          </h3>
+          <label class="w-7 h-7" (click)="closeEditModalPopup('adEditUser')">
+            <em class="ph-bold ph-x cursor-pointer text-xl hover:text-accent"></em>
+          </label>
+        </div>
+        <div class="image-container my-4 mx-auto table">
+          <span class="relative block" >
+              <img [src]="userData?.image_id ? getImageUrl(userData?.image_id) : 'assets/images/user.svg'"
+              class="w-24 h-24 rounded-full border-2 border-base-100" />
+              <ng-container *ngIf="showLoader">
+                <svg class="animate-spin -ml-1 mr-3 h-6 w-6 top-1 text-base-300 absolute left-[40%] top-[40%]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="blue" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="blue" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              </ng-container>
+              <label title="{{'changePhoto' | translate}}"
+                      class="absolute bottom-1 right-1 rounded-full bg-gray-50 h-6 w-6 flex items-center justify-center cursor-pointer">
+                      <em class="ph-fill ph-camera text-xl text-primary" (click)="fileInput.click()"></em>
+                      <input type='file' id="imageUpload" accept=".png, .jpg, .jpeg" #fileInput
+                          class="opacity-0 w-4 h-4 absolute" (change)="uploadFile($event)" />
+              </label>
+          </span>
+          <a *ngIf="userData?.image_id" class="text-neutral text-sm cursor-pointer mt-2 block" (click)="removeProfilePhoto()">{{"removePhoto" | translate}}</a>
+      </div>
+        <div class="py-4 text-gray-600 dark:text-base-100 text-sm">
+          <div class="max-h-[calc(100vh-25rem)] overflow-y-auto px-4">
+            <div class="grid md:grid-cols-2 grid-cols-1 gap-4">
+              <div class="mb-3 grid grid-cols-2">
+                <div class="mr-2">
+                  <label class="mb-1.5 font-medium">{{"name" | translate}}</label>
+                  <input type="text" [placeholder]="'firstName' | translate" name="firstname" id="firstname" formControlName="firstname"
+                    class="border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-1.5 px-3"
+                    [ngClass]="{ 'is-invalid': submitted && f.firstname.errors }" />
+                  <div *ngIf="submitted && f.firstname.errors" class="invalid-feedback">
+                    <p *ngIf="f.firstname.errors.required" class="text-neutral text-xs mt-0.5">
+                      {{"firstNameRequired" | translate}}
+                    </p>
+                    <p *ngIf="f.firstname.errors.minlength" class="text-neutral text-xs mt-0.5">
+                      {{"firstName3" | translate}}
+                    </p>
+                    <p *ngIf="f.firstname.errors.maxlength" class="text-neutral text-xs mt-0.5">
+                      {{"firstName31" | translate}}
+                    </p>
+                  </div>
+                </div>
+                <div class="ml-2 mt-5">
+                  <input type="text" [placeholder]="'lastName' | translate" name="lastname" id="lastname" formControlName="lastname"
+                    class="border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-1.5 px-3"
+                    [ngClass]="{ 'is-invalid': submitted && f.lastname.errors }" />
+                  <div *ngIf="submitted && f.lastname.errors" class="invalid-feedback">
+                    <p *ngIf="f.lastname.errors.required" class="text-neutral text-xs mt-0.5" >
+                      {{"lastNameRequired" | translate}}
+                    </p>
+                    <p *ngIf="f.lastname.errors.minlength" class="text-neutral text-xs mt-0.5">
+                      {{"lastName3" | translate}}
+                    </p>
+                    <p *ngIf="f.lastname.errors.maxlength" class="text-neutral text-xs mt-0.5">
+                      {{"lastName31" | translate}}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div class="mb-3">
+                <label class="mb-1.5 font-medium">{{"userId" | translate}}</label>
+                <input type="text" [placeholder]="'userId' | translate" name="userID" id="userID" formControlName="userID"
+                  class="border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-1.5 px-3"
+                  [ngClass]="{ 'is-invalid': submitted && f.userID.errors }" />
+                <div *ngIf="submitted && f.userID.errors" class="invalid-feedback">
+                  <p *ngIf="f.userID.errors.required" class="text-neutral text-xs mt-0.5">
+                    {{"userIDRequired" | translate}}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="grid md:grid-cols-2 grid-cols-1 gap-4">
+              <div class="mb-3">
+                <label class="mb-1.5 font-medium">{{"email" | translate}}</label>
+                <input type="email" [placeholder]="'email' | translate" name="email" id="email" formControlName="email"
+                  class="border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-1.5 px-3"
+                  [ngClass]="{ 'is-invalid': submitted && f.email.errors }" />
+                <div *ngIf="submitted && f.email.errors" class="invalid-feedback">
+                  <p *ngIf="f.email.errors.required" class="text-neutral text-xs mt-0.5">
+                    {{"emailRequired" | translate}}
+                  </p>
+                  <p *ngIf="f.email.errors.pattern" class="text-neutral text-xs mt-0.5">
+                    {{"emailPatternError" | translate}}
+                  </p>
+                </div>
+                <label class="cursor-pointer label mt-2 justify-start">
+                  <span class="mr-4">{{"email_Comm" | translate}}</span>
+                  <input type="checkbox" class="toggle toggle-primary toggle-sm" formControlName="emailCommunication"
+                    [disabled]="editUserDetailsForm.get('emailCommunication').disabled" />
+                </label>
+              </div>
+              <div class="mb-3">
+                <label class="mb-1.5 font-medium">{{"cellPhone" | translate}}</label>
+                <input type="text" [placeholder]="'cellPhone' | translate" name="cellPhone" id="cellPhone" formControlName="cellPhone"
+                  (keypress)="keyPress($event)"
+                  class="border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-1.5 px-3"
+                  [ngClass]="{ 'is-invalid': submitted && f.cellPhone.errors }" />
+                <div *ngIf="submitted && f.cellPhone.errors" class="invalid-feedback">
+                  <p *ngIf="f.cellPhone.errors.pattern" class="text-neutral text-xs mt-0.5">
+                    {{"cellPhonePatternError" | translate}}
+                  </p>
+                </div>
+                <label class="cursor-pointer label mt-2 justify-start">
+                  <span class="mr-4">{{"sms_Comm" | translate}}</span>
+                  <input type="checkbox" class="toggle toggle-primary toggle-sm" formControlName="cellPhoneCommunication"
+                    [disabled]="editUserDetailsForm.get('cellPhoneCommunication').disabled" />
+                </label>
+              </div>
+            </div>
+            <div class="grid md:grid-cols-2 grid-cols-1 gap-4">
+              <web-messenger-institution-search [userIDSearchInstitution]="userId"
+                (searchedInstituteData)="receiveInstituteNameID($event)" (userDataResponse)="getUserDataResponse($event)"></web-messenger-institution-search>
+                <div class="mb-3">
+                  <label class="mb-1.5 font-medium">{{"specialty" | translate}}</label>
+                      <div class="collapse  border bg-transparent border-base-300 
+                      dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-1.5 px-2"
+                          (change)="toggleSpecialtyDropdown($event,editUserDetailsForm.get('institution').value)"> 
+                          <div class="collapse-title p-0 pr-4 pl-2 min-h-6" 
+                          (click)="toggleSpecialtyDropdown($event,editUserDetailsForm.get('institution').value)">
+                              <em class="absolute right-0 top-1"
+                                  [ngClass]="showInstituteDropdown ? 'ph ph-caret-up' : 'ph ph-caret-down'"></em>
+                               <span [innerHTML]="selectedSpecialty | sanitizeHtml"></span>
+                          </div> 
+                              <ng-container *ngIf="showspecialtyDropdown && !closeInput">
+                                  <div *ngIf="settingsArrayStates.filteredSpecialties">
+                                      <input type="text" autofocus 
+                                      (keyup)="inputKeyUpSpecialityOrTitle($event,settingsArrayStates.filteredSpecialties,'specialty','edit')"
+                                          class="border bg-transparent border-base-300 dark:border-gray-600 
+                                          dark:text-white text-gray-600 rounded w-full py-1.5 px-3" 
+                                          maxlength="40"
+                                           placeholder="{{'specialities' | translate}}" 
+                                           autocomplete="off" 
+                                           (keydown.enter)="handleEnterKey(filteredArray, 'specialty')"
+                                          name="specialty" 
+                                          (focusout)="searchProperty($event,'selectedSpecialty')" 
+                                          id="specialtyInput" 
+                                          (click)="clickSpecialtyTitle($event)" 
+                                          (change)="onListItemChange()" />
+                                      <ul class="select2-results max-h-24 overflow-y-auto mt-2 cursor-pointer">
+                                          <li #specialtyItem *ngFor="let specialities of settingsArrayStates.filteredSpecialties,let i=index"
+                                              (pointerdown)="setSelectedSpeciality($event,specialities,editUserDetailsForm); selectedIndex = -1;" 
+                                              [ngClass]="{'bg-blue-50 dark:bg-gray-900 dark:text-base-100': i === selectedIndex}">
+                                          {{specialities}}</li> 
+                                      </ul>
+                                  </div>
+                              </ng-container> 
+              </div>
+              </div>
+            </div>
+            <div class="grid md:grid-cols-2 grid-cols-1 gap-4">
+              <div class="mb-3">
+                <label class="mb-1.5 font-medium">{{"title" | translate}}</label>
+                <div class="collapse  border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-1.5 px-2"
+                (change)="toggleTitleDropdown($event,editUserDetailsForm.get('institution').value)"> 
+                        <div class="collapse-title p-0 pr-4 pl-2 min-h-6" 
+                        (click)="toggleTitleDropdown($event,editUserDetailsForm.get('institution').value)">
+                            <em class="absolute right-0 top-1"
+                                [ngClass]="showInstituteDropdown ? 'ph ph-caret-up' : 'ph ph-caret-down'"></em>
+                             <span [innerHTML]="selectedTitle | sanitizeHtml"></span>
+                        </div> 
+                            <ng-container *ngIf="showTitleDropdown && !closeInput">
+                                <div *ngIf="settingsArrayStates.filteredTitles">
+                                    <input type="text" autofocus (keyup)="inputKeyUpSpecialityOrTitle($event,settingsArrayStates.filteredTitles,'title','edit')"
+                                        class="border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-1.5 px-3"  maxlength="40"
+                                         placeholder="{{'title' | translate}}" autocomplete="off" 
+                                         (keydown.enter)="handleEnterKey(filteredArray, 'title')"
+                                         name="title" (focusout)="searchProperty($event,'selectedTitle')" id="titleInput" (click)="clickSpecialtyTitle($event)" (change)="onListItemChange()"/>
+                                    <ul class="select2-results max-h-24 overflow-y-auto mt-2 cursor-pointer">
+                                        <li #title *ngFor="let title of settingsArrayStates.filteredTitles,let i=index"
+                                         (pointerdown)="setSelectedTitle($event,title,editUserDetailsForm); selectedIndex = -1;" [ngClass]="{'bg-blue-50 dark:bg-gray-900 dark:text-base-100': i === selectedIndex}">
+                                         <span [innerHTML]="title | sanitizeHtml"></span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </ng-container> 
+                    </div>
+            </div>
+              <div class="mb-3">
+                <label class="mb-1.5 font-medium">{{"Service" | translate}}</label>
+                <span
+                  class="border bg-transparent border-base-300 dark:border-gray-600 block cursor-pointer dark:text-accent text-primary rounded w-full py-1.5 px-3">
+                  {{"selectServices" | translate}}<em class="ph-bold ph-arrow-square-out"></em>
+                </span>
+              </div>
+            </div>
+          <div class="grid md:grid-cols-2 grid-cols-1 gap-4">
+              <ng-container *ngIf="updateUserTag">
+                <div class="mb-3">
+                  <label class="mb-1.5 font-medium">{{"reportingTags" | translate}}</label>
+                  <div
+                    class="border flex justify-between bg-transparent border-base-300 dark:border-gray-600 block dark:text-white text-gray-600 rounded w-full py-1 px-3">
+                    <span class="break-all" [innerHtml]="tags | sanitizeHtmlArray"></span>
+                    <label class="tooltip tooltip-primary cursor-pointer " data-tip="Edit"
+                      (click)="openReportingTags()">
+                      <em class="text-primary text-base ph-bold ph-note-pencil"></em> </label>
+                  </div>
+                </div>
+              </ng-container>
+              <ng-container *ngIf="isPagerIntegrationPresent">
+                <div class="mb-3">
+                  <label class="mb-1.5 font-medium">{{"pagerNumber" | translate}}</label>
+                  <input type="text"[placeholder]="'pagerNumber' | translate" 
+                    name="pagerNumber" id="pagerNumber" formControlName="pagerNumber"
+                    (keypress)="keyPress($event)"
+                    class="border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-1.5 px-3" 
+                    />
+                </div>
+              </ng-container>
+              <div>
+              </div>
+            </div>
+            <!-- 
+                  [disabled]="isInputDisabled()"
+
+               -->
+            <div class="grid md:grid-cols-2 grid-cols-1 gap-4">
+              <div class="mb-3">
+                <label class="mb-1.5 font-medium">{{"location" | translate}}</label>
+                <input type="text" [placeholder]="'location' | translate" name="location" id="location" formControlName="location"
+                  class="border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-1.5 px-3" />
+              </div>
+              <div class="mb-3">
+                <label class="mb-1.5 font-medium">{{"locationDetail" | translate}}</label>
+                <input type="text" [placeholder]="'locationDetail' | translate" name="locationDetail" id="locationDetail"
+                  formControlName="locationDetail"
+                  class="border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-1.5 px-3" />
+              </div>
+            </div>
+            <div class="grid md:grid-cols-2 grid-cols-1 gap-4">
+              <div class="mb-3">
+                <label class="mb-1.5 font-medium">{{"city" | translate}}</label>
+                <input type="text" [placeholder]="'city' | translate" name="city" id="city" formControlName="city"
+                  class="border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-1.5 px-3" />
+              </div>
+              <div class="mb-3">
+                <label class="mb-1.5 font-medium">{{"state" | translate}}</label>
+                <input type="text" [placeholder]="'state' | translate" name="state" id="state" formControlName="state"
+                  class="border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-1.5 px-3" />
+              </div>
+            </div>
+            <div class="flex gap-4 items-center">
+              <label class="font-medium">{{"basicUser" | translate}}</label>
+              <label class="label cursor-pointer justify-start">
+                <input type="radio" formControlName="basicUser" [value]="true"
+                  class="radio radio-primary dark:radio-accent radio-xs mr-2" />
+                  {{"yes" | translate}}
+              </label>
+              <label class="label cursor-pointer justify-start">
+                <input type="radio" formControlName="basicUser" [value]="false"
+                  class="radio radio-primary dark:radio-accent radio-xs mr-2" />
+                  {{"no" | translate}}
+              </label>
+            </div>
+          </div>
+          <div class="flex justify-end items-center mt-4 px-2">
+            <button type="button" (click)="closeEditModalPopup('adEditUser')"
+              class="bg-base-100 hover:bg-base-300 text-primary py-2.5 px-3 rounded inline-flex items-center mr-4">
+              {{"cancel" | translate}}
+            </button>
+            <button type="button" (click)="createNewUser()" class="btn btn-primary">
+              {{"save" | translate}}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Edit Tags End  -->
+  </form>
+</ng-container>
+
+
+<web-messenger-reporting-tags (tagsDataEvent)="reportingTagsValue($event)" [isReportingTag]="isReportingTag"
+  [serviceTags]="tags" (isReportingTags)="isreportingTags($event)"></web-messenger-reporting-tags>
+
+<input type="checkbox" id="adLockUser" class="modal-toggle" />
+<ng-container *ngIf="checkUserCreatedFromAPI !== undefined">
+  <form [formGroup]="editApiUserForm" class="modal bg-black/70">
+    <div>
+      <div
+        class="modal-box max-w-3xl bg-white dark:bg-black rounded p-0 relative overflow-y-hidden dark:border-primary/60 dark:border dark:shadow-xl dark:shadow-primary/20">
+        <div class="flex justify-between text-white items-center bg-primary p-3">
+          <h3 class="font-bold dark:text-white">Edit User - {{userData?.first_name}} {{ userData?.last_name}}
+          </h3>
+          <label class="w-7 h-7" (click)="closeEditModalPopup('adLockUser')">
+            <em class="ph-bold ph-x cursor-pointer text-xl hover:text-accent"></em>
+          </label>
+        </div>
+        <div class="image-container my-4 mx-auto table">
+          <span class="relative block" >
+              <img [src]="userData?.image_id ? getImageUrl(userData?.image_id) : 'assets/images/user.svg'"
+              class="w-24 h-24 rounded-full border-2 border-base-100" />
+              <ng-container *ngIf="showLoader">
+                <svg class="animate-spin -ml-1 mr-3 h-6 w-6 top-1 text-base-300 absolute left-[40%] top-[40%]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="blue" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="blue" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              </ng-container>
+              <label title="{{'changePhoto' | translate}}"
+                      class="absolute bottom-1 right-1 rounded-full bg-gray-50 h-6 w-6 flex items-center justify-center cursor-pointer">
+                      <em class="ph-fill ph-camera text-xl text-primary" (click)="fileInput.click()"></em>
+                      <input type='file' id="imageUpload" accept=".png, .jpg, .jpeg" #fileInput
+                          class="opacity-0 w-4 h-4 absolute" (change)="uploadFile($event)" />
+              </label>
+          </span>
+          <a *ngIf="userData?.image_id" class="text-neutral text-sm cursor-pointer mt-2 block" (click)="removeProfilePhoto()">{{"removePhoto" | translate}}</a>
+      </div>
+        <div class="py-4 text-gray-600 dark:text-base-100 text-sm">
+          <div class="max-h-[50vh] overflow-y-auto px-4">
+            <div class="grid md:grid-cols-2 grid-cols-1 gap-4">
+              <div class="mb-3 grid grid-cols-2">
+                <div class="mr-2">
+                  <label class="mb-1.5 font-medium">{{"name" | translate}}</label>
+                  <input type="text" [placeholder]="'name' | translate" name="apiFirstname" id="apiFirstname" formControlName="apiFirstname"
+                    class="border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-1.5 px-3"
+                    [ngClass]="{ 'is-invalid': submitted && h['apiFirstname'].errors }" />
+                  <div *ngIf="submitted && h['apiFirstname'].errors" class="invalid-feedback">
+                    <p *ngIf="h['apiFirstname'].errors['required']" class="text-neutral text-xs mt-0.5">
+                      {{"firstNameRequired" | translate}}
+                    </p>
+                    <p *ngIf="h['apiFirstname'].errors['minlength']" class="text-neutral text-xs mt-0.5">
+                      {{"firstName3" | translate}}
+                    </p>
+                    <p *ngIf="h['apiFirstname'].errors['maxlength']" class="text-neutral text-xs mt-0.5">
+                      {{"firstName31" | translate}}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div class="mb-3">
+                <label class="mb-1.5 font-medium">{{"userId" | translate}}</label>
+                <input type="text" [placeholder]="'userId' | translate" name="apiUserID" id="apiUserID" formControlName="apiUserID"
+                  class="border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-1.5 px-3"
+                  [ngClass]="{ 'is-invalid': submitted && h['apiUserID'].errors }" />
+                <div *ngIf="submitted && h['apiUserID'].errors" class="invalid-feedback">
+                  <p *ngIf="h['apiUserID'].errors['required']" class="text-neutral text-xs mt-0.5">
+                    {{"userIDRequired" | translate}}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="grid md:grid-cols-2 grid-cols-1 gap-4">
+              <div class="mb-3">
+                <label class="mb-1.5 font-medium">{{"email" | translate}}</label>
+                <input type="email" [placeholder]="'email' | translate" name="apiEmail" id="apiEmail" formControlName="apiEmail"
+                  class="border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-1.5 px-3"
+                  [ngClass]="{ 'is-invalid': submitted && h['apiEmail'].errors }" />
+                <div *ngIf="submitted && h['apiEmail'].errors" class="invalid-feedback">
+                  <div *ngIf="h['apiEmail'].errors['required']">{{"emailRequired" | translate}}</div>
+                  <div *ngIf="h['apiEmail'].errors['pattern']">
+                    {{"emailPatternError" | translate}}
+                  </div>
+                </div>
+              </div>
+              <div class="mb-3">
+                <web-messenger-institution-search [userIDSearchInstitution]="userId"
+                (searchedInstituteData)="receiveInstituteNameID($event)"></web-messenger-institution-search>
+              </div>
+            </div>
+          </div>
+          <div class="flex justify-end items-center mt-4 px-2">
+            <button type="button" (click)="closeEditModalPopup('adLockUser')"
+              class="bg-base-100 hover:bg-base-300 text-primary py-1 px-3 rounded inline-flex items-center mr-4">
+              {{"cancel" | translate}}
+            </button>
+            <button type="button"  (click)="editApiUserSubmit()" class="btn btn-primary">
+              {{"save" | translate}}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Edit Tags End  -->
+  </form>
+</ng-container>
+
+<web-messenger-modal *ngIf="showSuccessPopup" [modalId]="'success-modal'" 
+[modalTitle]='modalTitleMessage'
+[modalMessage]='modalShowMessage'
+(closePopup)=" performLockResetSendPassword(modalTitleMessage)"  
+[modalCloseText]="'Ok' | translate" 
+(cancelPopup)="cancelpopup()" 
+[cancelText]="'no'|translate">
+</web-messenger-modal>
+
+<web-messenger-modal *ngIf="showErrorModal" [modalId]="'error-modal'" [modalTitle]="showErrorMessage"
+    [modalMessage]="showValidation" (closePopup)="closeErrorPopup()" 
+    (cancelPopup)="closeErrorPopup()" [modalCloseText]="'close' | translate">
+</web-messenger-modal>
+
+
+<web-messenger-user-status-modal *ngIf="showUserStatusModal" 
+[userStatus]="userStatus"
+[userFirstName]="userData?.first_name" 
+[userId]="userData?._id?.$oid" 
+[userLastName]="userData?.last_name"
+[userData]="userData"
+(closeOffDutyPopUp)="userStatusPopup($event)">
+</web-messenger-user-status-modal>
+<!-- Resend Activation link success modal -->
+<web-messenger-modal *ngIf="showResendSuccessModal" 
+  [modalId]="'activation-success'" 
+  [modalTitle]="'Message'" 
+  [modalMessage]="resendActivationMailData.message" 
+  [modalCloseText]="'close' | translate"
+  (closePopup)="closeResendActivationSuccessPopup()"
+  (cancelPopup)="closeResendActivationSuccessPopup()"
+  >
+</web-messenger-modal>
+
+<web-messenger-modal *ngIf="showUIDModal" 
+[modalId]="'error-modal'" 
+[modalTitle]="showUIDTitle"
+[modalMessage]="showUIDMessage" 
+(closePopup)="triggerNormalApiUserUpdate()" 
+(cancelPopup)="closeErrorPopup()" 
+[modalCloseText]="'updateUIDUser' | translate">
+</web-messenger-modal>
+
+<web-messenger-current-service-team *ngIf="showServiceTeamModal" [userData]="userData" (closeServiceTeamEvent)="closeServiceTeamEvent()"></web-messenger-current-service-team>

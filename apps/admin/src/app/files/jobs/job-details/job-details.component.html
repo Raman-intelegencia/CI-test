@@ -1,0 +1,185 @@
+<div class="p-4 bg-gray-50 m-0 md:px-12 px-4 dark:bg-white/[0.05] dark:border-b dark:border-gray-700  dark:text-white">
+    <a class="link link-primary dark:link-accent text-sm table no-underline" (click)="navigateToBack()" >
+        <em class="ph ph-arrow-left mr-1"></em>{{'returnTolistOfJobs' | translate}}
+    </a>
+<div class="flex gap-x-3 w-full md:flex-nowrap flex-wrap">
+    <h1 class="font-semibold mt-2 text-lg">{{"jobDetails" | translate}}</h1>
+    <div class="ml-auto flex gap-2">
+        <button type="button" class="btn-sm btn btn-primary text-white px-4 rounded text-sm" [disabled]="rerun" (click)="handleRerun()">
+            {{"rerun" | translate}}
+        </button>
+        <button type="button" class="btn-sm btn btn-neutral text-white px-4 rounded text-sm disabled:text-gray-500" [disabled]="abort" (click)="handleAbort()">
+            {{"Abort" | translate}}
+        </button>
+        <button type="button" 
+        class="btn-sm btn btn-primary text-white px-4 rounded text-sm tooltip tooltip-primary"
+            data-tip="Refresh" (click)="handleRefresh()">
+            <em class="ph-bold ph-arrow-clockwise"></em>
+        </button>
+    </div>
+</div>
+</div>
+<div class="h-[calc(100%-10rem)] px-12 overflow-y-auto py-6 text-gray-600 dark:text-base-100">
+<div class="grid sm:grid-cols-2 grid-cols-1 gap-6 w-full">
+    <div class="mb-3 grid md:grid-cols-2 grid-cols-1 gap-3">
+        <div>
+            <label class="font-semibold">{{"Processor" | translate}}:</label>
+            <p>{{ jobList ? jobList.processor : 'N/A' }}</p>
+        </div>
+        <div>
+            <label class="font-semibold">{{"institution" | translate}}:</label>
+            <p><a class="link link-primary dark:link-accent no-underline flex items-center" (click)="navigateToInstitution(jobList ? jobList.iid : 'N/A')">{{ jobList ? jobList.iid : 'N/A' }}</a></p>
+        </div>
+        <div>
+            <label class="font-semibold">{{"User" | translate}}:</label>
+            <p>{{ jobList ? jobList.requestor.name : 'N/A' }} </p>
+        </div>
+        <div>
+            <label class="font-semibold">{{"State" | translate}}:</label>
+            <p>
+                <span class="rounded" [ngClass]="{
+                        'bg-green-600 text-white px-2 py-0.5 text-sm': jobList?.state === jobStates.Completed,
+                        'bg-blue-500 text-white px-2 py-0.5 text-sm': jobList?.state === jobStates.Running,
+                        'bg-yellow-500 text-white px-2 py-0.5 text-sm': jobList?.state === jobStates.Pending,
+                        'bg-neutral text-white px-2 py-0.5 text-sm': jobList?.state === jobStates.Failed,
+                        'bg-gray-600 text-white px-2 py-0.5 text-sm': jobList?.state === jobStates.Rerun,
+                        'bg-red-600 text-white px-2 py-0.5 text-sm': jobList?.state === jobStates.Aborted,
+                        'bg-neutral-500 text-white px-2 py-0.5 text-sm': jobList?.state === jobStates.New,
+                    }">
+                    {{ jobList ? jobList.state.toUpperCase() : 'N/A' }}
+                </span>
+            </p>
+        </div>     
+        <div>
+            <label class="font-semibold">{{"ID" | translate}}:</label>
+            <p>{{ jobList ? jobList.id : 'N/A' }}</p>
+        </div>
+        <div>
+            <label class="font-semibold">{{"numberofrows" | translate}}:</label>
+            <p>{{ jobList ? jobList.num_rows : 'N/A' }}</p>
+        </div>
+        <div>
+            <label class="font-semibold">{{"LastRowProcessed" | translate}}:</label>
+            <p>{{ jobList ? jobList.last_row_processed : 'N/A' }}</p>
+        </div>
+        <div *ngIf="timeReminingShow">
+            <label class="font-semibold">{{"time_Remaining" | translate}}:</label>
+            <p>{{ jobList ? jobList.time_remaining : 'N/A' }} {{"seconds" | translate}}</p>
+        </div>
+        <div>
+            <label class="font-semibold">{{"Created" | translate}}:</label>
+            <p>{{jobList?.time_created | date:'medium'}}</p>
+        </div>
+        <div>
+            <label class="font-semibold">{{"Started" | translate}}:</label>
+            <p>{{jobList?.time_start | date:'medium'}}</p>
+        </div>
+        <div>
+            <label class="font-semibold">{{"Ended" | translate}}:</label>
+            <p>{{jobList?.time_end | date:'medium'}}</p>
+        </div>
+        <div>
+            <label class="font-semibold">{{"Summary" | translate}}:</label>
+            <p>{{ jobList ? jobList.summary : 'N/A' }}</p>
+        </div>
+        <div>
+            <label class="font-semibold">{{"FileArea" | translate}}:</label>
+            <p><a class="link link-primary dark:link-accent no-underline flex items-center" (click)="navigateToPath('/filearea/dropbox')">filearea://dropbox</a></p>
+        </div>
+    </div>
+    <div class="mb-3">
+        <div class="mb-3" *ngIf="jobList && jobList.receipt_url && jobList.state === jobStates.Completed">
+            <label class="font-semibold">{{"ReceiptFile" | translate}}:</label>
+            <p class="flex gap-6">
+                <a *ngIf="!jobList?.has_phi" href="#" (click)="viewanddownloadReceipt(jobList.receipt_url,$event,'view')" class="link link-primary dark:link-accent no-underline flex items-center"><em
+                        class="ph-bold ph-eye mr-1" ></em> {{"View" | translate}}</a>
+                <a href="#" (click)="viewanddownloadReceipt(jobList.receipt_url,$event,'download')" class="link link-primary dark:link-accent no-underline flex items-center"><em
+                        class="ph-bold ph-download-simple mr-1" ></em> {{"download" | translate}}</a>
+            </p><br>
+        </div>
+        <div class="mb-3">
+            <label class="font-semibold">{{"jobListfile" | translate}}:</label>
+            <p>{{ jobList ? jobList.filename : 'N/A' }}</p>
+            <p class="flex gap-6">                    
+                <a *ngIf="!jobList?.has_phi" (click)="viewDownloadFile('viewFile')"
+                    class="link link-primary dark:link-accent no-underline flex items-center">
+                    <em class="ph-bold ph-download-simple mr-1"></em>{{"View" | translate}}
+                </a>
+                <a (click)="viewDownloadFile('downloadFile')"
+                    class="link link-primary dark:link-accent no-underline flex items-center">
+                    <em class="ph-bold ph-download-simple mr-1"></em>{{"download" | translate}}
+                </a>
+            </p>
+        </div>
+        <div class="mb-3">
+            <label class="font-semibold" >{{"Parameters" | translate}}:  </label>
+            <span *ngFor="let a of parameters; let i=index ">
+                <p>{{ a[0] }}: {{ a[1] }}</p> 
+            </span>
+        </div>
+    </div>
+
+    <ng-container *ngIf="jobList?.actions">
+        <ng-container *ngIf="typeofProcessor === constOfBroadcastMesseging">
+            <div class="mb-3">
+                <h2 class="font-semibold mb-2 text-lg">{{"Actions" | translate}}</h2>
+                <hr class="mb-4 dark:border-gray-700">
+                <ng-container *ngIf="broadCastSummaryData">
+                    <div class="mb-3">
+                        <label class="font-semibold">{{"Processor" | translate}}:</label>
+                        <p>{{"read" | translate}}: {{broadCastSummaryData.read}}</p>
+                        <p>{{"unread" | translate}}: {{broadCastSummaryData.unread}}</p>
+                    </div>
+                </ng-container>
+
+                <ng-container *ngIf="jobList?.actions">
+                    <div>
+                        <label class="font-semibold">{{"Processor" | translate}}:</label>
+                        <p class="flex gap-6">
+                            <a *ngIf="jobList?.actions?.details" href="#" 
+                            (click)="viewanddownloadReceipt(jobListActions.details,$event,'view')" 
+                            class="link link-primary dark:link-accent no-underline flex items-center"><em
+                                    class="ph-bold ph-eye mr-1"></em>{{"View" | translate}}</a>
+                            <a *ngIf="jobList?.actions?.summary" href="#" 
+                            (click)="viewanddownloadReceipt(jobListActions.details,$event,'download',true)"
+                            href="#" class="link link-primary dark:link-accent no-underline flex items-center"><em
+                                    class="ph-bold ph-download-simple mr-1"></em>{{"download" | translate}} </a>
+                        </p>
+                    </div>
+                </ng-container>
+            </div>
+        </ng-container>
+    </ng-container>
+</div>
+</div>
+
+<!-- Audit note pop-up -->
+<input type="checkbox" id="auditnote" class="modal-toggle" [checked]="showDownloadreportPopUp" />
+<div class="modal bg-black/70">
+<div class="modal-box max-w-xl bg-white dark:bg-black rounded p-0 relative overflow-y-hidden dark:border-primary/60 dark:border dark:shadow-xl dark:shadow-primary/20">
+  <div class="flex justify-between text-white items-center bg-primary p-3">
+    <h3 class="font-bold dark:text-white">{{'securityWarning' | translate}}</h3>
+    <label for="auditnote" class="w-7 h-7" (click)="cancelDownloadreportPopUp()">
+      <em class="ph-bold ph-x cursor-pointer text-xl hover:text-accent"></em>
+    </label>
+  </div>
+  <div class="max-h-[65vh] overflow-y-auto p-4 dark:text-base-100">
+    <div class="pb-1">
+      <p>{{'Thisdatacontains' | translate}} 
+        <strong class="text-neutral">{{'ProtectedHealthInformation' | translate}}</strong>
+        ,{{'youreassumingresponsibilityfor' | translate}} 
+        <strong>{{'securing' | translate}}</strong> 
+        {{'itafterexecutionEveryinstanceofexportofthisdataislogged' | translate}}
+      </p>
+    </div>
+    <div class="flex justify-end items-center gap-2 mt-4">
+      <button type="button" (click)="cancelDownloadreportPopUp()" class="btn border-base-300 bg-base-300 hover:border-base-300 text-black hover:bg-gray-200">
+        {{'cancel' | translate}}
+      </button>
+      <button type="button" (click)="onExportreport()" class="btn btn-primary">
+        {{'downloadReport' | translate}}
+      </button>
+    </div>
+  </div>
+</div>
+</div>

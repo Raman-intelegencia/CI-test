@@ -1,0 +1,205 @@
+<!--Tabs navigation-->
+<div class="pt-4 bg-gray-50 m-0 md:px-12 px-4 dark:bg-gray-900/80  dark:text-white">
+    <h1 class="mb-4 pt-4 px-4 font-semibold">{{ "createUsers" | translate }}</h1>
+    <div class="flex items-center justify-start gap-x-1 text-sm font-medium">
+        <a (click)="active_status = createUserView.CreateUser" [class]="active_status=== createUserView.CreateUser ? 'active':'inactive'"
+            class="rounded-t font-semibold md:px-8 px-6 py-2 hover:bg-white dark:hover:bg-secondary">{{ "userAccount" | translate }}</a>
+        <a (click)="active_status = createUserView.ApiUser" [class]="active_status=== createUserView.ApiUser ? 'active':'inactive'"
+            class="rounded-t font-semibold md:px-8 px-6 py-2 hover:bg-white dark:hover:bg-secondary">{{ "apiAccount" | translate }}</a>
+    </div>
+</div>
+<!--Content Details -->
+<div class="sm:h-[calc(100vh-10rem)] h-[calc(100vh-15rem)] overflow-y-auto" (click)="closetoggleDropdown()">
+    <form *ngIf="active_status=== createUserView.CreateUser; else apiUser" [formGroup]="createUserForm"
+        class="grid grid-cols-1 lg:grid-cols-12 text-secondary p-8 md:px-16 dark:text-white">
+        <div class="xl:col-span-5 lg:col-span-6">
+            <div class="md:flex items-center mb-4">
+                <label class="font-bold text-secondary text-sm dark:text-base-100 md:w-[12rem]">{{ "name" | translate }}:</label>
+                <div class="flex gap-3 w-full">
+                    <input
+                    class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-2 px-3" maxlength="40"
+                    type="text" name="fullname" id="fullname" formControlName="first_name" placeholder="{{ 'userFirstName' | translate }}">
+                    <input
+                    class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-2 px-3" maxlength="40"
+                    type="text" name="fullname" id="fullname" formControlName="last_name" placeholder="{{ 'userLastName' | translate }}">
+                </div>
+               
+            </div>
+            <div class="md:flex mb-4">
+                <label class="font-bold text-secondary text-sm dark:text-base-100 md:w-[12rem]">{{ "email" | translate }}:</label>
+                <div class="w-full">
+                    <input
+                    class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-2 px-3"
+                    type="text" name="email" id="email" formControlName="email" (input)="onInputChange($event)" placeholder="{{ 'userEmailAddress' | translate }}">
+                    <label class="cursor-pointer label mt-2 justify-start">
+                        <span class="mr-4">{{ "email_Comm" | translate }}</span>
+                        <input type="checkbox" class="toggle toggle-primary toggle-sm" formControlName="email_comm" checked />
+                      </label>
+                </div>
+                
+            </div>
+            <div class="md:flex items-center mb-4">
+                <label class="font-bold text-secondary text-sm dark:text-base-100 md:w-[12rem]">{{ "userId" | translate }}:</label>
+                <input
+                    class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-2 px-3" formControlName="uid"
+                     type="text" name="userid" id="userid"  placeholder="{{ 'defaultEmail' | translate }}">
+            </div>
+           
+            <div class="md:flex mb-4">
+                <label class="font-bold text-secondary text-sm dark:text-base-100 md:w-[12rem]">{{ "cellPhone" | translate }}:</label>
+                <div class="w-full">
+                <input
+                    class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-2 px-3"
+                    type="text" name="cellphone" id="cellphone" formControlName="cellphone" placeholder="{{ 'cellphoneNo' | translate }}"> 
+                        <label class="cursor-pointer label mt-2 justify-start">
+                            <span class="mr-4">{{ "sms_Comm" | translate }}</span>
+                            <input type="checkbox" class="toggle toggle-primary toggle-sm" formControlName="sms_comm"/>
+                          </label>
+                    </div>
+            </div>
+        </div>
+        <div class="lg:col-span-1"></div>
+        <div class="xl:col-span-4 lg:col-span-5">
+            <ng-container *ngIf="isPagerNumberAccess">
+                <div class="md:flex items-center mb-4">
+                  <ng-container *ngIf="isPagerIntegrationPresent else disabledInput">
+                    <label class="font-bold text-secondary text-sm dark:text-base-100 md:w-[12rem]">{{ "pagerNumber" | translate }}:</label>
+                    <input type="text" [placeholder]="'pagerNumber' | translate" 
+                      name="pagerNumber" id="pagerNumber" formControlName="pagerNumber"
+                      (keypress)="keyPress($event)"
+                      class="border bg-transparent border-base-300 dark:border-gray-600 
+                      dark:text-white text-gray-600 rounded w-full py-1.5 px-3" 
+                      />
+                  </ng-container>
+
+                  <ng-template #disabledInput>
+                    <label class="font-bold text-secondary text-sm dark:text-base-100 md:w-[12rem]">{{ "pagerNumber" | translate }}:</label>
+                    <input type="text" [placeholder]="'pagerNumber' | translate" 
+                      class="border bg-transparent border-base-300 dark:border-gray-600 
+                      dark:text-white text-gray-600 rounded w-full py-1.5 px-3" 
+                      disabled
+                    />
+                  </ng-template>
+                </div>
+              </ng-container>
+
+            <web-messenger-institution-search 
+            [userIDSearchInstitution]="userIDSearchInstitution" 
+            [isInstituteSearch]="isInstituteSearch"
+            class="w-full" (searchedInstituteData)="receiveInstituteNameID($event)" 
+            [isRestCreateAPIUser]="isRestCreateAPIUser" 
+            (checkForResetApiUserForm)="checkResetApiForm($event)"> 
+            </web-messenger-institution-search>
+    
+            <div class="md:flex items-center mb-4">
+                <label class="font-bold text-secondary text-sm dark:text-base-100 md:w-[12rem]">{{ "specialty" | translate }}:</label>
+                    <div class="collapse  border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-2 px-2"
+                        (click)="toggleSpecialtyDropdown($event)"> 
+                        <div class="collapse-title p-0 pr-4 pl-2 min-h-6">
+                            <em class="absolute right-0 top-1"
+                                [ngClass]="showInstituteDropdown ? 'ph ph-caret-up' : 'ph ph-caret-down'"></em>
+                            <span [innerHTML]="selectedSpecialty | sanitizeHtml"></span>
+                        </div> 
+                            <ng-container *ngIf="showspecialtyDropdown && !closeInput">
+                                <div *ngIf="settingsArrayStates.filteredSpecialties">
+                                    <input type="text" 
+                                    autofocus 
+                                    (keyup)="inputKeyUpSpecialityOrTitle($event,settingsArrayStates.filteredSpecialties,'specialty','edit')" 
+                                    (keydown.enter)="handleEnterKey(filteredArray, 'specialty')"
+                                    class="border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-2 px-3"  
+                                    maxlength="40"
+                                    placeholder="{{'specialities' | translate}}" 
+                                    autocomplete="off"
+                                    name="specialty" 
+                                    (focusout)="searchProperty($event,'selectedSpecialty')" 
+                                    id="specialtyInput" 
+                                    
+                                    (click)="clickSpecialtyTitle($event)" />
+                                    <ul class="select2-results max-h-24 overflow-y-auto mt-2 cursor-pointer">
+                                        <li #specialtyItem *ngFor="let specialities of settingsArrayStates.filteredSpecialties ,let i=index"
+                                            (click)="selectSpecialty(specialities,$event); selectedIndex = -1;" 
+                                            [ngClass]="{'bg-blue-50 dark:bg-gray-900 dark:text-base-100': i === selectedIndex}">
+                                        {{specialities}}</li> 
+                                    </ul>
+                                </div>
+                            </ng-container> 
+                </div>
+            </div>
+            <div class="md:flex items-center mb-4">
+                <label class="font-bold text-secondary text-sm dark:text-base-100 md:w-[12rem]">{{ "title" | translate }}:</label>
+                <div class="collapse  border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-2 px-2"
+                        (click)="toggleTitleDropdown($event)"> 
+                        <div class="collapse-title p-0 pr-4 pl-2 min-h-6">
+                            <em class="absolute right-0 top-1"
+                                [ngClass]="showInstituteDropdown ? 'ph ph-caret-up' : 'ph ph-caret-down'"></em>
+                            <span [innerHTML]="selectedTitle | sanitizeHtml"></span>
+                        </div> 
+                            <ng-container *ngIf="showTitleDropdown && !closeInput">
+                                <div *ngIf="settingsArrayStates.filteredTitles">
+                                    <input type="text" 
+                                    autofocus 
+                                    (keyup)="inputKeyUpSpecialityOrTitle($event,settingsArrayStates.filteredTitles,'title','edit')" 
+                                    (keydown.enter)="handleEnterKey(filteredArray, 'title')"
+                                    class="border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-2 px-3"  
+                                    maxlength="40"
+                                    placeholder="{{'title' | translate}}" 
+                                    autocomplete="off"
+                                    name="title" 
+                                    (focusout)="searchProperty($event,'selectedTitle')" 
+                                    id="titleInput" 
+                                    (click)="clickSpecialtyTitle($event)" />
+                                    <ul class="select2-results max-h-24 overflow-y-auto mt-2 cursor-pointer">
+                                        <li #title *ngFor="let title of settingsArrayStates.filteredTitles,let i=index"
+                                            (click)="selectTitles(title); selectedIndex = -1;" 
+                                            [ngClass]="{'bg-blue-50 dark:bg-gray-900 dark:text-base-100': i === selectedIndex}">
+                                         <span [innerHTML]="title | sanitizeHtml"></span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </ng-container> 
+                    </div>
+            </div>
+            <ng-container *ngIf="userTagsUpdate">
+                <div class="md:flex items-center mb-4">
+                    <label class="font-bold text-secondary text-sm dark:text-base-100 md:w-[12rem]">{{ "reportingTags" | translate }}</label>
+                    <div
+                        class="border flex justify-between bg-transparent border-base-300 dark:border-gray-600 block dark:text-white text-gray-600 rounded w-full py-1 px-3">
+                        <span><span *ngIf="tags" [innerHtml]="tags | sanitizeHtmlArray"></span></span>
+                        <label for="adEditTags" class="tooltip tooltip-primary cursor-pointer" data-tip="Edit" (click)="openReportingTags()">
+                            <em class="text-primary dark:text-accent text-base ph-bold ph-note-pencil"></em> </label>
+                    </div>
+                </div>
+            </ng-container>
+            <div class="md:flex items-center my-6">
+                <label class="font-bold text-secondary text-sm dark:text-base-100 md:w-[9rem]">{{ "basicUser" | translate }}:</label>
+                <div class="flex items-center space-x-2"><span>{{ "no" | translate }}</span> <input type="checkbox" formControlName="basic"
+                        class="toggle toggle-primary" checked /> <span>{{ "Yes" | translate }}</span></div>
+            </div>
+            <div class="mb-6">
+                <div class="cursor-pointer space-x-2 label justify-start">
+                    <input type="checkbox" id="skip-email" class="checkbox checkbox-primary dark:checkbox-accent rounded checkbox-xs" formControlName="skip_email" />
+                    <label for="skip-email" class="font-semibold text-secondary text-sm dark:text-base-100">{{ "notsendactivationemail" | translate }}</label>
+                </div>
+                <div class="cursor-pointer  space-x-2 label justify-start">
+                    <input type="checkbox" id="use-sso" class="checkbox checkbox-primary dark:checkbox-accent rounded checkbox-xs" formControlName="sso" (change)="updateSSO()"/>
+                    <label for="use-sso" class="font-semibold text-secondary text-sm dark:text-base-100">{{ "useSSO" | translate }}</label>
+                </div>
+            </div>
+            <div class="flex space-x-4 justify-end">
+                <button class="btn bg-gray-300 hover:bg-gray-400 border-0 text-primary" (click)="reset()">{{ "reset" | translate }}</button>
+                <button class="btn btn-primary text-white" (click)="createNewUser()">{{ "createAccount" | translate }}</button>
+            </div>
+        </div>
+    </form>
+ 
+    <web-messenger-reporting-tags (tagsDataEvent)="reportingTagsValue($event)" [isReportingTag]="isReportingTag" #ReportingTag (isReportingTags)="isreportingTags($event)"></web-messenger-reporting-tags>
+    <ng-template #apiUser>
+      <web-messenger-create-api-user></web-messenger-create-api-user>
+    </ng-template>
+</div>
+
+<web-messenger-modal *ngIf="showSuccessPopup" [modalId]="'success-modal'" [modalTitle]="'Success' | translate"
+[modalMessage]="showSuccessPopup" (closePopup)="closeErrorPopup()" (cancelPopup)="closeErrorPopup()" [modalCloseText]="'close' | translate" ></web-messenger-modal>
+
+<web-messenger-modal *ngIf="showValidation" [modalId]="'error-modal'" [modalTitle]="'error' | translate"
+    [modalMessage]="showValidation" (closePopup)="closeErrorPopup()" (cancelPopup)="closeErrorPopup()" [modalCloseText]="'close' | translate"></web-messenger-modal>

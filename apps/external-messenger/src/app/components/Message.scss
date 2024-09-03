@@ -1,0 +1,91 @@
+@import '../style/_util.scss';
+
+$avatarHeight: 60px;
+$arrowTop: calc(($avatarHeight - 28px) / 2); //($avatarHeight - 28px) / 2;
+
+.message {
+    position: relative;
+    border-radius: 6px;
+    padding: $gutter;
+    clear: both;
+    margin: 0 $arrowSize $gutter;/* MM chatbox sender: */
+    min-height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:last-child {
+        // inner arrow
+        &::after {
+            position: absolute;
+            bottom: $arrowTop + 1;
+            height: 0;
+            width: 0;
+            content: '';
+            border-top: ($arrowSize - 1) solid transparent;
+            border-bottom: ($arrowSize - 1) solid transparent;
+        }
+        // outer arrow
+        &::before {
+            position: absolute;
+            bottom: $arrowTop;
+            height: 0;
+            width: 0;
+            content: '';
+            border-top: $arrowSize solid transparent;
+            border-bottom: $arrowSize solid transparent;
+        }
+    }
+}
+
+// type based visual changes
+.message--sent {
+    float: right;
+    color: $color-white;
+    background-color: $color-darkgray;
+    border: 1px solid $color-darkgray;
+    // inner right arrow
+    &::after {
+        display: none;
+    }
+    // outer right arrow
+    &::before {
+        left: 100%;
+        border-left: $arrowSize solid $color-darkgray;
+        
+    }
+
+}
+
+.message--received {
+    float: left;
+    color: $color-blue;
+    background: $color-accent;
+    border: 1px solid rgba($color-lightgray, 0.5);
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+
+    // inner left arrow
+    &::after {
+        right: 100%;
+        border-right: ($arrowSize - 1) solid $color-accent;
+    }
+    // outer left arrow
+    &::before {
+        right: 100%;
+        border-right: $arrowSize solid rgba($color-lightgray, 0.5);
+    }
+}
+
+.message--system {
+    text-align: center;
+    margin-left: auto;
+    margin-right: 5rem;
+}
+
+.message__content {
+    max-width: 20em;
+    word-wrap: break-word;
+    hyphens: auto;
+}

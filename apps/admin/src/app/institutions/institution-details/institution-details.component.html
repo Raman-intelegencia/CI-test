@@ -1,0 +1,24 @@
+<div class="h-full overflow-hidden relative md:flex block md:gap-2">
+    <web-messenger-institute-leftpanel [institutionId]="institutionID"></web-messenger-institute-leftpanel>
+    <!-- second half section -->
+    <div class="p-6 w-full text-gray-600 dark:text-base-100">
+        <a class="text-primary text-sm cursor-pointer dark:text-accent mb-3 table" (click)="navigateBackToInstSearch()"><em class="ph ph-arrow-left"></em>
+            {{"Returntosearchresults" | translate}}</a>
+        <div class="md:h-[calc(100vh-9rem)] h-[calc(100vh-18rem)] overflow-y-auto">
+            <div class="grid 2xl:grid-cols-2 grid-cols-1 gap-8">
+                <!-- first box -->
+                <web-messenger-institution-subdetails
+                    [institution]="institution"></web-messenger-institution-subdetails>
+                <web-messenger-configure-user-child-ous (onIntegrationSyncCompleted)="fetchInstitutionIntegrations()"
+                    [integrations]="integrations" [institution]="institution"></web-messenger-configure-user-child-ous>
+            </div>
+            <hr class="my-4 dark:border-gray-700">
+            <h2 class="font-semibold text-base text-secondary dark:text-white mb-3">{{"FileProcessors" | translate}}
+            </h2>
+            <!-- <label>{{"Provisioning"| translate}} </label>
+            <a class="link link-primary dark:text-accent my-3 table">{{"filearea://cmh" | translate}}</a>
+            <a class="link link-primary dark:text-accent my-3 table">{{"filearea://cmh" | translate}}</a>
+            <a class="link link-primary dark:text-accent my-3 table">{{"filearea://cmh" | translate}}</a> -->
+        </div>
+    </div>
+</div>

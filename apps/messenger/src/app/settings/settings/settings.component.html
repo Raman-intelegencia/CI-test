@@ -1,0 +1,46 @@
+<div class="main-body overflow-hidden md:px-12 px-4 relative md:flex block md:mt-5 md:gap-6">
+    <span (click)="clickSettingToggle()" class="md:hidden text-primary dark:text-accent text-base gap-2 mb-3 cursor-pointer font-semibold flex items-center">
+        <em [ngClass]="settingMobile ? 'ph-bold ph-x' : 'ph-bold ph-list'" class="transition-all"></em> Settings
+    </span>
+    <aside [ngClass]="settingMobile ? 'w-64 shadow-lg dark:shadow-primary' : 'w-0'"
+        class="xl:w-[28vw] md:w-[36vw] transition-all z-50 duration-1000 py-4 md:mb-0 md:relative -left-2 absolute overflow-x-hidden md:h-[calc(100vh-8.5rem)] h-[calc(100vh-9.5rem)] bg-white dark:bg-black border border-base-100 dark:border-gray-600 rounded overflow-y-auto">
+        <div class="md:w-full w-64">
+        <h2 class="text-secondary text-xl font-medium dark:text-white mb-4 px-6 md:block hidden">{{ "settings" | translate }}</h2>
+        <h6 class="text-secondary dark:text-base-100 font-semibold mb-2 px-6">{{ "account" | translate }}</h6>
+        <div class="mb-4 flex flex-col gap-y-2">
+            <a *ngFor="let navigation of accountSideNavigation;let i=index" id="nav"
+                class="text-primary hover:opacity-90 dark:text-accent px-6 py-1 cursor-pointer"
+                [ngClass]="{'bg-blue-50 dark:bg-primary/30': navigation.name === status}"
+                (click)="AccountScrollTo(i,navigation.name)">
+                {{navigation.name}}
+            </a>
+        </div>
+
+        <h6 class="text-secondary dark:text-base-100 font-semibold mb-2 px-6">{{ "alerts&Preferences" | translate }}</h6>
+        <div class="mb-4 flex flex-col gap-y-2">
+            <a *ngFor="let navigation of preferencesSideNavigation;let i=index"
+                class="text-primary hover:opacity-90 dark:text-accent px-6 py-1 cursor-pointer"
+                [ngClass]="{'bg-blue-50 dark:bg-primary/30': navigation.name === status}"
+                (click)="PreferencesScrollTo(i,navigation.name)">
+                {{navigation.name}}
+            </a>
+        </div>
+
+        <h6 class="text-secondary dark:text-base-100 font-semibold mb-2 px-6">{{ "aboutAMSConnectHeading" | translate }}</h6>
+        <div class="mb-4 flex flex-col gap-y-2">
+            <a *ngFor="let navigation of aboutSideNavigation;let i=index"
+                class="text-primary hover:opacity-90 dark:text-accent px-6 py-1 cursor-pointer"
+                [ngClass]="{'bg-blue-50 dark:bg-primary/30': navigation.name === status}"
+                (click)="AboutScrollTo(i,navigation.name)">
+                {{navigation.name}}
+            </a>
+        </div>
+    </div>
+    </aside>
+    
+
+    <div
+        class="xl:w-[calc(100%-28vw)] md:w-[calc(100%-36vw)] w-full md:h-[calc(100vh-8.5rem)] h-[calc(100vh-10.8rem)] bg-white dark:bg-black border border-base-100 dark:border-gray-600 rounded py-4 ">
+        <router-outlet ></router-outlet>
+    </div>
+</div>

@@ -1,0 +1,206 @@
+<input type="checkbox" id="oncall-modal" class="modal-toggle" [checked]="showOnCallPopup"/>
+    <div class="modal bg-black/70">
+      <div class="modal-box max-w-xl bg-white dark:bg-black rounded p-0 relative overflow-y-hidden dark:border-primary/60 dark:border dark:shadow-xl dark:shadow-primary/20">
+        <div class="flex justify-between text-white items-center bg-primary p-3">
+          <h3 class="font-bold text-white">{{onCallPopUpState.showServiceTeamScheduleHeading}}</h3>
+          <label for="oncall-modal" class="w-7 h-7" (click)="closeOnCallPopup($event)">
+            <em class="ph-bold ph-x text-base-100 hover:bg-base-100/[0.08] p-2 rounded-full cursor-pointer"></em>
+          </label>
+        </div>
+        <form class="p-4 px-6 max-h-[60vh] overflow-y-auto">
+            <button class="text-primary dark:text-accent mb-3 border-0" (click)="closeOnCallPopup($event)"><em class="ph ph-caret-left"></em> {{'back' | translate}}</button>
+            <h4 class="font-bold text-secondary dark:text-white mb-3">{{'youWillBeOnCall' | translate}}</h4>
+            <div class="w-full mb-3 text-gray-600 dark:text-base-100">
+                <label class="label justify-start cursor-pointer" *ngIf="!selectedServiceRoleList.selectedServiceTeam.length">
+                    <input type="radio" name="radio" #addToTeamsRadio value="addToTeams" 
+                    class="radio radio-xs radio-primary dark:radio-accent mr-1" (change)="onRadioChange(addToTeamsRadio.value)"
+                    [checked]="onCallPopUpState.selectedRadio === 'addToTeams'" /> {{'manuallyOptIn' | translate}}
+            </label>
+            <label class="label justify-start cursor-pointer">
+                <input type="radio" name="radio" #oneTimeRadio value="oneTime" [disabled]="!selectedServiceRoleList.selectedServiceTeam || (selectedServiceRoleList.selectedServiceTeam.length > 0 && selectedServiceRoleList.selectedServiceTeam[0].recurring)"
+                    class="radio radio-xs radio-primary dark:radio-accent mr-1" (change)="onRadioChange(oneTimeRadio.value)"
+                    [checked]="onCallPopUpState.selectedRadio === 'oneTime'" /> {{'oneTimeSchedule' | translate}}
+            </label>
+            <label class="label justify-start cursor-pointer">
+                <input type="radio" name="radio" #repeatingRadio value="repeating" [disabled]="!selectedServiceRoleList.selectedServiceTeam || (selectedServiceRoleList.selectedServiceTeam.length > 0 && !selectedServiceRoleList.selectedServiceTeam[0].recurring)"
+                    class="radio radio-xs radio-primary dark:radio-accent mr-1" (change)="onRadioChange(repeatingRadio.value)"
+                    [checked]="onCallPopUpState.selectedRadio === 'repeating'" /> {{'repeatingSchedule' | translate}}
+            </label>
+            </div>
+            <label class="font-semibold text-sm text-secondary dark:text-white flex justify-between cursor-pointer">{{'serviceTeams' | translate}} <a (click)="openServiceListModal($event)" class="text-primary dark:text-accent">{{'edit' | translate}}</a>
+            </label>
+            <input class="rounded bg-gray-100 dark:border dark:border-gray-700 dark:bg-transparent py-1.5 px-3 w-full text-gray-800" type="text" name="" id="serviceTeam" disabled
+        [placeholder]="getSelectedRoleValue ? (getSelectedRoleValue| formatServiceTeam: maxLength) : 'noCurrentServiceTeam'|translate" />            
+            <div class="rounded p-1.5 gap-1 bg-gray-50 dark:bg-primary/40 mt-1 flex flex-wrap w-full text-gray-600 dark:text-base-100 mb-4" *ngFor="let roles of onCallPopUpState.selectedRoles;trackBy: trackByRoleId">
+                <ng-container >
+                    <span class="rounded px-1 py-0.5 bg-white dark:bg-opacity-20 border dark:border-0 text-sm">{{roles}}</span>
+                </ng-container>
+            </div>
+
+            <!-- one-time block -->
+
+            <div *ngIf="onCallPopUpState.selectedRadio === 'oneTime'">
+              <label class="text-sm text-secondary dark:text-white">{{'from' | translate}}</label>
+              <div class="grid grid-cols-2 gap-3 mt-2 mb-3">
+                <!-- From date picker -->
+                <div class="relative">
+                  <input type="date" [(ngModel)]="fromDate" [ngModelOptions]="{standalone: true}"
+                    class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1 h-8 px-3"
+                    name="fromDate" placeholder="Select Date" [min]="currentDate"
+                    (change)="fromDateChange()">
+                </div>
+            
+            
+                <!-- from time picker -->
+                    <div class="space-y-2">
+                        <div class="relative">
+                          <input #fromTimePicker 
+                            class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1 h-8 px-3"
+                            placeholder="Select Time"
+                            [readonly]="true" [(ngModel)]="fromTime" [ngModelOptions]="{standalone: true}" name="fromTime"
+                            (click)="onCallPopUpState.showFromTimeSuggestions = true">
+                          <div class="absolute top-full left-0 w-full max-w-full max-h-32 overflow-y-auto bg-white border border-gray-300 mt-2 z-10" *ngIf="onCallPopUpState.showFromTimeSuggestions">
+                            <p *ngFor="let timeOption of onCallPopUpState.allTimeSlots" class="px-4 cursor-pointer hover:bg-primary-100"
+                            [class.bg-blue-50]="timeOption === fromTimePicker.value"
+                              (click)="selectFromTime(timeOption,$event)">
+                              {{ timeOption }}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                </div>
+                <label class="text-sm text-secondary dark:text-white">{{'to' | translate}}</label>
+                <div class="grid grid-cols-2 gap-3 mt-2 mb-3">
+                    <!-- to date picker -->
+                    <div class="relative">
+                      <input type="date" [(ngModel)]="toDate" [ngModelOptions]="{standalone: true}"
+                        class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1 h-8 px-3"
+                        name="toDate" placeholder="Select Date" [min]="toDateMinValue" [disabled]="!fromDate"
+                        (change)="toDateChange()">
+                    </div>
+
+                    <!-- to time picker -->
+                    <div class="space-y-2">
+                        <div class="relative">
+                          <input #toTimePicker
+                            class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1 h-8 px-3"
+                            placeholder="Select Time"
+                            [readonly]="true"  [(ngModel)]="toTime" [ngModelOptions]="{standalone: true}" name="toTime"
+                            (click)="onCallPopUpState.showToTimeSuggestions = true">
+                          <div class="absolute top-full left-0 w-full max-w-full max-h-32 overflow-y-auto bg-white border border-gray-300 mt-2 z-10" *ngIf="onCallPopUpState.showToTimeSuggestions">
+                            <p *ngFor="let timeOption of onCallPopUpState.allTimeSlots" class="px-4 cursor-pointer hover:bg-primary-100"
+                            [class.bg-blue-50]="timeOption === toTimePicker.value"
+                              (click)="selectToTime(timeOption,$event)">
+                              {{ timeOption }}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                </div>
+            </div>
+
+            <div *ngIf="onCallPopUpState.selectedRadio === 'repeating'">
+                <div class="grid grid-cols-2 gap-3 mt-2 mb-3">
+                    <div class="my-1">
+                        <label class="text-sm text-secondary dark:text-white">{{'starts' | translate}}</label>
+                      <div class="relative">
+                        <input type="date" [(ngModel)]="fromDate" [ngModelOptions]="{standalone: true}"
+                          class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1 h-8 px-3"
+                          name="fromDate" placeholder="Select Date" [min]="currentDate"
+                          (change)="fromDateChange()">
+                      </div>
+                    </div>
+                    <div class="my-1">
+                        <label class="text-sm text-secondary dark:text-white">{{'ends' | translate}}</label>
+                      <div class="relative">
+                        <input type="date" [(ngModel)]="toDate" [ngModelOptions]="{standalone: true}"
+                          class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1 h-8 px-3"
+                          name="toDate" placeholder="Select Date" [min]="toDateMinValue" [disabled]="!fromDate"
+                          (change)="toDateChange()">
+                      </div>
+                    </div>
+                </div>
+                <span class="dark:text-white">On Every</span>
+                <!-- days checkboxes -->
+                <ng-container *ngIf="!showSelectedDaysOfWeek">
+                <div class="text-gray-600 dark:text-base-100" *ngFor="let day of onCallPopUpState.daysOfWeek | filterDaysOfweek:onCallPopUpState.validDays:'value'">
+                    <div class="cursor-pointer gap-2 label justify-start my-1" *ngIf="onCallPopUpState.validDays.includes(day.value)">
+                      <label class="flex items-center gap-2">
+                        <input type="checkbox" class="checkbox checkbox-primary dark:checkbox-accent rounded checkbox-xs" 
+                               [checked]="onCallPopUpState.selectedDaysOfWeek.includes(day.value)"
+                               (change)="toggleDaySelection(day.value)" />
+                        {{ day.label }}
+                      </label>
+                    </div>
+                  </div>
+                </ng-container>
+                  <ng-container *ngIf="showSelectedDaysOfWeek">
+                  <div class="text-gray-600 dark:text-base-100" *ngFor="let day of onCallPopUpState.selectedDaysOfWeekVal | filterDaysOfweek:onCallPopUpState.validDays:'value'">
+                    <div class="cursor-pointer gap-2 label justify-start my-1" *ngIf="onCallPopUpState.validDays.includes(day.value)">
+                      <label class="flex items-center gap-2">
+                        <input type="checkbox" class="checkbox checkbox-primary dark:checkbox-accent rounded checkbox-xs" 
+                               [checked]="onCallPopUpState.selectedDaysOfWeekVal.includes(day)"
+                               (change)="toggleDaySelection(day.value)" />
+                        {{ day.label }}
+                      </label>
+                    </div>
+                  </div>
+                </ng-container>
+                <div class="grid grid-cols-2 gap-3 mt-2 mb-3">
+                    <div class="my-1">
+                        <label class="text-sm text-secondary dark:text-white">{{'from' | translate}}</label>
+                         <!-- from time picker -->
+                        <div class="space-y-2">
+                            <div class="relative">
+                              <input #fromTimePicker [(ngModel)]="fromTime" [ngModelOptions]="{standalone: true}" name="fromTime"
+                                class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1 h-8 px-3"
+                                placeholder="Select Time"
+                                [readonly]="true"
+                                (click)="onCallPopUpState.showFromTimeSuggestions = true">
+                              <div class="absolute bottom-full left-0 w-full max-w-full max-h-32 overflow-y-auto bg-white border border-gray-300 mt-2 z-10" *ngIf="onCallPopUpState.showFromTimeSuggestions">
+                                <p *ngFor="let timeOption of onCallPopUpState.allTimeSlots" class="px-4 cursor-pointer hover:bg-primary-100"
+                                [class.bg-blue-50]="timeOption === fromTimePicker.value"
+                                  (click)="selectFromTime(timeOption,$event)">
+                                  {{ timeOption }}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                    </div>
+                    <div class="my-1">
+                        <label class="text-sm text-secondary dark:text-white">{{'to' | translate}}</label>
+                         <!-- to time picker -->
+                    <div class="space-y-2">
+                        <div class="relative">
+                          <input #toTimePicker
+                            class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1 h-8 px-3"
+                            placeholder="Select Time"
+                            [readonly]="true" [(ngModel)]="toTime" [ngModelOptions]="{standalone: true}" name="toTime"
+                            (click)="onCallPopUpState.showToTimeSuggestions = true">
+                          <div class="absolute bottom-full left-0 w-full max-w-full max-h-32 overflow-y-auto bg-white border border-gray-300 mt-2 z-10" *ngIf="onCallPopUpState.showToTimeSuggestions">
+                            <p *ngFor="let timeOption of onCallPopUpState.allTimeSlots" class="px-4 cursor-pointer hover:bg-primary-100"
+                            [class.bg-blue-50]="timeOption === toTimePicker.value"
+                              (click)="selectToTime(timeOption,$event)">
+                              {{ timeOption }}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex justify-end mt-4">
+                <button class="btn btn-primary text-white px-10" [disabled]="isSaveDisabled()" (click)="saveOnCallSchedule()">{{'save' | translate}}</button>
+            </div>
+        </form>
+      </div>
+    </div>
+
+    <ng-container *ngIf="onCallPopUpState.isErrorStatus">
+      <web-messenger-modal [modalId]="'error_model'" [showCancelButton]='true' [modalTitle]="'error' | translate"
+      [modalMessage]= "onCallPopUpState.createShiftResponseData.message || ''"
+      (closePopup)="closeErrorPopup()"
+      [modalCloseText]="'close' | translate"></web-messenger-modal>
+  </ng-container>

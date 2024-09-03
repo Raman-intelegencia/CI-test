@@ -1,0 +1,340 @@
+<ng-container [formGroup]="settingsViewModel.integrationForm">
+    <div *ngIf="wizardType === wizardTypeEnum.FIRST_TIME" class="tool-picker max-w-lg">
+        <h3 class="text-[19px] font-semibold">{{ 'integrationWizard.selectScheduler' | translate }}</h3>
+        <p class="text-[17px] mb-5 pt-3">{{ 'integrationWizard.selectSchedulerHelpText' | translate }}</p>
+
+        <!-- TODO: Remove duplicated code -->
+        <ng-container *ngFor="let vendorType of settingsViewModel.allTypes">
+            <div class="mb-2">
+                <input class="mr-1.5 h-[19px] w-[19px] accent-primary align-middle cursor-pointer" formControlName="vendorType" type="radio" [id]="vendorType" name="vendorType"
+                       [value]="vendorType">
+                <label class="text-base align-top cursor-pointer" [htmlFor]="vendorType">{{ vendorType }}</label>
+            </div>
+          <ng-container *ngIf="settingsViewModel.integrationForm.get('vendorType')?.value === vendorType">
+            <ng-container *ngTemplateOutlet="settingsViewModel.hasValidCredentials === CredentialsState.Success ? credentialSuccess : loginCredentials"/>
+          </ng-container>
+        </ng-container>
+    </div>
+
+    <div *ngIf="wizardType === wizardTypeEnum.RECONFIGURE" class="tool-picker">
+        <div class="flex flex-row justify-between w-full">
+            <div class="max-w-lg">
+                <h3 class="text-[19px] font-semibold">{{ 'integrationWizard.alreadyConfiguredScheduler' | translate }}</h3>
+                <p class="text-[17px] mb-5 mt-3.5">{{ 'integrationWizard.alreadyConfiguredSchedulerHelpText' | translate }}</p>
+            </div>
+            <button class="btn small-button btn-outline border-neutral text-neutral rounded ml-5 mt-4 hover:bg-error hover:text-white hover:border-error" (click)="showDeleteIntegrationConfirmationPrompt = true">
+                {{ 'integrationWizard.buttons.deleteIntegration' | translate }}
+            </button>
+        </div>
+
+        <ng-container *ngIf="settingsViewModel.isUpdatingCredentials">
+            <ng-container *ngIf="settingsViewModel.integrationForm.get('vendorType')?.value === settingsViewModel.mainVM.vendorType">
+                <p class="text-base">{{ settingsViewModel.mainVM.vendorType }}</p>
+                <ng-container *ngTemplateOutlet="settingsViewModel.hasValidCredentials === CredentialsState.Success ? credentialSuccess : loginCredentials"/>
+            </ng-container>
+
+        </ng-container>
+
+        <ng-container *ngIf="!settingsViewModel.isUpdatingCredentials">
+            <p class="text-base">{{ settingsViewModel.mainVM.vendorType }}</p>
+            <p class="text-base font-bold mb-3">{{ settingsViewModel.mainVM.institutionId }}</p>
+            <button
+                (click)="tryEditCredentials()"
+                class="btn small-button btn-outline btn-primary dark:btn-accent dark:btn-outline rounded text-[15px]">
+                {{ 'integrationWizard.buttons.updateCredentials' | translate }}
+            </button>
+        </ng-container>
+
+        <div class="mt-2">
+            <button
+                (click)="getUnmatchedEntities()"
+                class="btn small-button btn-outline btn-primary dark:btn-accent dark:btn-outline rounded text-[15px]">
+                {{ 'integrationWizard.buttons.exportUnmatchedEntities' | translate }}
+            </button>
+        </div>
+    </div>
+
+    <div class="mt-12">
+        <h3 class="text-[19px] font-semibold">
+            {{ (wizardType === wizardTypeEnum.RECONFIGURE ?
+                'integrationWizard.shownChildOUs' : 'integrationWizard.selectChildOUs') | translate }}
+        </h3>
+        <p class="text-[17px] mt-3.5" [innerHTML]="
+            (wizardType === wizardTypeEnum.RECONFIGURE ? 'integrationWizard.shownChildOUsHelpText' :
+                'integrationWizard.selectChildOUsHelpText') | translate">
+        </p>
+
+        <div class="child-ou-picker mt-4 flex flex-col">
+            <div>
+                <ul class="flex flex-row gap-4 mb-2">
+                    <li>
+                        <input class="mr-1.5 accent-primary h-[19px] w-[19px] align-middle cursor-pointer" formControlName="childOuType" type="radio" id="child-ou"
+                               name="childOuType" [value]="ouOptions.Selected">
+                        <label class="align-top text-base cursor-pointer" for="child-ou">{{ 'integrationWizard.childOuOptions.child' | translate }}</label>
+                    </li>
+                    <li>
+                        <input class="mr-1.5 accent-primary h-[19px] w-[19px] align-middle cursor-pointer" formControlName="childOuType" type="radio" id="all-child-ous"
+                               name="childOuType" [value]="ouOptions.All">
+                        <label class="align-top text-base cursor-pointer" for="all-child-ous">{{ 'integrationWizard.childOuOptions.all' | translate }}</label>
+                    </li>
+                    <li>
+                        <input class="mr-1.5 accent-primary h-[19px] w-[19px] align-middle cursor-pointer" formControlName="childOuType" type="radio" id="no-child-ous"
+                               name="childOuType" [value]="ouOptions.None">
+                        <label class="align-top text-base cursor-pointer" for="no-child-ous">{{ 'integrationWizard.childOuOptions.none' | translate }}</label>
+                    </li>
+                </ul>
+            </div>
+            <div *ngIf="settingsViewModel.integrationForm.get('childOrganizations')">
+                <ul formGroupName="childOrganizations" class="ml-4">
+                    <ng-container *ngFor="let item of settingsViewModel.integrationForm.get('childOrganizations')?.value | keyvalue;">
+                        <li class="pt-2">
+                            <input class="accent-primary h-[19px] w-[19px] align-middle rounded-[3px] cursor-pointer" type="checkbox" name="childOrganizations" [id]="item.key"
+                                   [formControlName]="$any(item.key)" [value]="item.value"/>
+                            <label class="align-top text-base ml-1.5 cursor-pointer" [htmlFor]="item.key">{{ this.settingsViewModel.institutionMap[$any(item.key)] }}</label>
+                        </li>
+                    </ng-container>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-12 pb-3" [formGroup]="settingsViewModel.scheduleControls">
+        <h3 class="text-[19px] font-semibold">{{ 'integrationWizard.syncSettingsHeader' | translate }}</h3>
+
+        <p class="text-[17px] pt-3 pb-2">{{ (wizardType === wizardTypeEnum.RECONFIGURE ?
+                'integrationWizard.updateSyncSettingsHelpText' :
+                'integrationWizard.syncSettingsHelpText') | translate }}
+        </p>
+
+        <input class="mr-2 border bg-transparent border-base-300 rounded w-[42.5px] h-[42.5px] text-center text-base"
+            type="text" inputmode="numeric" formControlName="scanPeriod"
+            pattern="[0-9]+" />
+        <select formControlName="scanUnit" class="bg-transparent border-transparent border-r-8 rounded outline outline-1 outline-base-300 pl-2 py-[10px] text-base cursor-pointer">
+            <option *ngFor="let unit of settingsViewModel.timeUnits?.scanUnits" [value]="unit">
+                {{ unit }}
+            </option>
+            <option *ngIf="(settingsViewModel.timeUnits?.scanUnits?.length ?? 0) >= 2" value="" disabled selected>
+                {{ 'integrationWizard.hints.unitTypeHint' | translate }}
+            </option>
+        </select>
+
+        <div *ngIf="(settingsViewModel.scheduleControls.dirty || settingsViewModel.scheduleControls.touched) && settingsViewModel.scheduleControls.errors?.['scanError']"
+            class="ml-2 text-red-500 dark:text-red-400">{{ settingsViewModel.scheduleControls.errors?.['scanError'] }}</div>
+
+        <p class="text-[17px] pt-[27px] pb-2">{{ (wizardType === wizardTypeEnum.RECONFIGURE ?
+            'integrationWizard.updateSyncSettingsHelpTextNewInfo' :
+            'integrationWizard.syncSettingsHelpTextNewInfo') | translate }}
+        </p>
+
+        <input class="mr-2 border bg-transparent border-base-300 rounded w-[42.5px] h-[42.5px] text-center text-base"
+            type="text" inputmode="numeric" formControlName="pollingPeriod"
+            pattern="[0-9]+" />
+        <select formControlName="pollingUnit" class="bg-transparent border-transparent border-r-8 rounded outline outline-1 outline-base-300 pl-2 py-[10px] text-base cursor-pointer">
+            <option class="dark:bg-slate-800" value="" disabled selected>{{ 'integrationWizard.hints.unitTypeHint' | translate }}</option>
+            <ng-container *ngFor="let unit of settingsViewModel.timeUnits?.pollingUnits">
+                <option class="dark:bg-slate-800" [value]="unit">{{ unit }}</option>
+            </ng-container>
+        </select>
+
+        <div *ngIf="(settingsViewModel.scheduleControls.dirty || settingsViewModel.scheduleControls.touched)
+            && settingsViewModel.scheduleControls.errors?.['pollingError']"
+            class="ml-2 text-red-500 dark:text-red-400">{{ settingsViewModel.scheduleControls.errors?.['pollingError'] }}
+        </div>
+    </div>
+
+    <ng-container *ngIf="settingsViewModel.vendorType === IntegrationVendorType.AmTelco && settingsViewModel.mainVM.integration?.id; then AmtelcoColumns" />
+
+    <button *ngIf="wizardType === wizardTypeEnum.FIRST_TIME"
+        class="mt-16 btn btn-primary text-white text-primary py-1 px-3 rounded inline-flex items-center w-[100px]"
+        [disabled]="!settingsViewModel.canSave()" (click)="onSubmit()">
+        {{ (hasCreated && settingsViewModel.amtelcoViewModel.hasMappedColumnsAmTelco ?
+            'integrationWizard.buttons.update' : 'integrationWizard.buttons.next') | translate}}
+    </button>
+
+    <ng-template #credentialSuccess>
+        <div class="ml-[25px] mb-5 text-base">
+            <div *ngIf="settingsViewModel.validCredentialsResponse.companyName">
+                <p>{{ 'integrationWizard.linkSuccess' | translate }} <a class="font-bold">{{settingsViewModel.validCredentialsResponse.companyName}}</a>.</p>
+            </div>
+            <div *ngIf="!settingsViewModel.validCredentialsResponse.companyName">
+                <p>{{ 'integrationWizard.linkSuccessNoCompany' | translate }} <a class="font-bold"></a></p>
+            </div>
+            <p class="mt-2" *ngIf="!settingsViewModel.mainVM.integration?.id">{{ 'integrationWizard.wrongAccount' | translate }}
+                <button class="underline font-bold text-primary" (click)="settingsViewModel.hasValidCredentials = CredentialsState.Undefined">
+                    {{ 'integrationWizard.tryAgain' | translate }}
+                </button>
+            </p>
+        </div>
+    </ng-template>
+    <ng-template #loginCredentials>
+        <div class="ml-[25px] mb-5">
+            <div class="t-4">
+                <p class="text-base">{{ 'integrationWizard.loginText' | translate }}</p>
+
+                <div class="grid grid-cols-4 my-2 w-64 gap-2 items-center">
+                    <label *ngIf="settingsViewModel.integrationForm.get('vendorType')?.value !== IntegrationVendorType.Amion" class="inline col-span-1 text-base" for="username">{{ 'integrationWizard.username' | translate
+                        }}</label>
+                    <input *ngIf="settingsViewModel.integrationForm.get('vendorType')?.value !== IntegrationVendorType.Amion" type="text" id="username" name="username" formControlName="username"
+                           class="inline col-span-3 ml-5 border rounded bg-transparent border-base-300 dark:text-white p-2"
+                           [placeholder]="'integrationWizard.hints.enterUsername' | translate" />
+
+                    <label class="inline col-span-1 text-base" for="password">{{ 'integrationWizard.password' | translate
+                        }}</label>
+                    <input type="password" id="password" name="password" formControlName="password"
+                           class="inline col-span-3 ml-5 border rounded bg-transparent border-base-300 dark:text-white p-2"
+                           [placeholder]="'integrationWizard.hints.enterPassword' | translate"/>
+
+                    <label *ngIf="settingsViewModel.integrationForm.get('vendorType')?.value === IntegrationVendorType.AmTelco" class="inline col-span-1 text-base" for="host">{{"integrationWizard.hostField" | translate}}</label>
+                    <input *ngIf="settingsViewModel.integrationForm.get('vendorType')?.value === IntegrationVendorType.AmTelco" type="text" id="host" name="host" formControlName="host"
+                           class="inline col-span-3 ml-5 border rounded bg-transparent border-base-300 dark:text-white p-2"
+                           [placeholder]="'integrationWizard.hints.enterHost' | translate" />
+                </div>
+            </div>
+
+            <ng-container *ngIf="settingsViewModel.hasValidCredentials === CredentialsState.BadCredentials">
+                <div class="font-bold text-red-600">{{ 'integrationWizard.invalidCredential' | translate }}</div>
+            </ng-container>
+
+            <ng-container *ngIf="settingsViewModel.hasValidCredentials === CredentialsState.BadOrganization">
+              <div class="font-bold text-red-600">{{ 'integrationWizard.invalidOrganization' | translate }}</div>
+            </ng-container>
+
+            <button type="button"
+                    class="btn btn-primary text-white pb-1 mt-[13px] px-3 rounded inline-flex items-center"
+                    (click)="onLinkToAccount()">
+                {{ 'integrationWizard.buttons.linkAccount' | translate }}
+            </button>
+
+            <div *ngIf="settingsViewModel.showCredentialError"
+                class="ml-2 text-red-600 dark:text-red-400">{{ 'integrationWizard.missingCredentials' | translate }}</div>
+        </div>
+    </ng-template>
+    <ng-template #AmtelcoColumns>
+      <div class="mb-16 text-[17px] font-[Arial]">
+          <h3 class="text-[19px] font-semibold mt-20">{{ 'integrationWizard.amtelcoColumnsHeader' | translate }}</h3>
+
+          <p class="mt-2 w-2/4">
+            {{ 'integrationWizard.amtelcoColumnsHelpText' | translate }}
+          </p>
+
+          <div class="flex flex-row gap-60 mt-6 2xl:grid-cols-4">
+            <!-- Required columns -->
+            <div>
+              <h3 class="text-base font-bold">{{ 'integrationWizard.amtelcoRequiredColumns' | translate }}</h3>
+              <p class="mt-3">{{ "integrationWizard.Directory" | translate }}</p>
+
+              <ng-container *ngIf="!settingsViewModel.amtelcoViewModel.hasLoadedAmTelcoData">
+                <select class="bg-transparent border-transparent border-r-8 rounded outline outline-1 outline-base-300 w-full p-2 mt-1 text-[16px] cursor-pointer">
+                    <option class="dark:bg-slate-800" value="" disabled selected>{{ "integrationWizard.loadingDirectories" | translate }}</option>
+                </select>
+              </ng-container>
+
+              <ng-container *ngIf="settingsViewModel.amtelcoViewModel.hasLoadedAmTelcoData">
+                <select formControlName="directoryId" class="bg-transparent border-transparent border-r-8 rounded outline outline-1 outline-base-300 w-full p-2 mt-1 text-[16px] cursor-pointer">
+                  <option class="dark:bg-slate-800" value="" disabled selected>{{ 'integrationWizard.hints.directorySelectorHint' | translate }}</option>
+                  <ng-container *ngFor="let directory of settingsViewModel.amtelcoViewModel.directoryList ?? []">
+                    <option class="dark:bg-slate-800" [value]="directory.id">{{ directory.name }}</option>
+                  </ng-container>
+                </select>
+              </ng-container>
+
+              <div class="mt-2 text-[16px]">
+                  <input type="checkbox" id="nameFieldCheckbox" 
+                    class="mr-1 cursor-pointer"
+                    [checked]="settingsViewModel.amtelcoViewModel.nameCheckbox" 
+                    (change)="settingsViewModel.amtelcoViewModel.nameCheckbox = !settingsViewModel.amtelcoViewModel.nameCheckbox">
+                  <label class="cursor-pointer" for="nameFieldCheckbox">{{ 'integrationWizard.nameCheckbox' | translate }}</label>
+              </div>
+              <ng-container [formGroup]="settingsViewModel.amtelcoViewModel.columnControls" *ngIf="settingsViewModel.amtelcoViewModel.hasLoadedAmTelcoData">
+                  <ng-container *ngTemplateOutlet="nameColumns; context: this" />
+                  <ng-template #nameColumns let-firstNameField="settingsViewModel.amtelcoViewModel.nameCheckbox ? ('integrationWizard.firstName') : 'integrationWizard.Name'">
+                      <div class="my-4">
+                          <p>{{ firstNameField | translate }}</p>
+                          <select formControlName="firstName" class="bg-transparent border-transparent border-r-8 rounded outline outline-1 outline-base-300 w-full p-2 mt-1 text-[16px] cursor-pointer">
+                              <option class="dark:bg-slate-800" value="" disabled selected>
+                                  {{ 'integrationWizard.hints.columnSelectorHint' | translate: { columnName: (firstNameField | translate) } }}
+                              </option>
+                              <ng-container *ngFor="let column of settingsViewModel.amtelcoViewModel.columnsList ?? []">
+                                  <option class="dark:bg-slate-800" [value]="column.id"
+                                    [disabled]="settingsViewModel.amtelcoViewModel.columnSelectedElsewhere('firstName', column.id)">
+                                    {{ column.displayName }}
+                                </option>
+                              </ng-container>
+                          </select>
+                          <ng-container *ngIf="settingsViewModel.amtelcoViewModel.nameCheckbox">
+                            <p class="mt-4">{{ "integrationWizard.lastName" | translate }}</p>
+                            <select formControlName="lastName" class="bg-transparent border-transparent border-r-8 rounded outline outline-1 outline-base-300 w-full p-2 mt-1 text-[16px] cursor-pointer">
+                                <option class="dark:bg-slate-800" value="" disabled selected>
+                                  {{ 'integrationWizard.hints.columnSelectorHint' | translate: { columnName: ("integrationWizard.lastName" | translate) } }}
+                              </option>
+                                <ng-container *ngFor="let column of settingsViewModel.amtelcoViewModel.columnsList ?? []">
+                                    <option class="dark:bg-slate-800" [value]="column.id"
+                                        [disabled]="settingsViewModel.amtelcoViewModel.columnSelectedElsewhere('lastName', column.id)">
+                                        {{ column.displayName }}
+                                    </option>
+                                </ng-container>
+                            </select>
+                          </ng-container>
+                        </div>
+                  </ng-template>
+              </ng-container>
+            </div>
+            <!-- Additional columns -->
+            <div *ngIf="settingsViewModel.amtelcoViewModel.hasLoadedAmTelcoData" [formGroup]="settingsViewModel.amtelcoViewModel.columnControls">
+              <h3 class="text-base font-bold">{{ "integrationWizard.amtelcoAdditionalColumns" | translate }}</h3>
+              <ng-container *ngFor="let fieldName of settingsViewModel.amtelcoViewModel.requestedFieldsList">
+                <p class="mt-4">{{ fieldName | titleCaseToWordsPipe }}</p>
+                <select formControlName="{{ fieldName }}" class="bg-transparent border-transparent border-r-8 rounded outline outline-1 outline-base-300 w-full p-2 mt-1 text-[16px] cursor-pointer">
+                  <option class="dark:bg-slate-800" value="none" selected>
+                      {{ 'integrationWizard.hints.columnSelectorHint' | translate: { columnName: (fieldName | titleCaseToWordsPipe) } }}
+                  </option>
+                  <ng-container *ngFor="let column of settingsViewModel.amtelcoViewModel.columnsList ?? []">
+                    <option class="dark:bg-slate-800" [value]="column.id"
+                        [disabled]="settingsViewModel.amtelcoViewModel.columnSelectedElsewhere(fieldName, column.id)">
+                        {{ column.displayName }}
+                    </option>
+                  </ng-container>
+                </select>
+              </ng-container>
+            </div>
+          </div>
+          <ng-container *ngIf="settingsViewModel.amtelcoViewModel.columnControls.invalid && settingsViewModel.amtelcoViewModel.columnControls.touched">
+              <div class="font-bold text-red-600">{{ 'integrationWizard.errors.invalidColumns' | translate }}</div>
+          </ng-container>
+      </div>
+    </ng-template>
+</ng-container>
+
+<web-messenger-modal *ngIf="showConfirmPrompt" [modalId]="'confirm-credential-remove'"
+    [boldText]="false"
+    [modalTitle]="'integrationWizard.modals.credentialDeleteHeader' | translate"
+    [modalMessage]="'integrationWizard.modals.credentialDeleteBody' | translate"
+    (closePopup)="showConfirmPrompt = false; settingsViewModel.setUpdatingIntegrations()"
+    (cancelPopup)="showConfirmPrompt = false;"
+    [showCancelButton]="true" [cancelText]="'integrationWizard.buttons.cancel' | translate"
+    [modalCloseText]="'integrationWizard.modals.credentialDeleteConfirm' | translate" />
+
+<web-messenger-modal *ngIf="showDeleteIntegrationConfirmationPrompt" [modalId]="'confirm-integration-delete'"
+    [boldText]="false"
+    [modalTitle]="'integrationWizard.deleteModal.title' | translate"
+    [modalMessage]="'integrationWizard.deleteModal.body' | translate"
+    (closePopup)="showDeleteIntegrationConfirmationPrompt = false; onDeleteIntegration()"
+    (cancelPopup)="showDeleteIntegrationConfirmationPrompt = false"
+    [showCancelButton]="true" [cancelText]="'integrationWizard.buttons.cancel' | translate"
+    [modalCloseText]="'integrationWizard.deleteModal.closeText' | translate"
+    [showConfirmationField]="true"
+    [confirmationFieldHint]="'integrationWizard.deleteModal.confirmationMessage' | translate"
+    [confirmationFieldRequiredInput]="'integrationWizard.deleteModal.confirmationMessage' | translate"
+    [overrideHeaderBgClass]="'bg-[#B1132F]'"
+    [closeIsDestructive]="true" />
+
+<web-messenger-modal *ngIf="showShouldDeleteModal" [modalId]="'notify-user-deletion'"
+    [boldText]="false"
+    [modalTitle]="'integrationWizard.modals.orgMismatchHeader' | translate"
+    [modalMessage]="this.settingsViewModel.vendorType === IntegrationVendorType.Amion ? 
+        ('integrationWizard.modals.orgMismatchBodyAmion' | translate) :
+        ('integrationWizard.modals.orgMismatchBody' | translate: { vendor: this.settingsViewModel.vendorType })"
+    (closePopup)="showShouldDeleteModal = false;"
+    (cancelPopup)="showShouldDeleteModal = false;"
+    [closeIsDestructive]="true"
+    [showCancelButton]="false" [modalCloseText]="'integrationWizard.modals.orgMismatchConfirm' | translate" />

@@ -1,0 +1,115 @@
+<input type="checkbox" id="scheduled-new-status" class="modal-toggle" [checked]="showScheduledNewStatus" />
+<div class="modal bg-black/70 overflow-auto">
+  <div
+    class="modal-box max-w-2xl bg-white dark:bg-black rounded p-0 relative overflow-y-hidden dark:border-primary/60 dark:border dark:shadow-xl dark:shadow-primary/20">
+    <div class="flex justify-between text-white items-center bg-primary p-3">
+      <h3 class="font-bold dark:text-white">{{"scheduledNewStatus"|translate}}</h3>
+      <label (click)="closePopup()" class="w-7 h-7">
+        <em class="ph-bold ph-x cursor-pointer text-xl hover:text-accent"></em>
+      </label>
+    </div>
+    <div class="max-h-[65vh] overflow-y-auto text-gray-600 dark:text-base-100 py-4 px-6">
+      <div class="pb-1 flex justify-between items-center">
+        <label (click)="back()" class="font-bold text-sm cursor-pointer text-primary dark:text-accent">
+          <em class="ph ph-caret-left"></em> {{"back"|translate}}
+        </label>
+      </div>
+      <form class="mt-3" [formGroup]="scheduledStatusForm">
+        <div class="mb-3">
+          <label class="font-semibold text-secondary text-sm dark:text-base-100 mb-2">{{"status"|translate}}</label>
+
+          <select formControlName="status"
+            class="border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-2 px-3"
+            (change)="setSelectedStatus()">
+            <option class="dark:text-black" *ngFor="let statusOption of status" [value]="statusOption.value">{{statusOption.label}}</option>
+          </select>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div class="mb-3">
+            <label
+              class="font-semibold text-secondary text-sm dark:text-base-100 mb-2">{{"startDate"|translate}}</label>
+            <input type="date" formControlName="start_date" (ngModelChange)="updateSubmitButtonStyle()"
+              class="border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-2 px-3" />
+          </div>
+          <div class="mb-3">
+            <label
+              class="font-semibold text-secondary text-sm dark:text-base-100 mb-2">{{"startTime"|translate}}</label>
+            <div class="space-y-2">
+              <div class="relative">
+                <input #fromTimePicker
+                  class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-2 px-3"
+                  placeholder="Select Time" (ngModelChange)="updateSubmitButtonStyle()" [readonly]="true"
+                  [(ngModel)]="fromTime" [ngModelOptions]="{standalone: true}" name="fromTime"
+                  (click)="onCallPopUpState.showFromTimeSuggestions = true">
+                <div
+                  class="absolute top-full left-0 w-full max-w-full max-h-32 overflow-y-auto bg-white border border-gray-300 mt-2 z-10 dark:text-black"
+                  *ngIf="onCallPopUpState.showFromTimeSuggestions">
+                  <p *ngFor="let timeOption of onCallPopUpState.allTimeSlots"
+                    class="px-4 cursor-pointer hover:bg-primary-100"
+                    [class.bg-blue-50]="timeOption === fromTimePicker.value"
+                    (click)="selectStartTime(timeOption,$event)">
+                    {{ timeOption }}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div class="mb-3">
+            <label class="font-semibold text-secondary text-sm dark:text-base-100 mb-2">{{"endDate"|translate}}</label>
+            <input type="date" formControlName="end_date"
+              class="border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-2 px-3" />
+          </div>
+          <div class="mb-3">
+            <label class="font-semibold text-secondary text-sm dark:text-base-100 mb-2">{{"endTime"|translate}}</label>
+            <div class="space-y-2">
+              <div class="relative">
+                <input #toTimePicker
+                  class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-2 px-3"
+                  placeholder="Select Time" (change)="updateSubmitButtonStyle()" [readonly]="true" [(ngModel)]="toTime"
+                  [ngModelOptions]="{standalone: true}" name="toTime"
+                  (click)="onCallPopUpState.showToTimeSuggestions = true">
+                <div
+                  class="absolute top-full left-0 w-full max-w-full max-h-32 overflow-y-auto bg-white border border-gray-300 mt-2 z-10 dark:text-black"
+                  *ngIf="onCallPopUpState.showToTimeSuggestions">
+                  <p *ngFor="let timeOption of onCallPopUpState.allTimeSlots"
+                    class="px-4 cursor-pointer hover:bg-primary-100"
+                    [class.bg-blue-50]="timeOption === toTimePicker.value" (click)="selectEndTime(timeOption,$event)">
+                    {{ timeOption }}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="font-semibold text-secondary text-sm dark:text-base-100 mb-2"> {{"Coverage"|translate}}</label>
+          <web-messenger-user-search (selectedUsersEvent)="selectedUsersValue($event)"></web-messenger-user-search>
+        </div>
+        <div class="mb-3">
+          <label
+            class="font-semibold text-secondary text-sm dark:text-base-100 mb-2">{{"autoResponse"|translate}}</label>
+          <div
+            class="border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-2 px-3 flex items-center">
+            <input type="text" class="bg-transparent outline-none w-full"
+              [placeholder]="autoResponse || customAutoResponse">
+            <label for="autoResponseModal" class="tooltip tooltip-primary cursor-pointer " data-tip="Edit"
+              (click)="showAutoResponseModal()"> <em class="text-primary text-base ph-bold ph-note-pencil"></em>
+            </label>
+          </div>
+        </div>
+        <div *ngIf="errorMessage" class="text-neutral text-lg">
+          {{errorMessage}}
+        </div>
+        <button type="submit" class="btn-primary text-white rounded py-2 w-full mt-3" [disabled]="!isEnableSubmit"
+          (click)="scheduleStatusHandle()">{{"scheduleStatus"|translate}}</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<ng-container *ngIf="showAutoResponsePopup">
+   <web-messenger-auto-response-model [showAutoResponsePopup]="showAutoResponsePopup" (customAutoResponseEvent)="customAutoResponseValue($event)" (showAutoResponsePopupEvent)="showAutoResponsePopupValue($event)"
+  [selectedStatus]="selectedStatus" (autoResponseFormResponseEvent)="autoResponseFormResponseValue($event)"></web-messenger-auto-response-model>
+</ng-container>

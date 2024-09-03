@@ -1,0 +1,154 @@
+<div class="flex flex-wrap justify-between items-center mb-3">
+    <h2 class="font-semibold text-base text-secondary dark:text-white">{{'userPermissions' | translate}}</h2>
+    
+    <ng-container *ngIf="isEditPermissionButtonVisible === true">
+      <button *ngIf="!isEditMode" class="btn btn-outline btn-primary dark:btn-accent dark:btn-outline" (click)="toggleEditMode()">
+        {{'editPermissions' | translate}}
+      </button>
+      <ng-container *ngIf="isEditMode">
+        <div class="flex justify-end mt-3 sticky top-0 py-0 px-4 pb-2">
+          <button class="btn bg-base-100 text-primary border-base-100 mr-4 hover:bg-base-200 hover:border-base-200" (click)="cancelEditPermissions()">
+            {{'cancel' | translate}}
+          </button>
+          <button type="submit" class="btn btn-primary text-white" (click)="updateUserPermissions()">
+            {{'save' | translate}}
+          </button>
+        </div>
+      </ng-container>
+    </ng-container>
+  </div>
+  <div class="h-[calc(100vh-25rem)] md:h-[calc(100vh-12rem)] overflow-y-auto pr-2">
+    <form [formGroup]="permissionsForm">
+      <div class="lg:grid lg:grid-cols-2 lg:gap-8 min-w-full justify-between">
+          <div class="p-4 border dark:border-gray-700 rounded w-full shadow-sm mb-4 md:mb-0">
+            <!-- ... -->
+            <h3 class="font-medium text-secondary dark:text-white text-lg mb-4 flex justify-between flex-wrap">
+              {{'institutionGrants' | translate}}
+              <button *ngIf="isEditMode" class="btn btn-primary dark:btn-accent btn-sm text-white" (click)="addNewPermissionsSet()">
+                {{'addAdditionalInstitutionGrants' | translate}}
+              </button>
+            </h3>
+      
+            <div formArrayName="grants" *ngFor="let grantControl of grantsFormArray.controls; let i = index; trackBy: trackByFn">
+              <ng-container [formGroupName]="i">
+                <div class="flex justify-between">
+                <h4 class="flex justify-between mb-3 text-base">
+                  <span>{{'institution(s)' | translate}}:</span>
+                </h4>
+                <div class="flex items-center flex-wrap mb-2 gap-3">
+                <!-- Display Institution Names -->
+                  <div formArrayName="institutions" *ngFor="let institutionControl of grantControl.get('institutions')?.value; let instIndex = index;">
+                    <span [formGroupName]="instIndex">
+                      <button *ngIf="isEditMode" (click)="removeInstituteFromGrant(i, instIndex)" class="text-xs text-neutral mr-1" title="Remove"><em  class="ph ph-x" ></em></button>
+                      <a [routerLink]="institutionControl?.id !== '*' ? ['/institution/', institutionControl?.id] : null" target="{{ institutionControl?.id !== '*' ? '_blank' : null }}" class="link text-primary dark:text-accent font-medium">{{ institutionControl?.id | titlecase }}</a>
+                    </span>
+                  </div>
+                  <!-- Button to remove this file path (visible only in edit mode) -->
+                <button *ngIf="isEditMode" (click)="removeInstitutePermissions(i)" class="font-medium text-neutral text-sm">{{'remove' | translate}}</button>
+                </div>
+                </div>
+                  <!-- Institution Input for Adding New Institutions -->
+                  <div *ngIf="isEditMode" class="relative w-full">
+                    <div tabindex="0" class="border border-base-300 dark:text-white bg-white dark:bg-black text-gray-600 rounded w-full h-8 px-3">
+                      <!-- Search input -->
+                      <input #institutionInput class="bg-transparent outline-none focus:ring-0 border-0 py-1 dark:text-base-100 text-gray-600 w-full"
+                             type="text" placeholder="{{'selectInstitutions' | translate}}"
+                             (focus)="getInstitutions(institutionInput.value); isInstituteInputFocused = true"
+                             (blur)="handleInstitutionInputBlurEvent()"
+                             (keyup)="getInstitutions(institutionInput.value)" />
+                    </div>
+      
+                    <!-- Dropdown List -->
+                    <div *ngIf="isInstituteInputFocused" class="absolute z-10 w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded mt-1 max-h-60 overflow-auto">
+                      <div *ngFor="let institute of allInstitutions;">
+                        <div class="hover:bg-gray-100 dark:hover:bg-gray-900 px-3 py-2 cursor-pointer" (click)="addInstituteToGrant(i, institute, institutionInput)">
+                          <p class="font-medium text-secondary dark:text-base-100" [innerHTML]="institute?.name | highlightSearchTxt:institutionInput.value"></p>
+                          <p class="text-sm" [innerHTML]="institute?.id | highlightSearchTxt:institutionInput.value"></p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- ... Rest of your form elements like actions ... -->
+                  <div class="my-3" *ngIf="isEditMode">
+                    <label>
+                      <input class="checkbox checkbox-primary checkbox-xs rounded dark:checkbox-accent" type="checkbox"
+                       (change)="turnOnAllAdminPermissions($event, i)">
+                      {{'turnOnAll' | translate}} <strong>{{'admin' | translate}}</strong> {{'Permissions' | translate}}*
+                    </label>
+                  </div>
+           
+                <div formGroupName="actions">
+                  <div *ngFor="let action of getControls(grantControl.get('actions')) | keyvalue">
+                    <label class="cursor-pointer label mb-1 rounded px-3 border dark:border-gray-700">
+                      <span>{{ formControlLabelMapping[action.key] }}</span>
+                      <span *ngIf="!isEditMode" [ngClass]="{'text-green-500': action.value.value, 'text-neutral': !action.value.value}">
+                        <em class="ph" [ngClass]="{'ph-check-circle': action.value.value, 'ph-x-circle': !action.value.value}"></em>
+                        <span>{{ action.value.value ? ('yes' | translate) : ('no' | translate) }}</span>
+                      </span>
+                      <!-- Checkbox in edit mode -->
+                      <input *ngIf="isEditMode" type="checkbox" class="toggle toggle-primary toggle-sm" [formControlName]="action.key"/>
+                    </label>
+                  </div>
+                </div>
+              </ng-container>
+            </div>
+          </div>
+          <!-- file grants  -->
+
+          <!-- Loop over the fileGrants FormArray -->
+          <div formArrayName="fileGrants">
+            <div *ngFor="let fileGrantControl of getFileGrantsArray.controls; let fileGrantIndex = index">
+              <ng-container [formGroupName]="fileGrantIndex">
+                <h3 class="font-medium text-secondary dark:text-white text-lg mb-4 flex justify-between flex-wrap">{{'fileArea(s)' | translate }}:</h3>
+                <!-- Loop over the filePaths FormArray within each file grant -->
+                  <div formArrayName="filePaths" class="mb-3"
+                    *ngFor="let filePathControl of filePathArray(fileGrantControl); let filePathIndex = index">
+                    <div class="flex items-center gap-2">
+                    <label class="whitespace-nowrap">{{'filePath' | translate}}</label>
+                    <input *ngIf="isEditMode" [formControlName]="filePathIndex" class="border border-base-300 dark:text-white bg-white dark:bg-black text-gray-600 rounded w-full h-8 py-2 px-3" />
+                    <!-- Display file path as text in normal mode -->
+                    <span *ngIf="!isEditMode">{{ filePathControl.value }}</span>
+                    <!-- Button to remove this file path (visible only in edit mode) -->
+                    <button *ngIf="isEditMode" (click)="removeFilePath(fileGrantIndex, filePathIndex)" class="font-medium text-neutral text-sm">{{'remove' | translate}}</button>
+                    </div>
+                    <!-- Button to add a new file path to this file grant (visible only in edit mode) -->
+                    <button *ngIf="isEditMode" (click)="addFilePath(fileGrantIndex)" class="link link-primary dark:link-accent my-2">{{'addAnotherFilePath' | translate}}</button>
+                  </div>
+       
+              <div formArrayName="actions">
+                <div *ngFor="let action of getControls(fileGrantControl.get('actions')) | keyvalue">
+                  <label class="cursor-pointer label mb-1 rounded px-3 border dark:border-gray-700">
+                    <span>{{ formControlLabelMapping[action.key] }}</span>
+                    <span *ngIf="!isEditMode" [ngClass]="{'text-green-500': action.value.value, 'text-neutral': !action.value.value}">
+                      <em class="ph" [ngClass]="{'ph-check-circle': action.value.value, 'ph-x-circle': !action.value.value}"></em>
+                      <span>{{ action.value.value ? ('yes' | translate) : ('no' | translate) }}</span>
+                    </span>
+                    <!-- Checkbox in edit mode -->
+                    <input *ngIf="isEditMode" type="checkbox" class="toggle toggle-primary toggle-sm" [formControlName]="action.key"/>
+                  </label>
+                </div>
+              </div>
+              </ng-container>
+            </div>
+            
+              <button *ngIf="isEditMode" class="btn btn-primary dark:btn-accent btn-sm text-white mt-3" (click)="addFileAreaGrant()">
+                {{'addAdditionalFileAreaGrants' | translate}}
+              </button>
+          </div>
+          </div>
+    </form>
+  </div>
+
+  <!-- Show error message -->
+  <web-messenger-modal *ngIf="successError" [modalId]="'error-modal'"[modalTitle] ="'error' | translate"
+  [modalMessage]="successError" (closePopup)="closepopup()" (cancelPopup)="closepopup()" [modalCloseText]="'close' | translate"></web-messenger-modal>
+
+  <web-messenger-modal *ngIf="actionTargetModal" 
+      [modalId]="'action-target-error-modal'"
+      [modalTitle] ="'invalidGrant' | translate"
+      [modalMessage]="'grantsrequirebothactionsandtargets' | translate" 
+      (closePopup)="closeTargetActionsErrorpopup()" 
+      (cancelPopup)="closeTargetActionsErrorpopup()" 
+      [modalCloseText]="'close' | translate"
+  >
+  </web-messenger-modal>

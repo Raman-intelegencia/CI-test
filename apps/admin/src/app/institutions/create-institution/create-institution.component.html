@@ -1,0 +1,38 @@
+
+<div
+  class="w-full md:px-12 px-4 bg-gray-100 dark:bg-gray-700/20 dark:border-b dark:border-gray-700 dark:text-white py-4">
+  <h2 class="text-secondary text-xl font-bold dark:text-white">{{"CreateInstitution"| translate}}</h2>
+</div>
+
+<div
+  class="w-full md:h-[calc(100vh-7rem)] h-[calc(100vh-9.5rem)] py-4 md:px-12 px-4 text-gray-600 dark:text-base-100 overflow-y-auto ">
+
+  <form [formGroup]="createInstitutionForm" (ngSubmit)="createInstitution()" class="lg:w-3/6 md:w-4/6 mt-4">
+    <div class="mb-4 mt-6">
+      <label class="mb-1 block font-semibold text-secondary text-sm dark:text-base-100">{{"ID" | translate}}</label>
+      <input type="text" placeholder="Institution ID" formControlName="id"
+        class="border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-2 px-3"
+        name="cpass" />
+    </div>
+    <div class="mb-4 mt-6">
+      <label class="mb-1 block font-semibold text-secondary text-sm dark:text-base-100">{{"ShortName" | translate}}</label>
+      <input type="text" placeholder="Institution Short Name" formControlName="short_name"
+        class="border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-2 px-3"
+        name="cpass" />
+    </div>
+    <div class="mb-4">
+      <label class="mb-1 block font-semibold text-secondary text-sm dark:text-base-100">{{"name" | translate}}</label>
+      <input type="text" placeholder="Institution Name" formControlName="name"
+        class="border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-2 px-3" />
+    </div>
+    <div class="flex gap-3">
+      <button type="button" class="btn btn-primary border-black  bg-white mt-4 text-black px-6 hover:text-white" (click)="resetInstitutionForm()">{{"reset" | translate}}</button>
+      <button type="submit" class="btn btn-primary mt-4 text-white px-6">{{"createInstitution" | translate}}</button>
+    </div>
+  </form>
+</div>
+
+<web-messenger-modal *ngIf="showValidationPopup" [modalId]="'validation-modal'" [modalTitle] ="'error' | translate"
+[modalMessage]='modalShowMessage' (closePopup)="closepopup()" [modalCloseText]="'close' | translate" 
+(cancelPopup)="closepopup()">
+</web-messenger-modal>

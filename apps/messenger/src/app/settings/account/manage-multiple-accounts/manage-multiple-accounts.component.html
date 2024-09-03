@@ -1,0 +1,60 @@
+<div class="px-6 h-full overflow-y-auto">
+    <h2 class="text-secondary text-xl font-medium dark:text-white mb-4">{{"multipleAccounts"|translate}}</h2>
+    <h4 class="text-secondary text-lg font-semibold dark:text-white">{{"manageMultipleAccounts"|translate}}</h4>
+    <p class="text-base text-gray-600 dark:text-base-100">{{"multipleAccDesc"|translate}}</p>
+    <div class="flex justify-between border-base-100 dark:border-gray-600 border-b mt-3">
+        <div class="py-3 flex items-center text-gray-600 dark:text-base-100">
+            <span  (click)="viewProfile(loggedInUsersData.user)" >
+                <img *ngIf="loggedInUsersData?.user?.image_id"
+                    class="w-12 h-12 rounded-full bg-base-100" id="imagePreview"
+                    [src]="config_profileimage_url + loggedInUsersData.user.image_id + '_profile.png'" />
+                <div class="w-12 h-12 rounded-full bg-base-100 flex items-center justify-center text-primary"
+                    *ngIf="loggedInUsersData?.user && !loggedInUsersData?.user?.image_id">
+                    <span class="text-2xl uppercase">{{loggedInUsersData.user.first_name
+                        |slice:0:1}}{{loggedInUsersData.user.last_name |slice:0:1}}</span>
+                </div>
+              </span>
+            <div class="ml-3 w-full" *ngIf="loggedInUsersData">
+                <p class="font-medium text-secondary dark:text-base-100">{{loggedInUsersData.user.first_name}}
+                    {{loggedInUsersData.user.last_name}} ({{loggedInUsersData.user.profile.ishort}})
+                </p>
+                <p class="text-sm">{{loggedInUsersData.user.email}}</p>
+            </div>
+        </div>
+        <span class="font-semibold text-secondary dark:text-base-100">{{"thisAcc"|translate}} </span>
+    </div>
+    <ng-container *ngIf="accountInformation">
+        <div class="flex justify-between border-base-100 dark:border-gray-600 border-b mt-3"
+            *ngFor="let multipleAcc of accountInformation">
+            <ng-container>
+
+                <div class="py-3 flex items-center text-gray-600 dark:text-base-100">
+                    <span  (click)="viewProfile(multipleAcc)" >
+                        <img *ngIf="multipleAcc.image_id"
+                            class="w-12 h-12 rounded-full bg-base-100" id="imagePreview"
+                            [src]="config_profileimage_url + multipleAcc.image_id + '_profile.png'" />
+                        <div class="w-12 h-12 rounded-full bg-base-100 flex items-center justify-center text-primary"
+                            *ngIf="multipleAcc && !multipleAcc.image_id">
+                            <span class="text-2xl uppercase">{{multipleAcc.first_name
+                                |slice:0:1}}{{multipleAcc.last_name |slice:0:1}}</span>
+                        </div>
+                      </span>
+                    <div class="ml-3 w-full">
+                        <p class="font-medium text-secondary dark:text-base-100">{{multipleAcc.first_name}}
+                            {{multipleAcc.last_name}} ({{multipleAcc?.profile?.ishort}})
+                        </p>
+                        <p class="text-sm">{{multipleAcc.email}}</p>
+                    </div>
+                </div>
+
+                <span class="font-semibold text-neutral cursor-pointer"
+                    (click)="removeUser(multipleAcc._id.$oid)">{{"remove"|translate}} </span>
+            </ng-container>
+        </div>
+    </ng-container>
+    <a class="table ml-auto mt-4 cursor-pointer text-primary dark:text-accent font-semibold " (click)="navigateToAccountsScreen()">+
+        {{"addAccount"|translate}}</a>
+ </div>
+ <web-messenger-user-profile-modal *ngIf="showProfileModal" [showUserProfileModal]="showProfileModal"
+[userId]="selectedUserIdDetails" (sendCoverageIdToCompose)="addComposeQueryParamsForCoverageId($event)" (sendUserIdToCompose)="addComposeQueryParamsForUserId($event)" (showUserProfile)="showUserProfile($event)"
+></web-messenger-user-profile-modal>

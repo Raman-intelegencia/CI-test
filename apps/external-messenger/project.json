@@ -1,0 +1,295 @@
+{
+  "name": "extmsg",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/external-messenger/src",
+  "projectType": "application",
+  "prefix": "web-messenger",
+  "targets": {
+    "build": {
+      "executor": "@nx/vite:build",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/apps/extmsg",
+        "index": "apps/external-messenger/index.html",
+        "main": "apps/external-messenger/src/main.tsx",
+        "polyfills": [
+          "zone.js"
+        ],
+        "tsConfig": "apps/external-messenger/tsconfig.app.json",
+        "inlineStyleLanguage": "scss",
+        "assets": [
+          "apps/external-messenger/src/app/assets",
+          {
+            "glob": "**/*",
+            "input": "./libs/shared-assets",
+            "output": "./assets"
+          }
+        ],
+        "styles": [
+          "apps/external-messenger/src/styles.scss",
+          "node_modules/@angular/cdk/overlay-prebuilt.css"
+        ],
+        "scripts": [
+          "node_modules/sockjs-client/dist/sockjs.min.js"
+        ],
+        "allowedCommonJsDependencies": [
+          "sockjs-client",
+          "global"
+        ]
+      },
+      "configurations": {
+        "live": {
+          "fileReplacements": [
+            {
+              "replace": "libs/shared/src/lib/config/environment.ts",
+              "with": "libs/shared/src/lib/config/prod.environment.ts"
+            }
+          ],
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "500kb",
+              "maximumError": "7mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "1mb",
+              "maximumError": "1.5mb"
+            }
+          ],
+          "outputHashing": "all"
+        },
+        "dev": {
+          "fileReplacements": [
+            {
+              "replace": "libs/shared/src/lib/config/environment.ts",
+              "with": "libs/shared/src/lib/config/dev.environment.ts"
+            }
+          ],
+          "buildOptimizer": false,
+          "optimization": false,
+          "vendorChunk": true,
+          "extractLicenses": false,
+          "sourceMap": true,
+          "namedChunks": true
+        },
+        "play-qa2": {
+          "fileReplacements": [
+            {
+              "replace": "libs/shared/src/lib/config/environment.ts",
+              "with": "libs/shared/src/lib/config/qa.environment.ts"
+            }
+          ],
+          "buildOptimizer": false,
+          "optimization": false,
+          "vendorChunk": true,
+          "extractLicenses": false,
+          "sourceMap": true,
+          "namedChunks": true,
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "4mb",
+              "maximumError": "7mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "1mb",
+              "maximumError": "1.5mb"
+            }
+          ]
+        },
+        "play-fgl": {
+          "fileReplacements": [
+            {
+              "replace": "libs/shared/src/lib/config/environment.ts",
+              "with": "libs/shared/src/lib/config/play-fgl.environment.ts"
+            }
+          ],
+          "buildOptimizer": false,
+          "optimization": false,
+          "vendorChunk": true,
+          "extractLicenses": false,
+          "sourceMap": true,
+          "namedChunks": true,
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "4mb",
+              "maximumError": "7mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "1mb",
+              "maximumError": "1.5mb"
+            }
+          ]
+        }, 
+        "play-dev1": {
+          "fileReplacements": [
+            {
+              "replace": "libs/shared/src/lib/config/environment.ts",
+              "with": "libs/shared/src/lib/config/play-dev1.environment.ts"
+            }
+          ],
+          "buildOptimizer": false,
+          "optimization": false,
+          "vendorChunk": true,
+          "extractLicenses": false,
+          "sourceMap": true,
+          "namedChunks": true,
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "4mb",
+              "maximumError": "7mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "1mb",
+              "maximumError": "1.5mb"
+            }
+          ]
+        }, 
+        "play": {
+          "fileReplacements": [
+            {
+              "replace": "libs/shared/src/lib/config/environment.ts",
+              "with": "libs/shared/src/lib/config/play.environment.ts"
+            }
+          ],
+          "buildOptimizer": false,
+          "optimization": false,
+          "vendorChunk": true,
+          "extractLicenses": false,
+          "sourceMap": true,
+          "namedChunks": true,
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "500kb",
+              "maximumError": "7mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "1mb",
+              "maximumError": "1.5mb"
+            }
+          ]
+        },
+        "play-retention1": {
+          "fileReplacements": [
+            {
+              "replace": "libs/shared/src/lib/config/environment.ts",
+              "with": "libs/shared/src/lib/config/play-retention1.environment.ts"
+            }
+          ],
+          "buildOptimizer": false,
+          "optimization": false,
+          "vendorChunk": true,
+          "extractLicenses": false,
+          "sourceMap": true,
+          "namedChunks": true,
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "500kb",
+              "maximumError": "7mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "1mb",
+              "maximumError": "1.5mb"
+            }
+          ]
+        }
+      },
+      "defaultConfiguration": "play-qa2"
+    },
+    "serve": {
+      "executor": "@nx/vite:dev-server",
+      "options": {
+        "buildTarget": "extmsg:build"
+      },
+      "configurations": {
+        "live": {
+          "browserTarget": "extmsg:build:live",
+          "buildTarget": "extmsg:build:live"
+        },
+        "dev": {
+          "browserTarget": "extmsg:build:dev",
+          "buildTarget": "extmsg:build:dev",
+          "ssl": true,
+          "sslKey": ".ssl/beta.amsconnectapp.com.key.pem",
+          "sslCert": ".ssl/beta.amsconnectapp.com.crt.pem",
+          "proxyConfig": "proxy.conf.json",
+          "host": "beta.amsconnectapp.com"
+        },
+        "qa": {
+          "browserTarget": "extmsg:build:play-qa2",
+          "buildTarget": "extmsg:build:play-qa2"
+        },
+        "play-fgl": {
+          "browserTarget": "extmsg:build:play-fgl",
+          "buildTarget":  "extmsg:build:play-fgl"
+        },
+        "play": {
+          "browserTarget": "extmsg:build:play",
+          "buildTarget":  "extmsg:build:play"
+        },
+        "play-dev1": {
+          "browserTarget": "extmsg:build:play-dev1",
+          "buildTarget":  "extmsg:build:play-dev1"
+        },
+        "play-retention1": {
+          "browserTarget": "extmsg:build:play-retention1",
+          "buildTarget":  "extmsg:build:play-retention1"
+        }
+      },
+      "defaultConfiguration": "dev"
+    },
+    "extract-i18n": {
+      "executor": "@angular-devkit/build-angular:extract-i18n",
+      "options": {
+        "browserTarget": "extmsg:build"
+      }
+    },
+    "preview": {
+      "executor": "@nx/vite:preview-server",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "extmsg:build"
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "extmsg:build:development"
+        },
+        "production": {
+          "buildTarget": "extmsg:build:production"
+        }
+      }
+    },
+    "test": {
+      "executor": "@nx/vite:test",
+      "outputs": ["{options.reportsDirectory}"],
+      "options": {
+        "passWithNoTests": true,
+        "reportsDirectory": "../../coverage/apps/external-messenger"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["apps/external-messenger/**/*.{ts,tsx,js,jsx}"]
+      }
+    },
+    "serve-static": {
+      "executor": "@nx/web:file-server",
+      "options": {
+        "buildTarget": "extmsg:build"
+      }
+    }
+  },
+  "tags": []
+}

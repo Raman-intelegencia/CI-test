@@ -1,0 +1,7 @@
+.breadcrumbs div {
+    @apply inline;
+
+    &.is-active {
+        @apply font-bold underline;
+    }
+}

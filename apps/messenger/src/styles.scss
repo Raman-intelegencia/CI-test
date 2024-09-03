@@ -1,0 +1,70 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* You can add global styles to this file, and also import other style files */
+
+html,body{
+  font-family: "Helvetica Neue",helvetica,arial,sans-serif;
+  @apply h-full bg-white;
+  ::-webkit-scrollbar { 
+    @apply h-2 w-2;
+   }
+  ::-webkit-scrollbar-track {
+    @apply bg-base-100 rounded-full;
+  }
+  ::-webkit-scrollbar-thumb { 
+    @apply bg-gray-600 rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover { 
+    @apply bg-gray-700;
+   }
+}
+input{
+  &:focus{
+    @apply outline-0;
+  }
+}
+dp-date-picker{
+  &.dp-material{
+    input{
+      &.dp-picker-input{
+          @apply bg-transparent text-base w-full h-auto;
+      }
+    }
+  }
+}
+.btn {
+  @apply normal-case py-1 h-8 min-h-0 rounded font-normal;
+}
+
+  @media (prefers-color-scheme: light){
+    .logo {
+      content: url(/assets/images/ams-dark-logo.svg);
+      }
+  }
+  @media (prefers-color-scheme: dark){
+    .logo {
+      content: url(/assets/images/ams-white-logo.svg);
+      }
+  }
+.login-img {
+  background-image: url(/assets/AMSConnect_WebLogin.jpg);
+}
+.main-body{
+  height: calc(100vh - 8.5rem);
+}
+
+/* Hide the default clear icon provided by the browser */
+input::-webkit-search-cancel-button,
+input::-webkit-search-decoration,
+input::-webkit-search-results-button,
+input::-webkit-search-results-decoration {
+  appearance: none;
+}
+
+.btn-primary {
+  &[disabled]{
+    @apply bg-primary/30 text-white;
+  }
+}

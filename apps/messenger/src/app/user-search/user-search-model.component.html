@@ -1,0 +1,64 @@
+<div
+            class="items-center my-3 text-sm border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-2 px-3">
+            <div tabindex="0" class="collapse w-full">
+              <div
+                class="flex gap-1 bg-white dark:bg-transparent dark:text-white text-gray-600 rounded w-full py-1.5 px-3">
+                <span *ngFor="let user of selectedUsers" (click)="openUserProfile(user.id)"
+                  class="px-2 py-1 rounded text-xs bg-blue-100 text-secondary flex items-center whitespace-nowrap justify-between">
+                  {{user?.data?.first_name}} {{user?.data?.last_name}}<em
+                    (click)="removeUser(user,$event); inputEditable = true;" class="ph ph-x ml-2"></em>
+                </span>
+                <input #currentCoverage class="bg-transparent border-0 w-full" (keyup)="getSearchedUsersList()"
+                  [placeholder]="selectedUsers.length?'': 'selectCoverage' | translate"
+                  (focus)="isInputFocused = true; getSearchedUsersList()" type="text" name=""
+                  id="currentCoverage" [readonly]="!inputEditable" />
+              </div>
+              <ng-container *ngIf="searchResults.length">
+                <div class="max-h-48 overflow-y-auto ">
+                  <div (click)="selectUser(user,$event)" *ngFor="let user of searchResults"
+                    class="hover:bg-accent/[0.08] px-3 py-2 bg-white dark:bg-black rounded flex items-center text-gray-600 cursor-pointer mb-1">
+                    <ng-container *ngIf="user.data.image_id as image_id; else noImageFound">
+                      <img class="w-12 h-12 rounded-full" [src]="getImageUrl(image_id)" alt="Profile-img"
+                        (click)="openUserProfile(user.id)">
+                      <!-- If image_id is not available, use the initials -->
+                    </ng-container>
+                    <ng-template #noImageFound>
+                      <span class="w-12 h-12 rounded-full bg-base-100 flex items-center justify-center text-primary"
+                        (click)="openUserProfile(user.id)">
+                        {{(user.data.first_name | slice:0:1) | uppercase}}{{(user.data.last_name | slice:0:1) |
+                        uppercase}}
+                      </span>
+                    </ng-template>
+                    <div class="w-[calc(100%-3.2rem)] ml-3 dark:text-base-100">
+                      <p class="font-medium text-secondary dark:text-base-100">
+                        {{user?.data?.first_name}}
+                        {{user?.data?.last_name}} ({{user?.data?.profile?.ishort}})
+                        <ng-container *ngIf="user?.data?.status?.s">
+                          <em *ngIf="user?.data?.status?.s === 'available'; else busyAndOff"
+                            class="ph-duotone ph-check-circle text-green-500"></em>
+                          <ng-template #busyAndOff>
+                            <em *ngIf="user?.data?.status?.s === 'busy'; else offOnly"
+                              class="ph-duotone ph-prohibit text-neutral"></em>
+                            <ng-template #offOnly>
+                              <em *ngIf="user?.data?.status?.s === 'off'"
+                                class="ph-duotone ph-minus-circle text-base-300"></em>
+                            </ng-template>
+                          </ng-template>
+                        </ng-container>
+                      </p>
+                      <p class="text-sm">{{user?.data?.profile?.dept}}</p>
+                      <p class="text-sm">
+                        <span *ngIf="user?.data?.status?.r as serviceTeam">
+                          <span *ngIf="serviceTeam.length">
+                            {{serviceTeam[serviceTeam.length - 1] | slice:0:8}}
+                          </span>
+                          <span *ngIf="serviceTeam.length > 1">, +{{serviceTeam.length - 1}}</span>
+                        </span>
+                        {{user?.data?.profile?.title}}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </ng-container>
+            </div>
+          </div>

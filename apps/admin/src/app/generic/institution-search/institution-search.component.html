@@ -1,0 +1,35 @@
+<form [formGroup]="instituteSearchForm" class="w-full">
+    <div [ngClass]="isInstituteSearch  ? 'mb-3 md:flex items-center': 'mb-3'">
+        <label *ngIf="showInstitutionLabel" [ngClass]="isInstituteSearch  ? 'font-bold text-secondary text-sm dark:text-base-100 md:w-[12rem]': 'mb-1.5 font-medium'" >{{"institution" | translate}}</label>
+                <div class="relative w-full z-[60]">
+                    <input 
+                        class="border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-1.5 px-3"
+                        type="text" 
+                        [placeholder]="(showInstitutionLabel ? 'usersInstitutionOptitonal' : 'selectAnInstitution') | translate" 
+                        formControlName="inst"
+                        (focus)="institutionSearch(instituteSearchForm.get('inst')?.value); 
+                        isInstituteInputFocused = true"
+                        (blur)="handleInstitutionInputBlurEvent()"
+                        (keyup.enter)="handleOnInstitutionInputEnterKeyEvent()"
+                        (keyup)="institutionSearch(instituteSearchForm.get('inst')?.value)"
+                        (click)="clickInstitution($event)"
+                         />
+
+                    <span *ngIf="instituteSearchForm.get('inst')?.value" class="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer">
+                        <em class="ph ph-x" (click)="clearInput()"></em>
+                    </span>
+
+                    <div *ngIf="isInstituteInputFocused"
+                        class="absolute z-50 w-full py-1 px-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded mt-1 max-h-60 overflow-auto">
+                        <div *ngFor="let institute of allInstitutions;">
+                            <div class="hover:bg-gray-100 dark:hover:bg-gray-900 px-3 py-2 cursor-pointer"
+                                (pointerdown)="touchSelectInstituteNew($event,institute)">
+                                <p class="font-medium text-secondary dark:text-base-100"
+                                    [innerHTML]="institute?.name | highlightSearchTxt:searchTerm"></p>
+                                <p class="text-sm" [innerHTML]="institute?.id | highlightSearchTxt:searchTerm"></p>
+                            </div>
+                        </div>
+                    </div>
+        </div>
+    </div>
+</form>

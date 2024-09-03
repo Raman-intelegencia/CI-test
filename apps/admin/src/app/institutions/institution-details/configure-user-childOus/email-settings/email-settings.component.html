@@ -1,0 +1,53 @@
+<form class="text-black dark:text-white" [formGroup]="emailSettingsForm" (ngSubmit)="onEmailFormSubmit()">
+  <div *ngIf="!hasLoaded" class="text-center font-bold text-l items-center mb-[-25px]">
+    {{ "emailReportSettings.loading" | translate }}
+  </div>
+  <div [class]="(!hasLoaded ? 'p-3 opacity-0 pointer-events-none' : 'p-3') + ' flex flex-row justify-between'">
+    <div class="flex flex-col gap-2">
+      <div class="flex justify-between">
+        <div class="flex justify-around items-center">
+          <h1 class="font-bold" >{{ 'emailReportSettings.frequencyHeader' | translate }}</h1>
+          <p class="px-3">{{ "every" | translate }} </p>
+          <select class="border bg-transparent border-base-300 rounded px-1.5 py-2.5" formControlName="interval">
+            <ng-container *ngFor="let number of numbers">
+              <option [value]="number">{{number}}</option>
+            </ng-container>
+          </select>
+          <ul class="flex flex-row gap-4 pl-3 items-center">
+            <li class="leading-none align-middle flex flex-row">
+              <input class="mr-1.5 accent-primary h-[19px] w-[19px] align-middle" type="radio" id="days"
+                     value="Day" formControlName="unit">
+              <label for="days">{{ 'emailReportSettings.Days' | translate }}</label>
+            </li>
+            <li class="leading-none align-middle flex flex-row">
+              <input class="mr-1.5 accent-primary h-[19px] w-[19px] align-middle" type="radio" id="hours"
+                     value="Hour" formControlName="unit">
+              <label for="hours">{{ 'emailReportSettings.Hours' | translate }}</label>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="mt-4">
+        <h1 class="font-bold">{{ 'emailReportSettings.recipientsHeader' | translate }}</h1>
+        <input class="w-full mb-4 mt-1 border-solid border bg-transparent border-base-300 px-[10px] py-[8px] rounded"
+               type="email" email formControlName="recipientEmail" placeholder="{{ 'emailReportSettings.addEmailHint' | translate }}"
+        />
+        <ul>
+          <ng-container *ngFor="let recipient of recipients">
+            <li class="flex justify-between w-full pt-1.5">
+              {{recipient}}
+              <button type="button" class="ml-auto pl-4" (click)="removeRecipientEmail(recipient)"><img src="/assets/images/X_Button.svg"></button>
+            </li>
+          </ng-container>
+        </ul>
+      </div>
+    </div>
+    <div class="flex flex-col items-end">
+      <a class="btn btn-outline btn-primary dark:btn-outline dark:btn-accent w-fit p-3" (click)="sendToMeNow()">
+        {{"emailReportSettings.sendNow" |translate}}</a>
+      <ng-container *ngIf="isRateLimited">
+        <p class="font-light text-sm italic">{{ 'emailReportSettings.rateLimitWarning' | translate }}</p>
+      </ng-container>
+    </div>
+  </div>
+</form>

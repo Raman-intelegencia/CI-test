@@ -1,0 +1,132 @@
+<!-- dynamic-form.component.html -->
+<input type="checkbox" [checked]="isServiceAddUser" class="modal-toggle" />
+<div class="modal bg-black/70">
+
+    <div class="modal-box max-w-2xl bg-white dark:bg-black rounded p-0 relative overflow-y-hidden dark:border-primary/60 dark:border dark:shadow-xl dark:shadow-primary/20">
+        <form [formGroup]="dynamicForm" *ngIf="isServiceAddUser">
+            <div class="flex justify-between text-white items-center bg-primary p-3">
+                <h3 class="font-bold dark:text-white">{{ modaltitle}}</h3>
+                <label for="EditRestrictedServiceTeam" class="w-7 h-7">
+                    <button type="button" (click)="closePopup()">
+                        <em class="ph-bold ph-x cursor-pointer text-xl hover:text-accent"></em>
+                    </button>  
+                </label>
+            </div>
+            <div class="p-4 text-gray-600 dark:text-base-100 text-sm">
+                <a class="table text-primary dark:text-accent mb-3 cursor-pointer" (click)="closePopup()">{{ "Backtotheedit" | translate }}</a>
+                <div class="max-h-[50vh] overflow-y-auto px-2">
+                    <span *ngIf ="showContentAfterload">
+                        <div *ngIf="renderDateTimeInputs">
+                        <label class="font-medium">{{"from" | translate}}</label>
+                        <div class="grid grid-cols-2 gap-3 mb-3">
+                            <input formControlName="fromDate" type="date" 
+                            class="mt-1 border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-1 px-3" 
+                            [min]="minDate"/>
+                            <input formControlName="fromTime" type="time" 
+                            class="mt-1 border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-1 px-3" 
+                            />
+                        </div>
+                        <label class="font-medium">{{"to"| translate}}</label>
+                        <div class="grid grid-cols-2 gap-3 mb-3">
+                            <input formControlName="toDate" 
+                            type="date" 
+                            class="mt-1 border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-1 px-3"
+                            [min]="minDate"
+                            />
+                            <input formControlName="toTime" 
+                            type="time" 
+                            class="mt-1 border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-1 px-3" />
+                        </div>
+                        </div> 
+                    </span>
+                    <div class="mx-auto table" *ngIf="showLoader">
+                        <svg class="animate-spin -ml-1 mr-3 h-12 w-12 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </div>  
+                    <h3 class="text-secondary dark:text-white font-semibold flex justify-between flex-wrap my-4">{{ "serviceName" | translate }} {{transform(serviceName)}} <small>{{"useradded" | translate}} {{transform(addUserCount.toString())}}</small></h3>
+                    <div class="flex gap-3 mb-4">
+                    <input formControlName="searchTerm" type="search" [placeholder]="'filterUsers' | translate"
+                        class="border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-1 px-3" (keydown)="onKeyDown($event)">
+                    <button *ngIf="isResetSearchButton;else showSearchblock" class="btn btn-primary text-white" (click)="onResetSearch()">{{"resetSearch" | translate}}</button>
+                    <ng-template #showSearchblock>
+                    <button  class="btn btn-primary text-white" [disabled]="!f['searchTerm'].value" (click)="onSearch()">{{ "searchUsers" | translate }}</button>
+                    </ng-template>
+                    </div>  
+            <ng-container *ngIf="showContentAfterload">
+                    <ng-container *ngIf="addedUserList.length">
+                        <h3 class="text-secondary dark:text-white font-semibold mb-2">{{"addedUserList"| translate}}</h3>
+                        <div *ngFor="let user of addedUserList" class="justify-start flex items-center gap-2 bg-blue-50 rounded p-3 dark:bg-gray-900 mb-1">
+                            <input name="selectedUsers" checked (change)="onSelectedUserChange($event)" type="checkbox" class="checkbox  checkbox-xs checkbox-primary dark:checkbox-accent rounded" [value]="user.email" />
+                            <span class="ml-4 text-sm">
+                            <strong>{{ user.name }}</strong>
+                            <p><b>{{ "uid" | translate }}:</b> {{user.institution}}:{{ user.uid }}</p>
+                            <p><b>{{ "email" | translate }}:</b> {{ user.email }}</p>
+                            </span>
+                        </div>
+                    </ng-container>
+            
+           
+                    <!-- Dynamically render user list -->
+                    <span *ngIf ="showContentAfterload">
+                        <h3 class="text-secondary dark:text-white font-semibold mt-4 mb-2"> {{"userList"|  translate}}</h3>
+                        <span *ngFor="let user of userList">
+                            <ng-container *ngIf="user.email && searchUserListResult">
+                                <label class="cursor-pointer label justify-start flex gap-2 border-b dark:border-gray-700">
+                                    <input name="listOfUsers"(change)="onSelectUserChange($event)" type="checkbox" class="checkbox  checkbox-xs checkbox-primary dark:checkbox-accent rounded" [value]="user.email" />
+                                    <span class="ml-4 text-sm">
+                                    <strong>{{ user.name }}</strong>
+                                    <p class="flex justify-between"><b>{{ "uid" | translate }}:</b>{{user.institution}} {{ user.uid }}</p>
+                                    <p><b>{{ "email" | translate }}:</b> {{ user.email }}</p>
+                                    </span>
+                                </label> 
+                            </ng-container>
+                        <ng-container *ngIf="!searchUserListResult">
+                                <label class="cursor-pointer label justify-start flex gap-2 border-b dark:border-gray-700">
+                                    <input name="listOfUsers" (change)="onSelectUserChange($event)" type="checkbox" class="checkbox  checkbox-xs checkbox-primary dark:checkbox-accent rounded" [value]="user.email" />
+                                    <span class="ml-4 text-sm">
+                                    <strong>{{ user.name }}</strong>
+                                    <p class="flex justify-between"><b>{{ "uid" | translate }}:</b>{{user.institution}} {{ user.uid }}</p>
+                                    <p><b>{{ "email" | translate }}:</b> {{ user.email }}</p>
+                                    </span>
+                                </label> 
+                            </ng-container>
+                        </span>
+                        
+                    </span>
+                    <ng-container *ngIf="!userList.length && !showLoader">
+                        <span  class="text-gray-500 font-bold text-lg xl:text-2xl flex items-center justify-center h-10">No users found.</span> </ng-container>
+                        <ng-container *ngIf="userList.length && !showLoader && filteredUsersListByEmail">
+                            <span  class="text-gray-500 font-bold text-lg xl:text-2xl flex items-center justify-center h-10">No users found.</span> </ng-container>
+                    <!-- Save button -->
+                  
+            </ng-container>      
+                </div>
+                <div class="flex justify-end items-center mt-8 px-2">
+                    <button type="button" [disabled]="isButtonDisabled" class="btn btn-primary" (click)="onSave()">
+                    {{ "save" | translate }}
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div> 
+</div>
+<web-messenger-modal *ngIf="showCheckBoxError" [modalId]="'error-modal'" 
+    [modalTitle]="'error' | translate"
+    [modalMessage]="showCheckBoxError" 
+    [modalCloseText]="'close' | translate" 
+    (closePopup)="closeErrorPopup()" 
+    (cancelPopup)="closeErrorPopup()">
+</web-messenger-modal>
+
+
+<web-messenger-modal *ngIf="showSuccessPopup == true" 
+    [modalId]="'success-modal'" 
+    [modalTitle]='modalTitleMessage'
+    [modalMessage]='modalShowMessage' 
+    (closePopup)="onReSave()"
+    [modalCloseText]="'Ok' | translate" 
+    (cancelPopup)="cancelpopup()" 
+    [cancelText]="'no'|translate">
+</web-messenger-modal>

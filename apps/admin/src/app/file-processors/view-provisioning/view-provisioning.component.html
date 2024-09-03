@@ -1,0 +1,47 @@
+<div class="p-4 bg-gray-50 m-0 md:px-12 px-4 dark:bg-white/[0.05] dark:border-b dark:border-gray-700  dark:text-white">
+    <div class="flex gap-x-3 w-full md:flex-nowrap flex-wrap">
+        <h1 class="font-semibold mt-2 text-lg">{{ "JobDetails" | translate}}</h1>
+        <div class="ml-auto flex gap-2">
+            <button type="button" (click)="navigateToEditProcessorPage()" class="btn-sm btn btn-primary text-white px-4 rounded text-sm">
+               {{ "edit" | translate}}
+            </button>
+        </div>
+    </div>
+</div>
+<div class="py-6" *ngIf="showLoader">
+<web-messenger-loader-model></web-messenger-loader-model>
+</div>
+<div *ngIf="viewAddProvisiongProcessorTag.dropbox "  class="h-[calc(100%-10rem)] px-12 overflow-y-auto py-6 text-gray-600 dark:text-base-100">
+        <div class="mb-3 grid md:grid-cols-2 grid-cols-1 gap-3 md:w-1/2">
+            <div>
+                <label class="font-semibold">{{ "type" | translate}}:</label>
+                <p>{{viewAddProvisiongProcessorTag.dropbox.type}}</p>
+            </div>
+            <div>
+                <label class="font-semibold">{{ "url" | translate}}:</label>
+                <p><a class="link link-primary dark:text-accent no-underline" (click)="navigateToBucketPage()">
+                    {{viewAddProvisiongProcessorTag.dropbox.url}}</a></p>
+            </div>
+            <div>
+                <label class="font-semibold">{{ "IID" | translate}}:</label>
+                <p><a class="link link-primary dark:text-accent no-underline" (click)="navigateToInstitutionPage()">
+                    {{viewAddProvisiongProcessorTag.dropbox.iid}}</a></p>
+            </div>
+            <div>
+                <label class="font-semibold">{{ "pollInterval" | translate}}:</label>
+                <p>{{viewAddProvisiongProcessorTag.dropbox.interval}} {{ "seconds" | translate}}</p>
+            </div>
+            <div>
+                <label class="font-semibold">{{ "nextPoll" | translate}}:</label>
+                <p>{{viewAddProvisiongProcessorTag.dropbox.next_poll | istConversion |timeAgo:'custom'}}</p>
+            </div>
+            <div>
+                <label class="font-semibold">{{ "notifyFAAdmins" | translate}}:</label>
+                <p>{{viewAddProvisiongProcessorTag.dropbox.email_admins  ===  true ? 'Yes' : 'No'}}</p>
+            </div>
+            <div>
+                <label class="font-semibold">{{ "notificationEmails" | translate}}:</label>
+                <p>{{viewAddProvisiongProcessorTag.dropbox.notification_emails}}</p>
+            </div>
+        </div>
+</div>

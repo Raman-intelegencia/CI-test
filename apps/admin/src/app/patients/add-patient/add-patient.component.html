@@ -1,0 +1,207 @@
+<!--Tabs navigation-->
+<div class="p-4 bg-gray-50 m-0 md:px-12 px-4 dark:bg-white/[0.05] dark:border-b dark:border-gray-700  dark:text-white">
+    <a (click)="navigateBackToPatients()" class="link link-primary dark:link-accent text-sm table no-underline">
+        <em class="ph ph-arrow-left mr-1"></em>
+        {{'Returntopatientsearch' | translate}}
+    </a>
+    <h1 class="font-semibold mt-2">{{'AddPatient' | translate}}</h1>
+</div>
+<!--Content Details -->
+<div class="h-[calc(100%-10rem)] md:px-12 px-4 py-6 overflow-y-auto">
+    <form [formGroup]="addPatientForm" (ngSubmit)="createPatient()" class="grid grid-cols-1 md:grid-cols-12 text-secondary dark:text-white">
+        <div class="lg:col-span-5 md:col-span-6">
+            <div class="md:flex items-center mb-4">
+                <label class="font-bold text-secondary text-sm dark:text-base-100 md:w-[12rem]">{{'PatientID' | translate}} :</label>
+                <input
+                    class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1.5 px-3"
+                    type="text" name="id" placeholder="Required" formControlName="pid" required>
+            </div>
+            <span formGroupName="name">
+                <div class="md:flex items-center mb-4">
+                    <label class="font-bold text-secondary text-sm dark:text-base-100 md:w-[12rem]">{{'Nameprefix' | translate}} :</label>
+                    <input
+                        class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1.5 px-3"
+                        type="text" name="Name prefix" formControlName="prefix">
+                </div>
+                <div class="md:flex items-center mb-4">
+                    <label class="font-bold text-secondary text-sm dark:text-base-100 md:w-[12rem]">{{'firstName' | translate}} :</label>
+                    <input
+                        class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1.5 px-3"
+                        type="text" name="name" placeholder="Required" formControlName="given" required>
+                </div>
+                <div class="md:flex items-center mb-4">
+                    <label class="font-bold text-secondary text-sm dark:text-base-100 md:w-[12rem]">{{'Middlename' | translate}} :</label>
+                    <input
+                        class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1.5 px-3"
+                        type="text" name="Middle name" formControlName="middle">
+                </div>
+                <div class="md:flex items-center mb-4">
+                    <label class="font-bold text-secondary text-sm dark:text-base-100 md:w-[12rem]">{{'lastName' | translate}} :</label>
+                    <input
+                        class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1.5 px-3"
+                        type="text" name="lastname" placeholder="Required" formControlName="family" required>
+                </div>
+                <div class="md:flex items-center mb-4">
+                    <label class="font-bold text-secondary text-sm dark:text-base-100 md:w-[12rem]">{{'Namesuffix' | translate}} :</label>
+                    <input
+                        class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1.5 px-3"
+                        type="text" name="Name prefix" formControlName="suffix">
+                </div>
+            </span>
+
+            <div class="md:flex items-center mb-4">
+                <label class="font-bold text-secondary text-sm dark:text-base-100 md:w-[12rem]">{{'dob' | translate}}</label>
+                <input
+                    class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1.5 px-3"
+                     type="date" name="dob" placeholder="select date required" formControlName="dob" required [max]="currentDate">
+            </div>
+
+            <div class="md:flex mb-4 items-center">
+                <label class="font-bold text-secondary text-sm dark:text-base-100 md:w-[12rem]">{{'sex' | translate}}:</label>
+                <div class="w-full flex gap-4">
+                    <ng-container *ngFor="let gender of genderList">
+                        <label class="label cursor-pointer dark:text-base-100">
+                          <input type="radio" formControlName="sex" class="radio radio-xs radio-primary dark:radio-accent mr-1" [value]="gender.value" required>
+                          {{ gender.display }}
+                        </label>
+                      </ng-container>
+                </div>
+            </div>
+            <span formGroupName="address">
+                <div class="md:flex items-center mb-4">
+                    <label class="font-bold text-secondary text-sm dark:text-base-100 md:w-[12rem]">{{'address' | translate}}:</label>
+                    <div class="flex gap-3 w-full">
+                        <input
+                            class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1.5 px-3"
+                            type="text" placeholder="Address line 1" formControlName="street_address">
+                        <input
+                            class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1.5 px-3"
+                            type="text" name="line2" placeholder="Address line 1" formControlName="street_other">
+                    </div>
+                </div>
+                <div class="md:flex items-center mb-4">
+                    <label class="font-bold text-secondary text-sm dark:text-base-100 md:w-[12rem]">{{'location' | translate}} :</label>
+                    <input
+                        class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1.5 px-3"
+                        type="text" name="location" formControlName="location">
+                </div>
+                <div class="md:flex items-center mb-4">
+                    <label class="font-bold text-secondary text-sm dark:text-base-100 md:w-[12rem]">{{'city' | translate}} :</label>
+                    <input
+                        class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1.5 px-3"
+                        type="text" name="city" formControlName="city">
+                </div>
+                <div class="md:flex items-center mb-4">
+                    <label class="font-bold text-secondary text-sm dark:text-base-100 md:w-[12rem]">{{'state' | translate}} :</label>
+                    <select formControlName="state"
+                        class="border bg-transparent border-base-300 dark:text-white dark:bg-black text-gray-600 rounded w-full h-8 px-3">
+                        <option value=""></option>
+                        <option *ngFor="let state of statesList" [value]="state.value">{{state.display}}</option>
+                    </select>
+                </div>
+                <div class="md:flex items-center mb-4">
+                    <label class="font-bold text-secondary text-sm dark:text-base-100 md:w-[12rem]">{{'zip' | translate}} :</label>
+                    <input
+                        class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1.5 px-3"
+                        type="text" name="zip" formControlName="zip">
+                </div>
+                <div class="md:flex items-center mb-4">
+                    <label class="font-bold text-secondary text-sm dark:text-base-100 md:w-[12rem]">{{'country' | translate}} :</label>
+                    <input
+                        class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1.5 px-3"
+                        type="text" name="Country" formControlName="country">
+                </div>
+            </span>
+
+        </div>
+        <div class="col-span-1"></div>
+        <div class="lg:col-span-4 md:col-span-5">
+            <div class="md:flex   mb-4">
+                <label class="font-bold text-secondary text-sm dark:text-base-100 md:w-[12rem]">{{'AssocOUs' | translate}} :</label>
+                <div class="collapse collapse-arrow border border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-1.5 pl-3">
+                    <p class="flex flex-wrap gap-1">
+                        <span *ngFor="let inst of associatedOuArray.value"
+                            class="bg-gray-50 dark:bg-gray-700 rounded px-2 py-0.5 text-sm">
+                            <em class="ph ph-x mr-1 cursor-pointer" (click)="removeAssociatedOu($event, inst.id)"></em>
+                            {{ inst.name }}
+                    </span>
+                    </p>
+                    <input type="checkbox" class="peer min-h-0 p-0" [checked]="isCollapseOpen" (change)="toggleCollapse($event)" />
+                    <div class="collapse-title p-0 min-h-0 gap-2">
+                        <span>{{'selectInstitutions' | translate}}</span>
+                    </div>
+                    <div class="collapse-content p-0 pr-3">
+                        <input #instSearch type="text" placeholder="Search" 
+                            (input)="onSearchChange($event, instSearch.value)"
+                            (blur)="closeCollapseOnBlur($event)"
+                            class="mt-3 border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1.5 px-3">
+                        <p class="my-2 hover:bg-gray-100 dark:hover:bg-gray-900 cursor-pointer rounded px-1" *ngFor="let child of filteredChildInst" (click)="addAssociatedOu($event, child)">
+                                <b class="block" [innerHTML]="child.name | highlightSearchTxt:instSearch.value"></b>
+                                <span [innerHTML]="child.id | highlightSearchTxt:instSearch.value"></span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="md:flex items-center mb-4">
+                <label class="font-bold text-secondary text-sm dark:text-base-100 md:w-[12rem]">{{'snn' | translate}} :</label>
+                <input
+                class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1.5 px-3"
+                type="text" name="ssn" formControlName="ssn">
+            </div>
+
+            <div class="md:flex items-center mb-4">
+                <label class="font-bold text-secondary text-sm dark:text-base-100 md:w-[12rem]">{{'MedicaidID' | translate}} :</label>
+                <input
+                    class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1.5 px-3"
+                    type="text" name="Medicaid" formControlName="medicaid_id">
+            </div>
+            <div class="md:flex items-center my-6">
+                <label class="font-bold text-secondary text-sm dark:text-base-100 md:w-[9rem]">{{'PCMEnabled' | translate}}</label>
+                <div class="flex items-center space-x-2">
+                    <input type="checkbox" class="toggle toggle-primary" formControlName="pcm_enabled" /> 
+                    <ng-container *ngIf="f['pcm_enabled'].value; else disabledText">
+                        <span class="text-green-500">{{'enabled' | translate}}</span>
+                      </ng-container>
+                      <ng-template #disabledText>
+                        <span class="text-gray-500">{{'disabled' | translate}}</span>
+                      </ng-template>
+                </div>
+            </div>
+            <span formGroupName="primary_insurance">
+                <div class="md:flex items-center mb-4">
+                    <label class="font-bold text-secondary text-sm dark:text-base-100 md:w-[12rem]">{{'PolicyNumber' | translate}} :</label>
+                    <input
+                        class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1.5 px-3"
+                        type="text" name="Policy Number" formControlName="policy_number">
+                </div>
+                <div class="md:flex items-center mb-4">
+                    <label class="font-bold text-secondary text-sm dark:text-base-100 md:w-[12rem]">{{'policyStart' | translate}} :</label>
+                    <input
+                        class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1.5 px-3"
+                        type="date" name="policyStart" formControlName="policy_start_date">
+                </div>
+                <div class="md:flex items-center mb-4">
+                    <label class="font-bold text-secondary text-sm dark:text-base-100 md:w-[12rem]">{{'policyEnd' | translate}} :</label>
+                    <input
+                        class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1.5 px-3"
+                        type="date" name="policyEnd" formControlName="policy_end_date">
+                </div>
+            </span>
+
+            <div class="flex space-x-4 mt-6 justify-end">
+                <button type="button" (click)="cancelEditPatientForm()" class="btn bg-gray-300 hover:bg-gray-400 border-0 text-primary">{{'cancel' | translate}}</button>
+                <button type="submit" [disabled]="!disabledFormChanged" class="btn btn-primary text-white">{{'save' | translate}}</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+<web-messenger-modal *ngIf="showSuccessPopup == true" [modalId]="'success-modal'" 
+[modalTitle]='modalTitleMessage'
+[modalMessage]='modalShowMessage' 
+(closePopup)="performDiscardForm(modalTitleMessage)"  
+[modalCloseText]='modalCloseTextMessage' 
+(cancelPopup)="cancelpopup()" 
+[cancelText]="'no'|translate">
+</web-messenger-modal>

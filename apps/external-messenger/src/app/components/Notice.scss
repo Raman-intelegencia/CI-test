@@ -1,0 +1,29 @@
+@import '../style/_util.scss';
+
+// TODO: same as .options - DRY up
+.notice {
+    align-items: center;
+    background: $color-offwhite;
+    color: $color-darkgray;
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    justify-content: center;
+    position: relative; // safari has some issues drawing content, kickstart it
+    text-align: center;
+    width: 100%;
+}
+
+.notice__header {
+    width: 90%; // clean up windows phone going wider than screen
+    font-weight: $weight-normal;
+}
+
+.notice__msg {
+    width: 90%; // clean up windows phone going wider than screen
+    max-width: 26em;
+}
+
+.notice__button--link {
+    @include button--link();
+}

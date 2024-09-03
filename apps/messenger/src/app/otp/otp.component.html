@@ -1,0 +1,70 @@
+<!-- otp popup -->
+<input *ngIf="showOTPModal" type="checkbox" id="verification-code-modal" class="modal-toggle" [checked]="showOTPModal" />
+<div class="modal bg-black/70">
+  <div class="modal-box max-w-xl bg-white dark:bg-black rounded p-0 relative overflow-y-hidden dark:border-primary/60 dark:border dark:shadow-xl dark:shadow-primary/20">
+    <div class="flex justify-between text-white items-center bg-primary p-3">
+      <h3 class="font-bold">{{"cellphoneNumberVerification"| translate}}
+      </h3>
+      <label for="verification-code-modal" class="w-7 h-7"><em
+          class="ph-bold ph-x cursor-pointer text-xl hover:text-accent"></em></label>
+    </div>
+    <div class="p-4 max-h-[65vh] overflow-y-auto">
+      <p class="dark:text-base-100 my-4">
+        {{verificationText}}
+      </p>
+      <div class="flex justify-end items-center mt-3">
+        <button
+          class="bg-base-100 hover:bg-base-300 text-primary py-1 px-3 rounded inline-flex items-center mr-4" (click)="verifyOTPLater()">{{"later"|translate}}</button>
+        <button class="btn btn-primary" (click)="sendOTP()">{{"verifyNow"|translate}}</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Verification popup -->
+<input *ngIf="showVerificationModal" type="checkbox" id="verification-code-modal2" class="modal-toggle" [checked]="showVerificationModal" />
+<div class="modal bg-black/70">
+  <div class="modal-box max-w-xl bg-white dark:bg-black rounded p-0 relative overflow-y-hidden dark:border-primary/60 dark:border dark:shadow-xl dark:shadow-primary/20">
+    <div class="flex justify-between text-white items-center bg-primary p-3">
+      <h3 class="font-bold">{{"cellphoneNumberVerification"| translate}}
+      </h3>
+      <label for="verification-code-modal2" class="w-7 h-7"><em
+          class="ph-bold ph-x cursor-pointer text-xl hover:text-accent"></em></label>
+    </div>
+    <div class="p-4 max-h-[65vh] overflow-y-auto">
+      <p class="dark:text-base-100 my-4">
+        {{"otpVerificationText"|translate}} . {{"verifyCode"|translate}}
+      </p>
+      <label class="mb-2 block font-bold text-secondary text-sm dark:text-base-100">
+        {{ "enterCode"|translate}}
+      </label>
+      <input type="text" placeholder="Enter your code" [(ngModel)]="otpValue" (input)="onInput()"
+        (keydown)="onKeyDown($event)" pattern="[0-9]*" maxlength="6"
+        class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-2 px-3"
+        name="password" id="password" required />
+      <div class="flex justify-between items-center mt-1">
+        <div *ngIf="display" class="text-secondary dark:text-base-100">{{display | timer}} {{"secondsRemaining"|translate}}
+        </div>
+        <a *ngIf="!display" type="button" (click)="sendOTP()"
+          class="text-primary dark:text-accent dark:hover:text-accent hover:text-secondary hover:underline cursor-pointer text-xs ml-auto">
+          {{"resendCode"|translate}}
+        </a>
+      </div>
+      <div class="flex justify-end items-center mt-3">
+        <button
+          class="bg-base-100 hover:bg-base-300 text-primary py-1 px-3 rounded inline-flex items-center mr-4" (click)="verifyOTPLater()">{{"later"|translate}}</button>
+        <button [disabled]="!enableVerifyOtpButton"
+          [ngClass]="{'otpEntered': enableVerifyOtpButton, 'otpNotEntered': !enableVerifyOtpButton}"
+          class="btn btn-primary" (click)="verifyOTP()">{{"verifyNow"|translate}}</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<web-messenger-modal *ngIf="showErrorMessage" [modalId]="'error-modal'" [modalTitle] ="'error' | translate"
+[modalMessage]="showErrorMessage" (closePopup)="closeErrorPopup()" 
+(cancelPopup)="cancelErrorpopup()" [modalCloseText]="'close' | translate"></web-messenger-modal>
+
+<web-messenger-modal *ngIf="showSuccessPopup" [modalId]="'success-modal'"(closePopup)="closeSuccessPopup()"
+[modalTitle]="'cellphoneNumberVerification' | translate" [modalMessage]="'successfullVerification' | translate"
+[modalCloseText]="'close' | translate" (cancelPopup)="cancelSuccesspopup()"></web-messenger-modal>

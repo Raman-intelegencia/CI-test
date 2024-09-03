@@ -1,0 +1,105 @@
+<h2 class="font-semibold text-base text-secondary dark:text-white">{{'auditUser' | translate}}</h2>
+<form [formGroup]="auditForm">
+    <div class="border dark:border-gray-700 shadow-sm rounded h-[calc(100vh-12rem)] overflow-y-auto px-8 py-4 mt-3">
+        <h3 class="font-medium text-secondary dark:text-white text-lg mb-4">
+        {{'selectAuditTimespan' | translate}}
+        </h3>
+        <label class="label cursor-pointer justify-start">
+        <input type="radio" formControlName="timespan" value="all" class="radio radio-primary dark:radio-accent radio-sm mr-2" />
+        {{'messagesFromAllTime' | translate}}
+        </label>
+        <label class="label cursor-pointer justify-start">
+        <input type="radio" formControlName="timespan" value="custom" class="radio radio-primary dark:radio-accent radio-sm mr-2" checked/>
+        {{'messageFromCustomDateRange' | translate}}
+        </label>
+        <div formGroupName="customDateRange" class="grid md:grid-cols-3 grid-cols-2 gap-4 my-4">
+        <span>
+            <label>{{'from' | translate}}</label>
+            <input type="date" formControlName="from" [max]="currentMonthDate" 
+            class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1.5 px-3" />
+        </span>
+        <span>
+            <label>{{'to' | translate}}</label>
+            <input type="date" formControlName="to" [max]="currentMonthDate" 
+            class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1.5 px-3" />
+        </span>
+        </div>
+       
+        <h3 class="font-medium text-secondary dark:text-white text-lg mt-6">
+          {{'selectTimeZone' | translate}}
+        </h3>
+        <label class="label cursor-pointer justify-start">
+          <input type="radio" formControlName="timezone" value="US/Central"
+            class="radio radio-primary dark:radio-accent radio-sm mr-2" checked />
+          {{'cst' | translate}}
+        </label>
+        <label class="label cursor-pointer justify-start">
+        <input type="radio" formControlName="timezone" [value]="localTimeZone" class="radio radio-primary dark:radio-accent radio-sm mr-2" />
+        {{'localTimezone' | translate}}({{getCurrentTimeZone}})
+        </label>
+
+         <!-- Error Message for Date Range Validation -->
+         <div *ngIf="f['customDateRange'].errors?.['dateRangeInvalid']">
+          {{'dateRangeValidationMsg' | translate}}
+        </div>
+        <!-- Validation Message for Empty 'To' Date -->
+        <div
+          *ngIf="f['customDateRange'].get('to')?.hasError('required')">
+          {{'invalidToDateValidationMsg' | translate}}
+        </div>
+        <!-- Validation Message for Empty 'From' Date -->
+        <div
+          *ngIf="(submitted || f['customDateRange'].get('from')?.touched) && f['customDateRange'].get('from')?.hasError('required')">
+          {{'invalidFromDateValidationMsg' | translate}}
+        </div>
+
+        <span class="font-semibold text-neutral block mt-6">{{'everyRequestToAuditMessagesIsLogged' | translate}}</span>
+        <p>{{'theAuditFileWillDownloadToYourComputer' | translate}}</p>
+        <div class="flex flex-wrap gap-3 mt-6">
+        <button class="btn btn-primary text-white" (click)="openAuditNotePopUp('txt')"> 
+            <em class="ph-bold ph-download-simple mr-2"></em> 
+            {{'downloadMessagesAsTXT' | translate}}
+        </button>
+        <button (click)="openAuditNotePopUp('json')" class="btn btn-outline btn-primary dark:btn-accent dark:btn-outline">
+            <em class="ph-bold ph-download-simple mr-2"></em> 
+            {{'downloadMessagesAsJSON' | translate}}
+        </button>
+        </div>
+    </div>
+</form> 
+
+<!-- Audit note pop-up -->
+<input type="checkbox" id="auditnote" class="modal-toggle" [checked]="showAuditNotePopUp" />
+<div class="modal bg-black/70">
+  <div class="modal-box max-w-xl bg-white dark:bg-black rounded p-0 relative overflow-y-hidden dark:border-primary/60 dark:border dark:shadow-xl dark:shadow-primary/20">
+    <div class="flex justify-between text-white items-center bg-primary p-3">
+      <h3 class="font-bold dark:text-white">{{'enterAuditReason' | translate}}</h3>
+      <label for="auditnote" class="w-7 h-7 cursor-pointer " (click)="cancelAuditNotePopup()">
+        <em class="ph-bold ph-x cursor-pointer text-xl hover:text-accent"></em>
+      </label>
+    </div>
+    <div class="max-h-[65vh] overflow-y-auto p-4">
+      <div class="pb-1">
+        <label class="mb-2 block">{{ 'AuditReason' | translate}}</label>
+        <textarea class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1.5 px-3" [(ngModel)]="auditNote" (input)="onAuditNoteChange($event)"></textarea>
+      </div>
+      <div class="flex justify-between items-center mt-2">
+          <button (click)="cancelAuditNotePopup()" class="btn btn-primary">
+            {{'cancel' | translate}}
+          </button>
+          <button [disabled]="!auditNote" type="button" (click)="getAuditUserFormData()" class="btn btn-primary">
+            {{'ok' | translate}}
+          </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<web-messenger-modal *ngIf="showSuccessPopup" [modalId]="'success-modal'" 
+[modalTitle]='modalTitleMessage'
+[modalMessage]='modalShowMessage' 
+(closePopup)="cancelpopup()"  
+[modalCloseText]="'Ok' | translate" 
+(cancelPopup)="cancelpopup()" 
+[cancelText]="'no'|translate">
+</web-messenger-modal>

@@ -1,0 +1,11 @@
+.active{
+    @apply bg-white dark:bg-black text-primary dark:text-white;
+}
+
+.inactive{
+    @apply text-gray-600 dark:text-base-100 cursor-pointer;
+}
+
+.toggle-success{
+    @apply bg-green-500;
+}

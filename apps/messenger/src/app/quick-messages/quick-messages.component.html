@@ -1,0 +1,93 @@
+<form class="mr-6">
+      <div class="dropdown dropdown-top dropdown-end" (keyup)="onPresstheNumber($event)">
+      <span class="chat chat-end tooltip tooltip-secondary" data-tip="Send Quick Messages">
+        <label tabindex="0" (click)="showQuickMsg()" 
+          class="cursor-pointer chat-bubble btn-primary text-white dark:btn-accent dark:text-secondary flex items-center p-0 justify-center h-10 rounded-xl">
+          <em class="ph-fill ph-dots-three-outline text-lg"></em>
+        </label>
+      </span>
+      <div tabindex="0"
+        class="dropdown-content menu p-3 shadow border border-base-100 dark:border-gray-600 bg-white dark:bg-black rounded md:w-[30rem] w-[80vw] " *ngIf="!cancelButton && !disableQM">
+        <div class="h-[32vh] overflow-y-auto">
+          <div  class="flex gap-2 justify-between items-center mb-2 text-secondary dark:text-base-100" *ngFor="let message of allquickMessages.slice().reverse(); trackBy: trackByMessageId;  let i=index;">
+            <span class="w-6 cursor-pointer" ><strong *ngIf="i<=8 && i>=0" (click)="selectedQuickMessage(message.body)">{{i+1}}</strong></span> 
+
+            <span class="rounded bg-accent/[0.08] dark:bg-gray-900 cursor-pointer text-secondary break-all dark:text-base-100 text-base px-3 py-2 w-full flex-col-reverse" (click)="selectedQuickMessage(message.body)">
+              {{message.body}}
+            </span>
+          </div>
+        </div>
+        <p class="text-xs text-base-300 py-2">{{"clickOrType" | translate}}</p>
+        <div class="flex justify-between text-base-300 items-center my-3 text-sm">
+          <label for="my-modal-5" (click)="closedropdown()" class="text-primary font-bold no-underline hover:text-accent dark:text-accent cursor-pointer"><em
+              class="ph-bold ph-pencil-simple"></em>{{"editList" | translate}}</label>
+          <label tabindex="0" class="text-red-500" (click)="cancelQuickMessage()">{{"cancel" | translate}}</label>
+        </div>
+      </div>
+    </div>
+  </form>
+
+<input type="checkbox" id="my-modal-5" class="modal-toggle" [checked]="showDropDown"/>
+<div class="modal bg-black/70">
+<div class="modal-box max-w-xl bg-white dark:bg-black rounded p-0 relative overflow-y-hidden dark:border-primary/60 dark:border dark:shadow-xl dark:shadow-primary/20">
+  <div class="flex justify-between text-white items-center bg-primary p-3">
+    <h3 class="font-bold">{{"editQM" | translate}}</h3>
+    <label class="w-7 h-7" (click)="crossPopup()">
+      <em class="ph-bold ph-x text-base-100  hover:text-accent cursor-pointer"></em>
+    </label>
+  </div>
+  <div class="p-4 max-h-[65vh] overflow-y-auto">
+    <h5 class="text-primary dark:text-accent cursor-pointer text-sm font-bold pb-0" *ngIf="!createbuttonToInput" (click)="changeCreatebuttonToInput()"  [ngClass]="{'pointer-events-none opacity-50': disableListQuickMessage}">
+      <em class="ph-bold ph-plus"></em> {{"createQM" | translate}}
+    </h5>
+    <form class="w-full flex items-center my-3 pb-0" *ngIf="createbuttonToInput" [formGroup]="MessageForm" (ngSubmit)="CreateQuickMessage()">
+      <em class="ph-bold ph-x cursor-pointer text-secondary dark:text-base-100 pr-2 text-sm" (click)="clearInputAndBack()"></em>
+      <textarea #addMessageInput rows="1"  class="resize-none bg-transparent w-full mr-4 overflow-y-hidden focus:outline-none dark:text-base-100 cursor-text blinking-cursor leading-none" (keyup.enter)="CreateQuickMessage()"
+      formControlName="body" placeholder="Enter your quick message" id="error-modal" autofocus></textarea>
+      <button type="submit" class="text-primary dark:text-accent cursor-pointer text-sm font-bold" [disabled]="MessageForm.invalid">
+        {{"save" | translate}}
+      </button>
+    </form>
+    <ul class="mt-3 dragContainer" cdkDropList (cdkDropListDropped)="onChangeTheMessagePosition($event)">
+      <li class="border-base-100 hover:bg-accent/[0.08] p-2 rounded flex items-center gap-2 justify-between text-secondary dark:text-base-100  cursor-pointer" [ngClass]="{'pointer-events-none opacity-50': disableCreateQuickMessage}"
+        *ngFor="let message of allquickMessages let i=index" cdkDrag>
+
+        <div class="flex w-full items-center">
+          <span class="w-3"><span *ngIf="quickMessageIndex-i<=9 && quickMessageIndex-i>=0">{{quickMessageIndex-i}}</span></span>
+          <em class="ph-bold ph-list px-4 text-lg"></em>
+          <div class="w-full">
+            <span class="break-all" *ngIf="!message.edit">{{message.body}}</span>
+            <ng-template [ngIf]="isEditQuickMessage && message.edit"> 
+                <form class="w-full" [formGroup]="MessageForm"> 
+                  <textarea #editMessageInput class="bg-transparent w-full mr-4 focus:outline-none cursor-text blinking-cursor leading-none resize-none pt-2" (keyup.enter)="saveEditedQuickMessage(message.id,i)" formControlName="body" autofocus></textarea>
+                </form>
+            </ng-template>
+          </div>
+        </div>
+        <div>
+          <div *ngIf="!isEditQuickMessage" class="flex items-center gap-3">
+            <em class="text-primary dark:text-accent ph-bold ph-pencil-simple text-lg" (click)="editQuickMessageListToInput(message.id)"></em>
+            <em class="text-neutral ph-fill ph-trash text-lg" (click)="DeletePopup(message.id)"></em>
+          </div>
+          <ng-container *ngIf="isEditQuickMessage && message.edit">
+            <div class="flex items-center gap-3">
+              <button type="submit" class="text-primary dark:text-accent no-underline text-sm font-bold pr-4" [disabled]="!(MessageForm.valid && MessageForm.dirty && MessageForm.touched)" (click)="saveEditedQuickMessage(message.id,i)">
+                {{"save" | translate}}
+              </button>
+              <em class="text-neutral ph-bold ph-x cursor-pointer text-lg" (click)="backToQuickMessage(message.id)"></em>
+            </div>
+          </ng-container>
+        </div>
+      </li>
+    </ul>
+  </div>
+</div>
+</div>
+
+<web-messenger-modal *ngIf="showSuccessPopup" [modalId]="'success-modal'" [modalTitle]="'successTitle' | translate"
+[modalMessage]="'successDelete' | translate" (closePopup)=" DeleteTheQuickMessage()"  [modalCloseText]="'Yes, remove' | translate" 
+(cancelPopup)="cancelpopup()" [cancelText]="'Cancel' | translate"></web-messenger-modal>
+
+<web-messenger-modal *ngIf="showErrorMessage" [modalId]="'error-modal'" [modalTitle]="'error' | translate"
+[modalMessage]="showErrorMessage" (closePopup)="closeErrorPopup()" [modalCloseText]="'close' | translate" 
+(cancelPopup)="cancelErrorpopup()"></web-messenger-modal>

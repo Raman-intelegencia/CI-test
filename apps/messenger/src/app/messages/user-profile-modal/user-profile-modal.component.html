@@ -1,0 +1,238 @@
+<input type="checkbox" id="user-profile" class="modal-toggle" [checked]="showUserProfileModal" />
+<div class="modal bg-black/70">
+  <div
+    class="modal-box max-w-xl bg-white dark:bg-black rounded p-0 relative overflow-y-hidden dark:border-primary/60 dark:border dark:shadow-xl dark:shadow-primary/20">
+    <div class="flex justify-between text-white items-center bg-primary p-3">
+      <h3 class="font-bold dark:text-white capitalize" *ngIf="userProfileResponse?.profile?.first_name">
+        {{userProfileResponse.profile.first_name}}
+        {{userProfileResponse.profile.last_name}}'s {{'Profile' | translate}}</h3>
+      <label  class="w-7 h-7 ml-auto" (click)="clearUserProfileData()">
+        <em class="ph-bold text-base-100 ph-x hover:text-accent cursor-pointer justify-end"></em>
+      </label>
+    </div>
+    <div class="px-4 py-2 dark:text-base-100" *ngIf="showUploadPhoto && storeImageUrl==='' && loggedInUserId === userId">
+      {{"addProfilePhoto"|translate}}
+    </div>
+    <div class="flex items-center text-secondary dark:text-base-100 p-4">
+      <div class="text-center">
+        <div class="relative">
+          <img class="w-20 h-20 rounded-full border-2 border-base-100" id="imagePreview" [src]="storeImageUrl"
+            *ngIf="userProfileResponse?.profile && userProfileResponse?.profile?.image_id!==''|| storeImageUrl" />
+            <ng-container *ngIf="showImageLoader">
+              <svg class="animate-spin -ml-1 mr-3 h-6 w-6 top-1 text-base-300 absolute left-[40%] top-[40%]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="blue" stroke-width="4"></circle>
+                <path class="opacity-75" fill="blue" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            </ng-container>
+          <div *ngIf="userProfileResponse?.profile?.image_id==='' && !storeImageUrl && userProfileResponse?.profile?.type !== userType.oneway"
+            class="bg-base-100 text-secondary rounded-full w-20 h-20 flex items-center justify-center">
+            <span class="text-3xl uppercase"
+              *ngIf="userProfileResponse?.profile?.first_name">{{userProfileResponse.profile.first_name
+              |slice:0:1}}{{userProfileResponse.profile.last_name
+              |slice:0:1}}</span>
+          </div>
+          <div *ngIf="userProfileResponse?.profile?.image_id==='' &&  userProfileResponse?.profile?.type === userType.oneway"
+            class="bg-base-100 text-secondary rounded-full w-20 h-20 flex items-center justify-center">
+            <img src="assets/images/user.svg">
+          </div>
+          <label *ngIf="loggedInUserId === userId"
+            class="absolute bottom-1 right-1 rounded-full bg-base-100 h-6 w-6 flex items-center justify-center cursor-pointer">
+            <em class="ph-fill ph-camera text-xl text-primary" (click)="fileInput.click()"></em>
+            <input type='file' id="imageUpload" accept=".png, .jpg, .jpeg" #fileInput class="opacity-0 w-4 h-4 absolute"
+              (change)="uploadProfilePicture($event)" />
+          </label>
+
+        </div>
+        <ng-container
+          *ngIf="storeImageUrl!== '' && loggedInUserId === userId">
+          <a class="text-neutral text-xs cursor-pointer" (click)="removePhoto()">{{"removePhoto"|translate}}</a>
+        </ng-container>
+        <ng-container *ngIf="showUploadPhoto && storeImageUrl==='' && loggedInUserId === userId">
+          <a class="text-xs relative cursor-pointer" (click)="triggerFileInputClick()">{{"uploadPhoto"|translate}}</a>
+        </ng-container>
+
+      </div>
+      <ng-container *ngIf="userProfileResponse?.profile?.first_name">
+        <div class="ml-4 w-[calc(100%-5.5rem)]">
+          <h4 class="font-bold mb-0 text-lg flex items-center">{{userProfileResponse.profile.first_name}}
+            {{userProfileResponse.profile.last_name}}
+            <span *ngIf="userProfileResponse.profile?.flag_active || userProfileResponse?.profile?.type === userType.oneway"
+              class="ml-3 flex items-center rounded border text-xs gap-1 px-2" [ngClass]="{
+                'border-green-500 text-green-500 bg-green-500/10': showProfileStatus.s === 'available' && !showProfileStatus.is_signed_out,
+                'border-base-300 text-base-300  bg-base/10': showProfileStatus.s === 'off' && !showProfileStatus.is_signed_out,
+                'border-neutral text-neutral bg-neutral/10 ': showProfileStatus.s === 'busy' && !showProfileStatus.is_signed_out,
+              }">
+              <ng-container *ngIf="showProfileStatus.is_signed_out">
+                <em class="ph-duotone ph-circle"></em>
+                <span class="capitalize  border-base-300 text-base-300 bg-base/10">Signed Out</span>
+              </ng-container>
+              <ng-container *ngIf="showProfileStatus.s && !showProfileStatus.is_signed_out">
+                <em *ngIf="showProfileStatus.s === 'available'; else busyAndOff"
+                  class="ph-duotone ph-check-circle text-green-500"></em>
+                <ng-template #busyAndOff>
+                  <em *ngIf="showProfileStatus.s === 'busy'; else offOnly"
+                    class="ph-duotone ph-prohibit text-neutral"></em>
+                  <ng-template #offOnly>
+                    <em *ngIf="showProfileStatus.s === 'off'" class="ph-duotone ph-minus-circle text-base-300"></em>
+                  </ng-template>
+                </ng-template><span *ngIf="showProfileStatus.s !== 'off'"
+                  class="capitalize">{{showProfileStatus.s}}</span>
+                <span *ngIf="showProfileStatus.s === 'off'" class="capitalize">{{showProfileStatus.s}} Duty</span>
+              </ng-container>
+            </span>
+          </h4>
+          <p *ngIf="userProfileResponse?.profile?.status?.s === 'busy' || userProfileResponse?.profile?.status?.s === 'off' && userProfileResponse?.references?.[0] !== undefined && userProfileResponse?.references?.[0] !== null"
+            (click)="openCurrentlyCoveredProfile()">
+            <ng-container *ngIf="userProfileResponse.references?.[0]?.data?.first_name">
+              Currently Covered by:  <span class="cursor-pointer">{{ userProfileResponse.references?.[0]?.data?.first_name
+              }} {{ userProfileResponse.references?.[0]?.data?.last_name }}
+              </span>
+              <ng-container *ngIf="userProfileResponse.references">
+                <ng-container
+                  *ngIf="userProfileResponse.references[0]?.data?.status?.s === 'available'; else busyAndOff">
+                  <em class="ph-duotone ph-check-circle text-green-500"></em>
+                </ng-container>
+                <ng-template #busyAndOff>
+                  <ng-container *ngIf="userProfileResponse.references[0]?.data?.status?.s === 'busy'; else offOnly">
+                    <em class="ph-duotone ph-prohibit text-neutral"></em>
+                  </ng-container>
+                  <ng-template #offOnly>
+                    <ng-container *ngIf="userProfileResponse.references[0]?.data?.status?.s === 'off'">
+                      <em class="ph-duotone ph-minus-circle text-base-300"></em>
+                    </ng-container>
+                  </ng-template>
+                </ng-template>
+              </ng-container>
+            </ng-container>
+          </p>
+
+          <p *ngIf="displayProfileData.pager_number" class="text-sm flex items-center">
+            <img class="h-4 mr-1" src="assets/icons/pager-gray.svg" alt="pagericon" /> {{displayProfileData.pager_number}}
+          </p>
+          <p class="text-sm">{{displayProfileData.iname}}</p>
+          <p class="text-sm">{{displayProfileData.dept}}</p>
+          <p class="text-sm">
+            {{showProfileStatus.r| formatServiceTeam: maxLength }}
+            <ng-container *ngIf="userProfileResponse?.profile?.status?.r"> &middot; </ng-container>
+            {{ userProfileResponse.profile.profile.title }}
+          </p>
+        </div>
+      </ng-container>
+    </div>
+
+    <ng-container *ngIf="userProfileResponse?.profile && userProfileResponse?.profile?.flag_active!==true && userProfileResponse?.profile?.type !== userType.oneway">
+      <p class="text-sm bg-gray-50 dark:bg-gray-900 text-base-300 px-4 p-2 mb-3">
+        <span class="block font-medium">{{"userNotActivatedYet"|translate}}</span>
+        <span>{{"userNotActivatedDescription"|translate}}</span>
+      </p>
+    </ng-container>
+    <div class="mx-auto table" *ngIf="showLoader">
+      <svg class="animate-spin -ml-1 mr-3 h-12 w-12 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </div>
+    <label for="service-teams" class="cursor-pointer mx-4 mb-4 text-primary dark:text-accent"
+      (click)="enterServiceSchedule()"
+      *ngIf="showEnterServiceSchedule && userProfileType && loggedInUserId !== userId"><em
+        class="ph-fill ph-calendar-check"></em> {{"enterServiceSchedule"|translate}}</label>
+    <div class="max-h-[38vh] overflow-y-auto p-4">
+      <web-messenger-current-scheduled-service-team [userProfileResponse]="userProfileResponse" [showEnterServiceSchedule]="showEnterServiceSchedule"
+        [selectedChatIds]="selectedChatIds" [userId]="userId" [currentServiceTeam]="currentServiceTeam"
+        [scheduledServiceTeam]="scheduledServiceTeam" [shiftsData]="shiftsData"></web-messenger-current-scheduled-service-team>
+      <ng-container *ngIf="loggedInUserId !== userId">
+        <h4 class="font-bold text-secondary dark:text-base-100 text-base mb-2 mt-4" *ngIf="userProfileResponse?.profile?.first_name && userProfileResponse?.profile?.type !== userType.oneway">
+          {{"messagesWith"|translate}} {{userProfileResponse.profile.first_name}} </h4>
+          <div class="mx-auto table" *ngIf="showLoaderForMessageScreen">
+            <svg class="animate-spin -ml-1 mr-3 h-12 w-12 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                </div>
+        <div *ngFor="let threadData of getUpdatedUsersThreadData.slice(0, initialMessageCount); trackBy: trackByThreadId"
+          class="text-secondary dark:text-base-100 flex border-base-100 dark:border-gray-700 border p-3 mb-1 rounded">
+          <div class="cursor-pointer" (click)="openProfileModal(threadData.sender_profile?._id ?? '')" *ngIf="getUserThreadValue.profiles">
+            <ng-container [ngSwitch]="threadData?.threads?.type">
+              <ng-container *ngSwitchCase="'external'">
+                <img chat class="w-12 h-12 rounded-full bg-base-100" src="assets/icons/user_external.svg" alt="Profile-img">
+              </ng-container>
+              <ng-container *ngSwitchDefault>
+                <img *ngIf="threadData.sender_profile?.image_id as image_id" class="w-12 h-12 rounded-full"
+                  [src]="fetchImageUrl(image_id)" alt="Profile-img">
+                <span *ngIf="threadData && !threadData.sender_profile?.image_id"
+                  class="w-12 h-12 rounded-full border-2 border-base-100 bg-base-100 flex items-center justify-center text-primary">
+                  {{ getInitials(threadData.sender_profile?.first_name, threadData.sender_profile?.last_name)}}
+                </span>
+              </ng-container>
+            </ng-container>
+          </div>          
+          <div class="ml-3 w-[calc(100%-3.1rem)] cursor-pointer" (click)="openMessagesDetailScreen(threadData.threads._id)">
+            <h4 class="text-base flex items-center justify-between">
+              <ng-container *ngIf="getReceiversValues(threadData?.threads?.receivers) as receivers;">
+                <span *ngIf="receivers !== ' '">
+                  <span [title]="receivers">{{ receivers | truncate: 40 }}</span>
+                </span>
+              </ng-container>
+              <span class="text-xs">{{threadData?.threads?.time_created | date:'MMM d':'en-US' }}</span>
+            </h4>
+            <div class="flex justify-between gap-1">
+            <div>
+            <span class="text-sm"><strong class="font-normal"
+              *ngIf="threadData?.threads?.patient?.name && threadData?.threads?.subject">{{threadData?.threads?.patient.name}}</strong>
+               </span>
+               <span class="text-sm"><strong class="font-normal"
+                *ngIf="threadData?.threads?.patient?.name && threadData?.threads?.subject">{{threadData?.threads?.patient.name}}</strong>
+               <span *ngIf="threadData?.threads?.patient?.name && threadData?.threads?.subject" class="mx-1">-</span>
+               <span *ngIf="threadData?.threads?.subject">{{threadData?.threads?.subject}}</span></span> 
+            <p class="text-sm" [title]="threadData?.threads?.receivers">{{ getFormattedContent(threadData?.threads?.messages, getUserThreadValue.profiles,
+              threadData.threads.time_updated)}}</p>
+              </div>
+              <div>
+                <p class="text-sm text-neutral" *ngIf="threadData.threads?.visibility === false">{{'archived' |
+                  translate}}</p>
+                <span class="flex items-center gap-2">
+                  <em *ngIf="threadData?.threads?.muted"
+                    class="ph-fill ph-speaker-simple-x text-lg text-base-300 dark:text-base-100"></em>
+                  <em *ngIf="isUrgentAndUnread(threadData?.threads?.messages)" class="ph-fill ph-info text-neutral"></em>
+                  <span *ngIf="threadData.threads.unread_count > 0"
+                    class="rounded-full h-5 w-5 py-0.5 text-center inline-block bg-primary text-white dark:bg-accent text-xs">{{threadData.threads.unread_count}}</span>
+                </span>
+              </div>
+            </div>
+          </div>
+           
+          </div>
+          <div *ngIf="getThreadMessagesResponse.length > initialMessageCount">
+            <p (click)="showMoreMessages()" class="cursor-pointer text-primary dark:text-accent text-sm mt-2">Show more
+              messages...</p>
+          </div>
+      </ng-container>
+    </div>
+    <div class="flex justify-end gap-3 py-2 px-4" *ngIf="userProfileType && userProfileResponse?.profile?.type !== userType.oneway && !isbasic">
+      <a (click)="sendMsgToCoverage()" *ngIf="coverageId" class="btn btn-outline dark:btn-outline dark:btn-accent btn-primary ">{{"msgTheirCoverage"|translate}}</a>
+      <ng-container
+      *ngIf="loggedInUserId !== userId;else editProfile">
+        <a (click)="sendMessage()" class="btn btn-primary text-white ">{{"sendMessage"|translate}}</a>
+    </ng-container>
+    <ng-template #editProfile>
+        <a (click)="redirectTo('settings/account')" class="btn btn-primary text-white ">{{"editYourProfile"|translate}}</a>
+    </ng-template>
+    </div>
+    
+  </div>
+</div>
+  <ng-container *ngIf="showServiceTeamList">
+    <web-messenger-service-team-pop-up [selectedServiceTeam]="selectedServiceRoleList"
+      [userId]="userId? userId:selectedChatIds.selectedProfileUserId"
+      (backClickedEvent)="backToFirstServiceTeamScreen()" [userProfileResponse]="userProfileResponse">
+      [currentServiceTeam]="currentServiceTeam" [scheduledServiceTeam]="scheduledServiceTeam"
+      [showServiceTeam]="showServiceTeamList"
+    </web-messenger-service-team-pop-up>
+  </ng-container>
+  <ng-container *ngIf="showNonActiveUser">
+  <web-messenger-modal  [modalId]="'error-modal'" [modalTitle]="showNonActiveUserModal"
+  [modalMessage]="'userNotActivatedDescription' | translate" [modalCloseText]="'close'|translate" [showCancelButton]="true"
+   [cancelText]="'cancel' | translate" (cancelPopup)="closeNonActiveUserModal()" (closePopup)="closeNonActiveUserModal()"></web-messenger-modal>
+  </ng-container>
+  <web-messenger-user-profile-modal *ngIf="showProfileModal" [selectedChatThread]="selectedChatThread" [userId]="userId"  
+></web-messenger-user-profile-modal>

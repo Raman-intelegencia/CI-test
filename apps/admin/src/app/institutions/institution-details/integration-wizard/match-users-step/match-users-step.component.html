@@ -1,0 +1,100 @@
+<p class="text-[18px] font-bold pb-3">{{ usersViewModel.mainVM.institutionId }}</p>
+<div class="flex flex-wrap flex-row mt-4 justify-between max-w-[1400px] w-9/10">
+  <div class="max-w-[540px]">
+    <div class="flex flex-row justify-between items-center mb-2">
+      <h2 class="text-[23px] font-semibold">{{ 'integrationWizard.unmatchedUsers' | translate }}</h2>
+      <div class="flex flex-row gap-1.5">
+        <button [disabled]="!isIgnoreAllowed" class="btn small-button btn-outline btn-primary dark:btn-accent dark:btn-outline rounded" 
+          (click)="ignoreSelected()">{{ 'integrationWizard.buttons.ignoreSelected' | translate }}</button>
+        <button [disabled]="!isMatchAllowed" class="btn small-button btn-outline btn-primary dark:btn-accent dark:btn-outline rounded"
+          (click)="matchSelected()" aria-labelledby="match-extra-text">{{ 'integrationWizard.buttons.matchSelected' | translate }}</button>
+      </div>
+    </div>
+    <div class="flex flex-row justify-between">
+      <p class="w-8/12 text-[15px]">
+        {{ 'integrationWizard.matchUsersInfo' | translate }}
+      </p>
+      <div class="flex flex-col justify-between">
+        <p class="text-[#626262] dark:text-zinc-300 text-[13px] mr-3.5 mt-0.5 ml-auto" id="match-extra-text">
+          {{ 'integrationWizard.matchKeyboardInfo' | translate }}
+        </p>
+        <div class="flex flex-row gap-1 hover:underline hover:cursor-pointer" (click)="autoMatch()">
+          <button class="font-bold text-primary dark:text-primary">
+            {{ 'integrationWizard.buttons.autoMatchInitiate' | translate }}
+          </button>
+          <img class="w-[14px]" [class.animate-spin]="usersViewModel.isLoadingAutomatches" alt="refresh icon" src="assets/match.svg" />
+        </div>
+      </div>
+    </div>
+    <div class="flex flex-row justify-between mt-8">
+      <div class="flex flex-col">
+        <div>
+          <div class="flex flex-row justify-between pb-[7px]">
+            <h3 class="text-base">AMS Connect ({{ usersViewModel.unmatchedUsersAms.length }}) </h3>
+            <button class="text-primary dark:text-accent" (click)="onAMSSelectAll()">{{ !isAllAMSSelected ? ('integrationWizard.buttons.selectAll' | translate) : ('integrationWizard.buttons.deselectAll' | translate) }}</button>
+          </div>
+          <web-messenger-card-list class="max-h-fit" 
+            [selectableItems]="usersViewModel.unmatchedUsersAms" 
+            [ignoredItems]="usersViewModel.ignoredAmsUsers" 
+            [onSelectCallback]="onSelectAmsUserCard"
+            [selectAllEmitter]="selectAllAMSEmitter"
+            (selectableFilteredItemsChange)="selectAllFilteredAMSItems($event)"
+            (clickSelectEmitter)="onAMSClickSelect($event)"
+            (addCardEmitter)="selectionVM.addAMSUser($event)"
+            [isUnignoreAllowed]="isUnignoreAllowed"
+            [onUnignoreCallback]="unignoreSelected"
+            [searchPlaceholder]="'integrationWizard.hints.searchVendor' | translate: { vendor: 'AMS Connect' }"
+            entityType="user" />
+        </div>
+      </div>
+      <div class="flex flex-col">
+        <div>
+          <div class="flex flex-row justify-between pb-[7px]">
+            <h3 class="text-base">{{ usersViewModel.mainVM.vendorType ?? "Vendor" }} ({{ usersViewModel.unmatchedUsersVendor.length }})</h3>
+            <button class="text-primary dark:text-accent" (click)="onVendorSelectAll()">{{ !isAllVendorSelected ? ('integrationWizard.buttons.selectAll' | translate) : ('integrationWizard.buttons.deselectAll' | translate) }}</button>
+          </div>
+          <web-messenger-card-list 
+            [selectableItems]="usersViewModel.unmatchedUsersVendor" 
+            [ignoredItems]="usersViewModel.ignoredVendorUsers" 
+            [onSelectCallback]="onSelectVendorUserCard"
+            [selectAllEmitter]="selectAllVendorEmitter"
+            (selectableFilteredItemsChange)="selectAllFilteredVendorItems($event)"
+            (clickSelectEmitter)="onVendorClickSelect($event)"
+            (addCardEmitter)="selectionVM.addVendorUser($event)"
+            [isUnignoreAllowed]="isUnignoreAllowed"
+            [onUnignoreCallback]="unignoreSelected"
+            [searchPlaceholder]="'integrationWizard.hints.searchVendor' | translate: { vendor: usersViewModel.mainVM.vendorType }"
+            entityType="user"/>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="max-w-[480px]">
+    <div class="flex flex-row justify-between items-center mb-2">
+      <h2 class="text-[23px] font-semibold">{{ 'integrationWizard.matchedUserCount' | translate: { count: usersViewModel.matchedUsers.length } }}</h2>
+      <button class="btn small-button btn-outline btn-primary dark:btn-accent dark:btn-outline rounded" 
+        [disabled]="!isUnmatchAllowed"
+        (click)="unmatchSelected()">{{ 'integrationWizard.buttons.unmatchSelected' | translate }}</button>
+    </div>
+    <p class="text-[15px] w-8/12">
+      {{ 'integrationWizard.unmatchUsersInfo' | translate }}
+    </p>
+    <div class="flex flex-row mt-5" *ngIf="usersViewModel.matchedUsers.length > 0" >
+        <web-messenger-matched-card-list
+          [cardType]="'integrationWizard.cardTypes.user'"
+          [matchData]="usersViewModel.matchedUsersForCardData" 
+          [vendorName]="usersViewModel.mainVM.vendorType" 
+          [onSelectCallback]="onSelectMatch"
+          [lastAutomatchCount]="usersViewModel.lastAutomatchSuggestions?.length"
+          [unmatchSuggestions]="unmatchSuggestions"
+          [searchPlaceholder]="'integrationWizard.hints.searchMatches' | translate" />
+    </div>
+  </div>
+</div>
+
+<div class="toast toast-center" [class.closing]="toastIsClosing" (click)="closeToast()" >
+  <div #toast class="alert alert-info w-max" *ngIf="showToast">
+    <p>{{ "integrationWizard.noMatchesFound" | translate }}</p>
+  </div>
+</div>

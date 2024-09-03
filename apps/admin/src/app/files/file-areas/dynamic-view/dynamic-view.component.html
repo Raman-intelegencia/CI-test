@@ -1,0 +1,227 @@
+<div class="p-4 bg-gray-50 m-0 md:px-12 px-4 dark:bg-white/[0.05] dark:border-b dark:border-gray-700  dark:text-white">
+    <a class="link link-primary dark:link-accent text-sm table no-underline">
+        <div class="text-sm breadcrumbs">
+            <ul>
+              <em class="ph ph-arrow-left mr-1"></em>
+              <li class="link dark:text-accent" routerLink="/filearea">{{'allFileAreas' | translate}}</li>
+              <ng-container *ngFor="let navigationDirection of segments;let i=index">
+                <li class="link dark:text-accent" (click)="navigateToSelectedPage(segments,i)" >{{navigationDirection}}</li>
+              </ng-container>
+            </ul>
+        </div>
+    </a>
+
+    <div class="flex gap-x-3 w-full md:flex-nowrap flex-wrap">
+        <div class="ml-auto flex gap-2">
+            <button type="button" (click)="navigateToViewProvisioningPage()" class="btn-sm btn btn-primary text-white px-4 rounded text-sm">
+                {{ viewAddProvisiongProcessorTag.length > 0 ? 'View Provisioning Processor' : 'Add Provisioning Processor' }}  
+            </button>
+            <button type="button"  (click)="navigateToADTProcessorPage()" class="btn-sm btn btn-primary text-white px-4 rounded text-sm">
+                {{ "addADTProcessor" | translate }}
+            </button>
+            <button type="button" (click)="refreshPage()" class="btn-sm btn btn-primary text-white px-4 rounded text-sm tooltip tooltip-primary"
+                data-tip="Refresh">
+                <em class="ph-bold ph-arrow-clockwise"></em>
+            </button>
+        </div>
+    </div>
+</div>
+<div class="md:px-12 px-4 mt-4 flex justify-end gap-3">
+<label class="btn btn-outline btn-primary dark:btn-outline dark:btn-accent text-sm relative">
+    {{ "uploadFile" | translate }}
+    <input type='file'
+        class="opacity-0 w-4 h-4 absolute" (change)="uploadFile($event)" multiple/>
+</label>
+
+<label for="uploadFile" class="btn btn-outline btn-primary dark:btn-outline dark:btn-accent text-sm cursor-pointer">
+    {{ "createFolder" | translate }}
+</label>
+<a (click)="navigateToBatchJobsPage()" class="btn btn-outline btn-primary dark:btn-outline dark:btn-accent text-sm cursor-pointer">
+    {{ "batchJobs" | translate }}
+</a>
+</div>
+<ng-container *ngIf="showProgressBarWithName === true">
+    <div class="md:px-12 px-4 flex gap-2 flex-wrap justify-end mt-2">
+        <span *ngFor="let fil of totalNumberOfFilesUploaded; let i = index" 
+        class="rounded bg-primary/10 dark:bg-primary/30 text-secondary dark:text-base-100 text-xs flex items-center gap-1 block p-0.5">
+            <span>
+              <em class="ph text-green-500 ph-check"></em> {{fil.name}}
+              <progress class="progress progress-primary w-24 h-1"
+                [value]="uploadFileStatus + i" max="100"></progress>
+              <em class="ph text-neutral ph-x cursor-pointer"></em>
+            </span>
+        </span>
+    </div>
+</ng-container>
+<div class="md:px-12 px-4 mt-4 overflow-auto sm:h-[calc(100vh-14rem)] h-[calc(100vh-20rem)] dark:text-base-100">
+    <table class="table w-full">
+        <!-- head -->
+        <thead class="sticky top-0">
+            <tr>
+                <th>{{ "name" | translate }}</th>
+                <th>{{ "lastModified" | translate }}</th>
+                <th>{{ "size" | translate }}</th>
+                <th>{{ "Actions" | translate }}</th>
+            </tr>
+        </thead>
+        <div class="mx-auto table" *ngIf="showLoader">
+            <svg class="animate-spin -ml-1 mr-3 h-12 w-12 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" 
+                    fill="currentColor" 
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+        </div>
+
+        <ng-container *ngIf="fileAreaData.length > 0; else fileLoop">
+            <tbody >
+                <ng-container *ngFor="let fileAreasData of fileAreaData" >
+                    <tr *ngIf="fileAreasData.type === 'd'">
+                        <td><a [routerLink]="[fileAreasData?.filename]" class="text-primary dark:text-accent cursor-pointer">
+                            {{fileAreasData?.filename}}</a></td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>
+                            <a (click)="lockResetSendPassword(fileAreasData.filename)" class="link link-neutral no-underline flex items-center gap-1"><em
+                                    class="ph-bold ph-trash"></em> {{ "delete" | translate }}</a>
+                        </td>
+                    </tr>
+                    <tr *ngIf="fileAreasData.type === 'f'">
+                        <td>{{fileAreasData?.filename}}</td>
+                        <td><label for="lastModify" class="text-primary dark:text-accent cursor-pointer">
+                            <span (click)="carryDetails(fileAreasData.filename)">
+                            {{fileAreasData.last_modified  |  date: 'medium'}}
+                            </span>
+                        </label>
+                        </td>
+                        <td>{{fileAreasData.size / 1000}} {{ "kb" | translate }}</td>
+                        <td>
+                            <div class="flex gap-3">
+                                <a (click)="viewDownloadFile(fileAreasData.filename,'viewFile')" class="link link-primary dark:link-accent no-underline flex items-center"><em
+                                        class="ph-bold ph-eye mr-1"></em>{{ "View" | translate }}</a>
+                                <label for="renameFileArea" (click)="setFileName(fileAreasData.filename)" class="link link-primary dark:link-accent no-underline flex items-center"><em
+                                        class="ph-bold ph-textbox mr-1"></em>{{ "rename" | translate }}</label>
+                                <a (click)="viewDownloadFile(fileAreasData.filename,'downloadFile')" class="link link-primary dark:link-accent no-underline flex items-center"><em
+                                        class="ph-bold ph-download-simple mr-1"></em>{{ "download" | translate }}</a>
+                                <a (click)="lockResetSendPassword(fileAreasData.filename)" class="link link-neutral no-underline flex items-center"><em
+                                        class="ph-bold ph-trash"></em> {{ "delete" | translate }}</a>
+                            </div>
+                        </td>
+                    </tr>
+                </ng-container>
+        </tbody>
+        </ng-container>
+        
+        <ng-template #fileLoop>
+            <div class="text-center dark:text-base-100 text-2xl py-1" *ngIf="!showLoader">
+                {{ "thereAreNoFiles" | translate }}!
+            </div>
+        </ng-template>
+    </table>
+</div>
+<!-- Upload File Modal-->
+<input type="checkbox" id="uploadFile" class="modal-toggle" />
+<form [formGroup]="createNewDirectoryForm" class="modal bg-black/70">
+    <div
+    class="modal-box max-w-xl bg-white dark:bg-black rounded p-0 relative overflow-y-hidden dark:border-primary/60 dark:border dark:shadow-xl dark:shadow-primary/20">
+    <div class="flex justify-between text-white items-center bg-primary p-3">
+        <h3 class="font-bold dark:text-white">{{ "fileFolder" | translate }}</h3>
+        <label class="w-7 h-7" (click)="closeEditModalPopup('uploadFile')">
+            <em class="ph-bold ph-x cursor-pointer text-xl hover:text-accent"></em>
+        </label>
+    </div>
+    <div class="p-4 text-gray-600 dark:text-base-100 text-sm max-h-[60vh] overflow-y-auto">
+        <label class="font-medium mb-2 block">{{ "enterFolderName" | translate }}</label>
+        <textarea name="directoryName" id="directoryName" formControlName="directoryName"
+            class="border bg-transparent border-base-300 dark:border-gray-600 
+            dark:text-white text-gray-600 rounded w-full py-2 px-3" 
+            [ngClass]="{ 'is-invalid': submitted && h.directoryName.errors }"></textarea>
+            <div *ngIf="submitted && h.directoryName.errors" class="invalid-feedback">
+                <div *ngIf="h.directoryName.errors.required">
+                    {{"folderNamerequired" | translate}}
+                </div>
+                <div *ngIf="h.directoryName.errors.minlength">
+                    {{"folderNamerequiredMinLength" | translate}}
+                </div>
+                <div *ngIf="h.directoryName.errors.maxlength">
+                    {{"folderNamerequiredMaxLength" | translate}}
+                </div>
+            </div>
+            <div class="flex justify-end items-center mt-4 px-2">
+                <button type="button" (click)="createNewFileBucket('uploadFile')" class="btn btn-primary text-white" >{{"ok" | translate}}</button>
+            </div>
+    </div>
+</div>
+</form>
+<!-- Rename Modal-->
+<input type="checkbox" id="renameFileArea" class="modal-toggle" />
+<form [formGroup]="renameFileNameForm" class="modal bg-black/70">
+    <div class="modal-box max-w-xl bg-white dark:bg-black rounded p-0 relative overflow-y-hidden dark:border-primary/60 dark:border dark:shadow-xl dark:shadow-primary/20">
+    <div class="flex justify-between text-white items-center bg-primary p-3">
+        <h3 class="font-bold dark:text-white">{{"renameFile" | translate}}</h3>
+        <label class="w-7 h-7" (click)="closeEditModalPopup('renameFileArea')">
+            <em class="ph-bold ph-x cursor-pointer text-xl hover:text-accent"></em>
+        </label>
+    </div>
+    <div class="p-4 text-gray-600 dark:text-base-100 text-sm max-h-[60vh] overflow-y-auto">
+        <label class="font-medium mb-2 block">{{"enterNewItemName" | translate}}</label>
+        <textarea name="reNamedFile"
+            id="reNamedFile" formControlName="reNamedFile"
+            class="border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-2 px-3"
+            ></textarea>
+        <div *ngIf="submitted && f.reNamedFile.errors" class="invalid-feedback">
+            <div *ngIf="f.reNamedFile.errors.required">
+                {{"renameFileNamerequired" | translate}}
+            </div>
+            <div *ngIf="f.reNamedFile.errors.minlength">
+                {{"renameFileNameMinLength" | translate}}
+            </div>
+            <div *ngIf="f.reNamedFile.errors.maxlength">
+                {{"renameFileNameMaxLength" | translate}}
+            </div>
+        </div>
+        <div class="flex justify-end items-center mt-4 px-2">
+            <button type="button" (click)="fileRename('renameFileArea')" class="btn btn-primary text-white">{{"ok" | translate}}</button>
+        </div>
+    </div>
+</div>
+</form>
+
+<!-- Last modified Modal-->
+<input type="checkbox" id="lastModify" class="modal-toggle" />
+<div class="modal bg-black/70">
+    <div
+    class="modal-box max-w-xl bg-white dark:bg-black rounded p-0 relative overflow-y-hidden dark:border-primary/60 dark:border dark:shadow-xl dark:shadow-primary/20">
+    <div class="flex justify-between text-white items-center bg-primary p-3">
+        <h3 class="font-bold dark:text-white" *ngIf="fileDetails?.filename">  {{fileDetails.filename}} </h3>
+        <label for="lastModify" class="w-7 h-7">
+            <em class="ph-bold ph-x cursor-pointer text-xl hover:text-accent"></em>
+        </label>
+    </div>
+    <div class="p-4 text-gray-600 dark:text-base-100 text-sm max-h-[60vh] overflow-y-auto">
+        <p class="py-3 border-b dark:border-gray-700" >
+            <strong class="font-medium"> Created by:</strong>
+            <a class="text-blue-600 underline cursor-pointer" *ngIf="fileDetails?.created_by?.name" (click)="navigateTocreatedDetails()" target="_blank">{{fileDetails.created_by.name}}</a>
+        </p>
+        <p class="py-3 border-b dark:border-gray-700" >
+            <strong class="font-medium"> Last modified by: </strong>
+            <a class="text-blue-600 underline cursor-pointer" *ngIf="fileDetails?.modified_by?.name" (click)="navigateTomodifyDetails()" target="_blank"> {{fileDetails.modified_by.name}}</a>
+        </p>
+        <p class="py-3 border-b dark:border-gray-700" >
+            <strong class="font-medium"> Last modified:</strong> 
+            <span *ngIf="fileDetails?.last_modified">{{fileDetails.last_modified | date:'medium'}}
+            </span> 
+        </p>
+    </div>
+</div>
+
+</div>
+
+<web-messenger-modal *ngIf="showSuccessPopup == true" [modalId]="'success-modal'" 
+[modalTitle]='modalTitleMessage'
+[modalMessage]='modalShowMessage' 
+(closePopup)="deleteFile(deleteFileName)"  
+[modalCloseText]="'Ok'" 
+(cancelPopup)="cancelpopup()" 
+[cancelText]="'no'">
+</web-messenger-modal>

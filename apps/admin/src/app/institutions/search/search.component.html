@@ -1,0 +1,63 @@
+<div class="p-4 bg-gray-50 m-0 md:px-12 px-4 dark:bg-white/[0.05] dark:border-b dark:border-gray-700  dark:text-white">
+  <form [formGroup]="institutionSearchForm" (ngSubmit)="searchInstitutions()">
+    <div class="flex gap-x-3 w-full md:flex-nowrap flex-wrap">
+      <div class="flex w-full items-center md:mb-0 mb-2">
+        <span class="mr-2 text-secondary dark:text-base-100 whitespace-nowrap">{{'institutionsSearch' | translate}}</span>
+        <input type="text" formControlName="institutionSearch"
+          class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1.5 px-3"
+          placeholder="Enter here institutions name" />
+      </div>
+      <button type="submit" class="btn-sm btn btn-primary  text-white px-4 rounded text-sm">
+        {{'SearchInstitute' | translate}}
+      </button>
+      <button type="button" class="btn-sm btn btn-primary  text-white px-4 rounded text-sm" (click)="showAllInstitutions()">
+        {{'showAll' | translate}}
+      </button>
+    </div>
+    <div class="flex justify-end flex-wrap mt-3 gap-x-2  text-secondary dark:text-base-100 text-sm">
+      <label class="cursor-pointer label justify-start py-0 gap-x-1">
+        <input type="checkbox" formControlName="showLockedInstitutions" class="checkbox checkbox-xs checkbox-primary rounded" />
+        {{'showOnlyLockedInstitutions' | translate}}
+
+      </label>
+    </div>
+  </form>
+</div>
+<div class="md:px-12 px-4 mt-6 overflow-auto sm:h-[calc(100vh-14rem)] h-[calc(100vh-20rem)]">
+  <table *ngIf="allInstitutionsData?.length" class="table w-full">
+    <!-- head -->
+    <thead class="sticky top-0">
+      <tr>
+        <th>{{'institutionName' | translate}}</th>
+        <th>{{'id' | translate}}</th>
+        <th>{{'shortName' | translate}}</th>
+        <th>{{'parent' | translate}}?</th>
+        <th>{{'status' | translate}}</th>
+      </tr>
+    </thead>
+    <tbody>
+      <ng-container *ngFor="let institute of allInstitutionsData;">
+        <tr class="cursor-pointer" (click)="onItemClick(institute)">
+          <td class="font-bold"> {{institute?.name}} </td>
+          <td>{{institute?.id}}</td>
+          <td>{{institute?.short_name}}</td>
+          <td>
+            <span *ngIf="institute.parent_iid; else rootBlock">{{institute.parent_iid}}</span>
+            <ng-template #rootBlock><span>[{{'root' | translate}}]</span></ng-template>
+          </td>
+          <td>
+            <span *ngIf="!institute?.is_locked; else lockedBlock" class="text-green-600">{{'enabled' | translate}}</span>
+            <ng-template #lockedBlock><em class="ph-fill ph-lock-simple text-gray-500 text-2xl"></em></ng-template>
+          </td>
+        </tr>
+      </ng-container>
+    </tbody>
+  </table>
+  <web-messenger-loader-model *ngIf="showLoader"></web-messenger-loader-model>
+  <!-- Show "No record found" if there's no data -->
+  <div *ngIf="!showLoader">
+  <div class="text-center dark:text-base-100 text-2xl" *ngIf="!allInstitutionsData?.length || allInstitutionsData?.length === 0">
+    {{'noResultsFound' | translate}}!
+  </div>
+</div>
+</div>

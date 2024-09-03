@@ -1,0 +1,95 @@
+<div class="flex flex-wrap justify-between h-full overflow-hidden relative" *ngIf="!showSSOLoginScreen; else ssoScreen">
+    <div class="md:w-3/6 md:block hidden login-img w-full bg-bottom bg-cover bg-no-repeat"></div>
+    <div class="md:w-3/6 sm:w-9/12 w-full mx-auto bg-white dark:bg-black md:relative h-full overflow-y-auto flex flex-col">
+        <form class="login-form xl:max-w-md m-auto p-8 xl:p-0 w-full items-center pb-12" [formGroup]="loginForm" ngNativeValidate>
+            <img class="h-8 bg-no-repeat logo mb-8 cursor-pointer" alt="image description" routerLink="/login">
+            <h2 class="text-2xl text-secondary dark:text-base-100 font-bold">
+                {{ "logInWithInst" | translate }}
+            </h2>
+            <div *ngIf="!isInputFocused && institutionInput.value ==='' && loginForm.controls['institution'].touched ">
+                <div class="text-sm border text-neutral border-neutral p-2 mt-2 rounded flex">
+                    <em class="ph-fill ph-warning-circle mr-1 mt-1"></em>
+                    {{ "pleaseSelectInst"| translate }}
+                </div>
+            </div>
+            <div *ngIf="!isInputFocused && institutionInput.value!=='' && !filteredInstitutions.length && !institutionId">
+                <div class="text-sm border text-neutral border-neutral p-2 mt-2 rounded flex">
+                    <em class="ph-fill ph-warning-circle mr-1 mt-1"></em>
+                    {{ "noInstFound"  | translate }}
+                </div>
+            </div>
+            <div class="mb-4 mt-2 md:pr-4 text-base text-secondary dark:text-base-100">
+                {{ "searchInst" | translate }}
+            </div>
+            <div class="mb-4 relative">
+                <label class="mb-2 block font-bold text-secondary text-sm dark:text-base-100">
+                    {{ "institution" | translate }}
+                </label>
+                <div class="relative">
+                    <input type="text" (keyup)="inputKeyUp($event)"  formControlName="institution" [ngClass]="{'border-neutral': !institutionId && loginForm.controls['institution'].touched  && !isInputFocused }"
+                        class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-2 px-3" autocomplete="off"
+                        name="institution" (focusout)="searchInstitution($event)" id="institutionInput" placeholder="ex. American Messaging"
+                        #institutionInput [value]="loginForm.get('institution')?.value"  (focus)="isInputFocused = true" (blur)="isInputFocused = false" />
+                    <span *ngIf="!loginForm.controls['institution'].errors && institutionInput.value !== ''"
+                        (click)="resetInstitutionInputValue()"
+                        class="absolute inset-y-0 right-0 flex items-center px-2 text-gray-500 transition-colors duration-150 bg-transparent border-none cursor-pointer focus:outline-none">
+                        <em
+                            class="ph-bold ph-plus transform rotate-45 -translate-x-1 -translate-y-1 text-secondary dark:text-white hover:text-primary dark:hover:text-white  text-xl mt-2"></em>
+                    </span>
+                </div>
+                <ul *ngIf="showDropdown && filteredInstitutions.length > 0" 
+                    class="absolute left-0 right-0 bg-white shadow border border-base-300 max-h-[25vh] overflow-y-auto">
+                    <li *ngFor="let institution of filteredInstitutions,let i=index"  #institutionItem
+                        class="cursor-pointer p-3 hover:bg-blue-50"   [class.bg-base-100]="i === selectedIndex"
+                        (click)="selectInstitution(institution.id); selectedIndex = -1;">
+                        <span class="block text-secondary text-base"
+                         >{{institution.name}}</span>
+                    </li>
+                </ul>
+
+            </div>
+            <button type="button" [disabled]="!institutionId" (click)="redirectToSAML()"
+                [ngClass]="{'institutionSelected': institutionId, 'institutionNotSelected': !institutionId}">
+                {{ "continue" | translate }}
+            </button>
+            <div
+                class="after:border-t after:flex-1 after:mt-0.5 before:border-t before:border-base-300 dark:before:border-base-300 after:border-base-300 dark:after:border-base-300 before:flex-1 before:mt-0.5 flex items-center my-4">
+                <span class="mx-3 mb-0 text-center text-base text-gray-600 dark:text-base-100">
+                    {{ "or" | translate }}
+                </span>
+            </div>
+            <a routerLink="/login" class="btn btn-outline btn-primary dark:btn-accent dark:btn-outline rounded w-full">
+                {{ "loginWithEmail" | translate }}
+            </a>
+        </form>
+        <web-messenger-help-support></web-messenger-help-support>
+    </div>
+
+</div>
+<!-- </ng-template> -->
+<ng-template  #ssoScreen>
+    <form class="login-form xl:max-w-md m-auto p-8 xl:p-0 w-full items-center pb-12">
+        <img class="h-8 bg-no-repeat logo mb-8 cursor-pointer" alt="image description" (click)="navigateToEmailScreen()">
+        <h2 class="text-2xl text-secondary dark:text-base-100 font-bold">
+            {{ "welcome" | translate }}
+        </h2>
+        <div class="mb-4 mt-2 md:pr-4 text-base text-secondary dark:text-base-100">
+            {{ "continueToSelectInstitution" | translate }}
+            <b class="font-bold" >
+                {{selectedInstName}}
+            </b>        {{ "logInScreen" | translate }}    </div>
+       
+        <button type="button" class="btn-primary text-white py-2 rounded w-full" (click)="redirectToSAML()">
+            {{ "ssoLogin" | translate }}
+        </button>
+        <div class="after:border-t after:flex-1 after:mt-0.5 before:border-t before:border-base-300 dark:before:border-base-300 after:border-base-300 dark:after:border-base-300 before:flex-1 before:mt-0.5 flex items-center my-4">
+            <span class="mx-3 mb-0 text-center text-base text-base-300 dark:text-base-100">
+            {{ "or" | translate }}
+            </span>
+        </div>
+        <button (click)="navigateToEmailScreen()"
+            class="btn btn-outline btn-primary dark:btn-accent dark:btn-outline rounded w-full">
+            {{ "logInDiffAcc" | translate }}
+    </button>
+    </form>    
+</ng-template>

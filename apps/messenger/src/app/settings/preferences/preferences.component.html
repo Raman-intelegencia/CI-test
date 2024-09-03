@@ -1,0 +1,6 @@
+<ng-container [ngSwitch]="status">
+    <web-messenger-enable-notifications *ngSwitchDefault id="enable-notification-section"></web-messenger-enable-notifications>
+    <web-messenger-help-pop-ups *ngSwitchCase="'Help pop-ups'" id="help-pop-ups-section"></web-messenger-help-pop-ups> 
+    <web-messenger-inbox-management *ngSwitchCase="'Inbox Management'" id="inbox-management-section"></web-messenger-inbox-management>
+    <web-messenger-manage-groups *ngSwitchCase="'Manage Groups'" id="manage-groups-section"></web-messenger-manage-groups>
+</ng-container>

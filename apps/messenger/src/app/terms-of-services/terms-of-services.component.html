@@ -1,0 +1,26 @@
+<input type="checkbox" class="modal-toggle" [checked]="termsOfServiceUrl"/>
+<div class="modal bg-black/70">
+  <div class="modal-box max-w-5xl bg-white dark:bg-black rounded p-0 relative overflow-y-hidden dark:border-primary/60 dark:border dark:shadow-xl dark:shadow-primary/20">
+    <div class="flex justify-between text-white items-center bg-primary p-3">
+      <h3 class="font-bold">{{ "termsOfServices"|translate}}</h3>
+      <label (click)="crossButton()" class="w-7 h-7">
+        <em class="ph-bold ph-x cursor-pointer text-xl hover:text-accent"></em>
+      </label>
+    </div>
+    <div class="p-3 max-h-[74vh] overflow-y-auto">
+      <div class="border-solid border-2 border-gray-300 p-3 text-secondary  dark:bg-black dark:text-white" *ngIf="termsOfServiceUrl"> 
+           <iframe class="w-full overflow-auto text-base dark:bg-black h-[50vh]" [src]="termsOfServiceUrl" ></iframe>       
+      </div>
+        <p class="mt-4 mb-2 alert bg-gray-300 dark:bg-yellow-50/10 dark:text-white rounded">
+          {{ "ifNotAcceptTermsYouUnableToAccess"|translate}}
+        </p>
+      <div class="flex justify-between items-center pt-3">
+        <button type="button" class="btn" (click)="logOut()"> {{ "logOut"|translate}}</button>
+        <button type="button" class="btn btn-primary text-white" (click)="acceptTermsOfService()">{{ "accept"|translate}}</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<web-messenger-modal *ngIf="showErrorMessage" [modalId]="'tos-modal'"[modalTitle] ="'Confirm ?' | translate" (cancelPopup)="CancelTermsOfServices()"
+[modalMessage]="showErrorMessage" (closePopup)="logOutPopup()" [modalCloseText]="'logoutTitle' | translate"></web-messenger-modal>

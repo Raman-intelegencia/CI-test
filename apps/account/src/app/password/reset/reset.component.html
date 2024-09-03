@@ -1,0 +1,53 @@
+<!-- forgot design section -->
+<div class="flex flex-wrap justify-between h-full overflow-hidden relative" *ngIf="!showEmailSent; else elseBlock">
+  <div class="md:w-3/6 md:block hidden login-img w-full bg-bottom bg-cover bg-no-repeat"></div>
+  <div class="md:w-3/6 sm:w-9/12 w-full mx-auto bg-white dark:bg-black md:relative h-full overflow-y-auto flex flex-col">
+    <form class="login-form xl:max-w-md m-auto p-8 xl:p-0 w-full items-center pb-12">
+      <img class="h-8 bg-no-repeat logo mb-8 cursor-pointer" alt="image description" (click)="navigateToEmailScreen()">
+      <h2 class="text-2xl font-bold text-secondary dark:text-white">
+        {{ "forgotPass" | translate }}
+      </h2>
+      <div *ngIf="showErrorMessage" class="text-sm border text-neutral border-neutral p-2 mt-2 rounded flex break-all">
+        <em class="ph-fill ph-warning-circle mr-1 mt-1"></em>
+        {{showErrorMessage}}
+      </div>
+      <p class="mb-4 mt-2 md:pr-4 text-base text-secondary dark:text-base-100 flex items-center">
+        <a class="ph ph-arrow-left text-primary dark:text-accent hover:opacity-80 cursor-pointer mr-2" (click)="backToPasswordScreen()" ></a> {{email}}
+      </p>
+      <p class="mb-4 mt-2 md:pr-4 text-base text-secondary dark:text-base-100">
+        {{ "resetLink" | translate }}
+      </p>
+      <button type="button" (click)="sendResetEmailLink()" class="btn-primary text-white py-2 rounded w-full">
+        {{ "resetEmail" | translate }}
+      </button>
+      
+    </form>
+    <web-messenger-help-support></web-messenger-help-support>
+  </div>
+</div>
+
+<!-- reset email design section -->
+<ng-template #elseBlock>
+  <div class="flex flex-wrap justify-between h-full overflow-hidden relative">
+    <div class="md:w-3/6 md:block hidden login-img w-full bg-bottom bg-cover bg-no-repeat"></div>
+    <div class="md:w-3/6 sm:w-9/12 w-full mx-auto bg-white dark:bg-black md:relative h-full overflow-y-auto flex flex-col">
+      <form class="login-form xl:max-w-md m-auto p-8 xl:p-0 w-full items-center pb-12">
+        <img class="h-8 bg-no-repeat logo mb-8 cursor-pointer" alt="image description" (click)="navigateToEmailScreen()">
+        <h2 class="text-2xl text-secondary dark:text-base-100 font-bold">
+          {{ "resetEmailSent" | translate }}
+        </h2>
+        <p class="mb-4 mt-2 md:pr-4 text-base text-secondary dark:text-base-100 flex items-center" routerLink="/login"> 
+          {{email}}
+        </p>
+        <p class="mb-4 mt-2 md:pr-4 text-base text-secondary dark:text-base-100">
+          {{ "changePassword" | translate }}
+        </p>
+        <a routerLink="/login" class="text-primary dark:text-accent font-bold hover:opacity-80 cursor-pointer">
+          {{ "backToLogin" | translate }}
+        </a>
+        
+      </form>
+      <web-messenger-help-support></web-messenger-help-support>
+    </div>
+  </div>
+</ng-template>

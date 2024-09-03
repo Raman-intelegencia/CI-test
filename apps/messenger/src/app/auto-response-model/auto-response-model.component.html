@@ -1,0 +1,47 @@
+<input type="checkbox" id="autoResponseModal" class="modal-toggle" />
+<div class="modal bg-black/70">
+  <div
+    class="modal-box max-w-xl bg-white dark:bg-black rounded p-0 relative overflow-y-hidden dark:border-primary/60 dark:border dark:shadow-xl dark:shadow-primary/20">
+    <div class="flex justify-between text-white items-center bg-primary p-3">
+      <h3 class="font-bold dark:text-white">{{ "autoResponse"| translate }}</h3>
+      <label for="autoResponseModal" class="w-7 h-7">
+        <em class="ph-bold ph-x cursor-pointer text-xl hover:text-accent"></em>
+      </label>
+    </div>
+    <form class="px-8 py-4 dark:text-base-100 max-h-[65vh] overflow-y-auto" [formGroup]="autoResponseForm">
+      <div class="flex justify-between mb-4">
+        <div class="label cursor-pointer " (click)="selectedAutoResponse('default')">
+          <input type="radio" name="autoResponse" id="default"
+            class="radio radio-primary dark:radio-accent radio-sm mr-2" value="default"
+            formControlName="autoResponse" />
+          <label class="label cursor-pointer" for="default"> {{'default'|translate}}</label>
+        </div>
+        <div class="label cursor-pointer" (click)="selectedAutoResponse('custom')">
+          <input type="radio" name="autoResponse" id="custom"
+            class="radio radio-primary dark:radio-accent radio-sm mr-2" value="custom"
+            formControlName="autoResponse" />
+          <label class="label cursor-pointer" for="custom"> {{'custom'|translate}}</label>
+        </div>
+        <div class="label cursor-pointer" (click)="selectedAutoResponse('disable')">
+          <input type="radio" id="disable" name="autoResponse"
+            class="radio radio-primary dark:radio-accent radio-sm mr-2" value="disable"
+            formControlName="autoResponse" />
+          <label class="label cursor-pointer" for="disable"> {{'disable'|translate}}</label>
+        </div>
+      </div>
+      <input type="text" *ngIf="isCustomResponseEnabled"
+        [disabled]="!isCustomResponseEnabled"
+        [placeholder]="customAutoResponse?customAutoResponse : 'Write custom auto-response'"
+        [(ngModel)]="customAutoResponse" name="customResponse" [ngModelOptions]="{ standalone: true }"
+        class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-2 px-3">
+      <div class="flex justify-end items-center mt-4">
+        <label class="btn btn-neutral mr-3 border-0"
+          (click)="enableDisablefn($event)">{{'cancel'|translate}}
+        </label>
+        <button type="button" (click)="saveAutoResponse($event)" class="btn btn-primary text-white">
+          {{ 'save'|translate }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

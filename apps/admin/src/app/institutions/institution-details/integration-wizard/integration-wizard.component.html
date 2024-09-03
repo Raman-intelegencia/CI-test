@@ -1,0 +1,109 @@
+<div class="text-sm text-black dark:text-white">
+    <div class="bg-gray-50 dark:bg-[#060E38] px-[97px] pt-10 border-b border-base-100 dark:border-gray-800">
+        <header class="flex flex-row justify-between">
+            <h1 class="text-[27px] inline">
+                {{ (mainVM.wizardType === wizardTypeEnum.FIRST_TIME ? 
+                    'integrationWizard.configureHeader' : 'integrationWizard.updateHeader') | translate }}
+            </h1>
+            <div class="buttons-group flex flex-row">
+                <div *ngIf="mainVM.wizardType === wizardTypeEnum.FIRST_TIME" class="flex flex-row gap-12">
+                    <button class="text-primary dark:text-accent hover:underline min-w-28 w-28 leading-[15px] font-medium"
+                        (click)="closeWizard()">
+                        {{ 'integrationWizard.buttons.discardClose' | translate }}</button>
+                    <button class="btn btn-outline btn-primary dark:btn-accent dark:btn-outline rounded"
+                        (click)="saveAndClose()" [disabled]="shouldDisableSave()">
+                        {{ 'integrationWizard.buttons.saveClose' | translate }}
+                    </button>
+                    <div class="flex flex-row gap-4">
+                        <button class="btn btn-outline btn-primary dark:btn-accent dark:btn-outline rounded w-[113px]"
+                                [disabled]="shouldDisablePrevious()" (click)="navigateToPrevious(currentStep)">
+                          <img [class.hidden]="shouldDisablePrevious()" class="pr-2" src="/assets/images/Icon-Left-Arrow-Primary.svg">
+                          <img [class.hidden]="!shouldDisablePrevious()" class="pr-2" src="/assets/images/Icon-Left-Arrow-White.svg">
+                                  {{ 'integrationWizard.buttons.previous' | translate }}
+                        </button>
+                        <button class="btn btn-primary dark:btn-accent text-white rounded w-[113px]"
+                                [disabled]="shouldDisableNext()" (click)="navigateToNext(currentStep)">
+                          {{ 'integrationWizard.buttons.next' | translate }}
+                          <img class="pl-2" src="/assets/images/Icon-Right-Arrow.svg">
+                        </button>
+                    </div>
+                </div>
+
+                <div *ngIf="mainVM.wizardType === wizardTypeEnum.RECONFIGURE" class="flex flex-row gap-4">
+                    <button class="btn btn-outline btn-primary dark:btn-accent dark:btn-outline rounded w-[100px] text-[15px]"
+                        (click)="closeWizard()">
+                        {{ 'integrationWizard.buttons.cancel' | translate }}</button>
+                    <button class="btn btn-primary dark:btn-accent text-white rounded w-[123px] text-[15px] p-[14px]"
+                        (click)="saveAndClose()" [disabled]="shouldDisableSave()">
+                        {{ 'integrationWizard.buttons.saveClose' | translate }}</button>
+                </div>
+            </div>
+        </header>
+    
+        <div>
+            <ng-container *ngIf="mainVM.wizardType === wizardTypeEnum.FIRST_TIME">
+                <amsconnect-breadcrumbs [(currentStep)]="currentStep" [items]="allSteps" [title]="companyName" />
+            </ng-container>
+    
+            <ng-container *ngIf="mainVM.wizardType === wizardTypeEnum.RECONFIGURE">
+                <div class="mt-6 flex flex-row gap-[0.7em] text-sm font-medium">
+                    <ng-container *ngFor="let step of updateSteps; index as i">
+                        <div *ngIf="step.name !== currentStepEnum.DONE" 
+                            class="flex flex-row dark:text-base-100 pt-[16px] pr-[9px] pb-[14px] pl-[20px] h-[42px] 
+                                justify-center items-center cursor-pointer
+                                border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-700 rounded-t sm:mb-[-1px]"
+                            [class.border-b-white]="currentStep === step.name"
+                            [class.dark:border-b-black]="currentStep === step.name"
+                            (click)="tryUpdateTab(step)">
+    
+                            <p class="w-fit font-bold text-base pr-3 align-middle">{{ step.displayText | translate }}</p>
+                            
+                            <ng-container *ngIf="step.name !== currentStepEnum.SETTINGS">
+                                <div class="flex flex-col items-center font-bold">
+                                    <p class="text-center w-fit bg-neutral
+                                         rounded-[9px] text-white text-[13px] min-w-[23px] px-[3px]">
+                                        {{ getUnmatchedAmsCount(step.name) }}
+                                    </p>
+                                    <p class="text-[10px] leading-[11.5px] font-normal">{{ 'integrationWizard.subtitles.ams' | translate }}</p>
+                                </div>
+                                <div class="flex flex-col items-center pl-3 font-bold">
+                                    <p class="text-center w-fit bg-neutral
+                                         rounded-[9px] text-white text-[13px] min-w-[23px] px-[3px]">
+                                        {{ getUnmatchedVendorCount(step.name) }}
+                                    </p>
+                                    <p class="text-[10px] leading-[11.5px] font-normal">{{ 'integrationWizard.subtitles.vendor' | translate }}</p>
+                                </div>
+                            </ng-container>
+                        </div>
+                    </ng-container>
+                </div>
+            </ng-container>
+        </div>
+    </div>
+    <div class="sm:h-[calc(102vh-14rem)] h-[calc(100vh-12rem)] scrollable-main-content px-[97px] pt-[53px]">
+        <ng-container [ngSwitch]="currentStep" 
+            *ngIf="mainVM.institution && (mainVM.integration || mainVM.wizardType === wizardTypeEnum.FIRST_TIME)">
+            <web-messenger-integration-wizard-settings-step #activeChild [wizardType]="mainVM.wizardType" 
+                [onCreateIntegration]="onCreateIntegration" [updateCompanyName]="updateCompanyName" 
+                [settingsViewModel]="settingsVM" *ngSwitchCase="currentStepEnum.SETTINGS" />
+            <web-messenger-integration-wizard-match-users-step #activeChild 
+                [usersViewModel]="usersVM" [selectionVM]="userSelectionVM"
+                *ngSwitchCase="currentStepEnum.MATCH_USERS" />
+            <web-messenger-integration-wizard-match-services-step #activeChild 
+                [servicesViewModel]="servicesVM" [selectionVM]="serviceSelectionVM"
+                *ngSwitchCase="currentStepEnum.MATCH_TEAMS" />
+            <web-messenger-integration-wizard-done-step #activeChild *ngSwitchCase="currentStepEnum.DONE"
+                [institutionId]="mainVM.institutionId"
+                [usersRemaining]="unmatchedUsersCount"
+                [serviceTeamsRemaining]="unmatchedServiceTeamsCount"
+                [usersMatched]="matchedUsersCount"
+                [serviceTeamsMatched]="matchedServiceTeamsCount" />
+        </ng-container>
+    </div>
+</div>
+
+<web-messenger-modal *ngIf="showNavguardModal" modalId="nav-guard-modal" [modalTitle]="'integrationWizard.navModal.title' | translate" 
+    [boldText]="false"
+    (cancelPopup)="shouldNavigate.next(false)" (closePopup)="shouldNavigate.next(true)" [showCancelButton]="true" [closeIsDestructive]="true"
+    [modalCloseText]="'integrationWizard.navModal.discardChanges' | translate" [cancelText]="'integrationWizard.navModal.cancelNavigation' | translate" 
+    [modalMessage]="'integrationWizard.navModal.body' | translate" />

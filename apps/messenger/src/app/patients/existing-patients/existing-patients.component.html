@@ -1,0 +1,113 @@
+<div class="main-body md:px-12 px-4 relative md:flex block mt-5 md:gap-6">
+  <aside *ngIf="is767Screen  || !isNot767Screen"
+    class="md:w-[28vw] mb-2 md:mb-0 w-full h-full md:h-[calc(100vh-8.5rem)] flex flex-col bg-white dark:bg-black border border-base-100 dark:border-gray-600 rounded">
+    <div class="rounded bg-base-100/[0.1] border-base-100 dark:border-gray-600 border flex items-center m-3">
+      <em class="ph ph-magnifying-glass px-2 dark:text-base-100"></em>
+      <input #patientSearchTxt type="search" placeholder="Search for an existing patient"
+        class="bg-transparent border-0 dark:text-white text-gray-600 rounded w-full py-2 pr-3" [(ngModel)]="searchtxt"
+        (keyup)="searchPatients()" (keydown)="onKeyDown($event)">
+      <em *ngIf="patientSearchTxt.value" class="ph ph-x-circle mr-2 dark:text-white"
+        (click)="clearSearchInput()"></em>
+    </div>
+    <div class="h-[calc(100vh-16rem)] relative">
+      <div *ngIf="patientSearchTxt.value" class="absolute bottom-0 top-0  bg-gray-50 dark:bg-black h-full w-full overflow-y-auto">
+        <div *ngIf="!patientDataArray?.length">
+          <div class="text-center text-gray-600 dark:text-base-100 p-3 mt-4">
+            <h2 class="font-semibold text-secondary text-2xl dark:text-white">{{"noPatientsFound" | translate}}</h2>
+            <p>{{"thereWereNoPatients" | translate}} "{{patientSearchTxt.value}}"</p>
+          </div>
+        </div>
+        <div *ngIf="patientDataArray?.length">
+            <ng-container
+             *ngFor="let patient of patientDataArray">
+              <div 
+                class="hover:bg-accent/[0.08] p-3 flex items-center text-gray-600 dark:text-base-100 border-base-100 dark:border-gray-600 border-b dark:border-opacity-50 cursor-pointer">
+                <div class="w-full" (click)="selectPatient(patient.id, patient?.is_watched)">
+                  <p class="font-medium text-secondary dark:text-base-100"
+                    [innerHTML]="patient.name | highlightSearchKey: patientSearchTxt.value : 'name'"></p>
+                  <p class="text-sm">{{patient.sex}} • {{patient.dob}}</p>
+                  <p class="text-sm">{{"idNumber" | translate}}: <span [innerHTML]="patient.pid | highlightSearchKey: patientSearchTxt.value : 'id'"></span></p>
+                </div>
+                  <em
+                  [class]="patient.is_watched ? 'text-neutral ph-bold ph-x-circle text-lg' : 'text-primary dark:text-accent ph-bold ph-plus-circle text-lg'"
+                  (click)="updateUserPatient(patient.id, patient.is_watched ? 'remove' : 'add')">
+                </em>
+              </div>
+            </ng-container>
+        </div>
+      </div>
+      <div class="overflow-y-auto h-full">
+        <h2
+          class="mt-4 font-semibold text-secondary text-base dark:text-white px-3 py-1 border-base-100 dark:border-gray-600 border-b">
+          {{"myPatients" | translate}} ({{myPatientList? myPatientList.length : 0}})</h2>
+        <ng-container *ngFor="let patient of myPatientList">
+          <div 
+            class="hover:bg-accent/[0.08] p-3 flex items-center text-gray-600 dark:text-base-100 border-base-100 dark:border-gray-600 border-b dark:border-opacity-50 cursor-pointer">
+            <div class="w-full" (click)="selectPatient(patient.id, patient?.is_watched)">
+              <p class="font-medium text-secondary dark:text-base-100">{{patient.name}}</p>
+              <p class="text-sm">{{patient.sex}} • {{patient.dob}}</p>
+              <p class="text-sm">{{"idNumber" | translate}}: {{patient.pid}}</p>
+            </div>
+            <em
+            [class]="patient.is_watched ? 'text-neutral ph-bold ph-x-circle text-lg' : 'text-primary dark:text-accent ph-bold ph-plus-circle text-lg'"
+            (click)="updateUserPatient(patient.id, patient.is_watched ? 'remove' : 'add')">
+          </em>
+          </div>
+        </ng-container>
+        <div *ngIf="!myPatientList.length">
+          <div
+            class="p-3 flex items-center text-gray-600 border-base-100 dark:border-gray-600 border-b dark:border-opacity-50">
+            {{"noPatientsAdded" | translate}}
+          </div>
+        </div>
+        <h2
+          class="mt-4 font-semibold text-secondary text-base dark:text-white border-base-100 dark:border-gray-600 border-b px-3 py-1">
+          {{"recentActivity" | translate}}</h2>
+        <ng-container *ngFor="let patient of recentPatientList; let i=index">
+          <div 
+            class="hover:bg-accent/[0.08] p-3 flex items-center text-gray-600 dark:text-base-100 border-base-100 dark:border-gray-600 border-b dark:border-opacity-50 cursor-pointer">
+            <div class="w-full" (click)="selectPatient(patient.id, patient?.is_watched)">
+              <p class="font-medium text-secondary dark:text-base-100">{{patient.name}}</p>
+              <p class="text-sm">{{patient.sex}} • {{patient.dob}}</p>
+              <p class="text-sm">{{"idNumber" | translate}}: {{patient.pid}}</p>
+            </div>
+            <span class="relative">
+            <em
+              [class]="patient.is_watched ? 'text-neutral ph-bold ph-x-circle text-lg' : 'text-primary dark:text-accent ph-bold ph-plus-circle text-lg'"
+              (click)="updateUserPatient(patient.id, patient.is_watched ? 'remove' : 'add')">
+            </em>
+              <div *ngIf="showtooltip && (i===0)"  class="absolute bg-gray-50 shadow-sm w-64 text-sm p-3 border border-gray-200 rounded dark:bg-gray-900 dark:text-white right-0 top-8">
+              <em class="ph-fill ph-caret-up text-gray-50 text-2xl dark:text-gray-900 absolute -top-[1.2rem] right-0"></em>
+              <p>{{"patientlistInfo"|translate}}</p>
+              <label (click)="closeTooltip()"><em class="ph ph-x text-primary top-1.5 right-1.5 dark:text-accent absolute"></em></label>
+            </div>
+            </span>
+          </div>
+          </ng-container>
+          
+        <div *ngIf="!recentPatientList?.length">
+          <div
+            class="p-3 flex items-center text-gray-600 dark:text-base-100 border-base-100 dark:border-gray-600 border-b dark:border-opacity-50">
+            {{"noRecentActivity" | translate}}
+          </div>
+        </div>
+      </div>
+     
+    </div>
+    <button class="btn btn-primary bottom-5 inline-flex items-center text-white m-3" *ngIf="isPatientCreate && showAddPatientButton || is767Screen" (click)="navigateToAddPatients()">{{ "addNewPatient" | translate }}</button>
+  </aside>
+  <div class="md:w-[calc(100%-28vw)] w-full h-[calc(100vh-8.5rem)]" *ngIf="!is767Screen  || isNot767Screen">
+    <web-messenger-add-patient *ngIf="!selectedPatientId" (sendshowAddPatientButton)="receivebutton($event)" (screenVisibiltySent)="onscreenVisibiltySent($event)"></web-messenger-add-patient>
+    <!-- Patient details component selector shows conditionally when the patient is selected and sends patient Id from parent to child -->
+    <web-messenger-view-patient-details *ngIf="selectedPatientId" [patientId]="selectedPatientId"
+      [isPatientWatched]="isPatientWatched"
+      (addRemovePatientFromMyList)="addRemovePatient($event)" (screenVisibiltySent)="onscreenVisibiltySent($event)"></web-messenger-view-patient-details>
+      <div class="text-center flex h-full items-center justify-center py-3 bg-white dark:bg-black border border-base-100 dark:border-gray-600 rounded" *ngIf="!isPatientCreate && !selectedPatientId">
+        <div> 
+          <em class="ph-duotone ph-users text-9xl text-base-300"></em>
+          <p class="text-3xl my-4 text-secondary dark:text-base-100">{{'noPatientSelected' | translate}}</p>
+          <p class="text-secondary dark:dark:text-base-100">{{'selectPatientFromLeft' | translate}}</p>
+        </div>
+      </div>  
+  </div> 
+</div>

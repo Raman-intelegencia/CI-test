@@ -1,0 +1,156 @@
+
+<div class="p-4 bg-gray-50 m-0 md:px-12 px-4 dark:bg-white/[0.05] dark:border-b dark:border-gray-700  dark:text-white">
+  <form [formGroup]="userSearchForm" (ngSubmit)="onUserSearch()">
+    <div class="flex gap-x-3 w-full md:flex-nowrap flex-wrap">
+      <div class="flex w-full items-center md:mb-0 mb-2">
+        <span class="mr-2 text-secondary dark:text-base-100 whitespace-nowrap">{{'userSearch' | translate}}</span>
+        <input
+          type="text"
+          id="voice-search"
+          formControlName = "search"
+          class="border border-base-300 dark:text-white bg-white dark:bg-black text-gray-600 rounded w-full py-1.5 px-3"
+          [placeholder]="'searchUserPlaceholder' | translate"
+          />
+      </div>
+      <div class="flex items-center w-full gap-x-3">
+        <!-- Institution search with dropdown behavior -->
+        <div class="relative w-full">
+          <div tabindex="0" class="border border-base-300 dark:text-white bg-white dark:bg-black text-gray-600 rounded w-full px-3">
+             <!-- Search input -->
+              <input
+                class="bg-transparent outline-none focus:ring-0 border-0 py-1.5 dark:text-base-100 text-gray-600  w-full"
+                type="text" [placeholder]="'usersInstitutionOptitonal' | translate" formControlName="inst"
+                (focus)="institutionSearch(userSearchForm.get('inst')?.value); isInstituteInputFocused = true"
+                (blur)="handleInstitutionInputBlurEvent()"
+                (keyup.enter)="handleOnInstitutionInputEnterKeyEvent()"
+                (keyup)="institutionSearch(userSearchForm.get('inst')?.value)" />
+                <!-- Close icon -->
+              <span *ngIf="userSearchForm.get('inst')?.value" class="absolute right-0 top-0 bottom-0 pr-3 flex items-center cursor-pointer">
+                <em class="ph ph-x" (click)="clearInput()"></em>
+              </span>
+          </div>
+      
+          <!-- Dropdown list -->
+          <div *ngIf="isInstituteInputFocused" class="absolute z-10 w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded mt-1 max-h-60 overflow-auto">
+            <div *ngFor="let institute of allInstitutions;">
+              <div class="hover:bg-gray-100 dark:hover:bg-gray-900 px-3 py-2 cursor-pointer" (pointerdown)="selectInstitute(institute)">
+                <p class="font-medium text-secondary dark:text-base-100" [innerHTML]="institute?.name | highlightSearchTxt:searchTerm"></p>
+                <p class="text-sm" [innerHTML]="institute?.id | highlightSearchTxt:searchTerm"></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      
+        <button type="submit" class="btn btn-primary text-white px-4 rounded text-sm">
+          {{'searchUsers' | translate}}
+        </button>
+      </div>
+    </div>
+    <div class="flex justify-end flex-wrap mt-3 gap-x-2  text-secondary dark:text-base-100 text-sm">
+      <label class="cursor-pointer label justify-start py-0 gap-x-2">
+          <input type="checkbox" class="checkbox checkbox-xs  checkbox-primary rounded" formControlName="apiUsers" />
+           {{'showOnlyApiUsers' | translate}}        
+      </label>
+      <label class="cursor-pointer label justify-start py-0 gap-x-1">
+        <input type="checkbox" class="checkbox checkbox-xs checkbox-primary rounded" formControlName="notSignedIn" />
+         {{'showUserWhoAreNotSignedIn' | translate}}        
+      </label>
+    </div>
+    </form>  
+</div>
+<div class="flex text-2xl relative gap-x-1 justify-end md:px-12 px-8 pt-4">      
+  <a (click)="changeTab('gridview')" [class]="active_status=== 'gridview' ? 'text-primary dark:text-accent':'text-gray-600 dark:text-base-100 hover:text-primary'"  class="cursor-pointer"><em class="ph-fill ph-squares-four"></em></a>
+  <a (click)="changeTab('listview')" [class]="active_status=== 'listview' ? 'text-primary dark:text-accent':'text-gray-600 dark:text-base-100 hover:text-primary'" class="cursor-pointer"> <em class="ph-fill ph-list-bullets"></em></a>
+</div>
+<div class="md:px-12 px-8 pt-2 pb-8 sm:mb-0 overflow-y-auto sm:h-[calc(100vh-15rem)] h-[calc(100vh-20rem)]">
+  
+  <ng-container *ngIf="allUsersListData.length">
+    <!-- Grid view -->
+    <div *ngIf="active_status=== 'gridview';else listview" class="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
+      <ng-container *ngFor="let user of allUsersListData">
+        <div class="block py-2 group shadow relative border border-gray-200 hover:opacity-90 bg-gray-50 dark:bg-primary/10 dark:border-gray-600 cursor-pointer" (click)="navigateToDetails(user)">
+          <div class="mb-3 text-right absolute top-0 right-0">
+            <span [ngClass]="user?.flag_active ? 'bg-green-600 text-white' : 'bg-base-100 text-black'"
+              class="rounded-bl px-2 text-xs flex items-center justify-end">
+              {{ user?.flag_active ? ('active' | translate) : ('inactive' | translate) }}
+            </span>
+            <span *ngIf="user?.flag_locked"><em class="ph-fill ph-lock-simple text-gray-500 text-2xl top-1 relative mr-4"></em></span>
+          </div>
+          <div class="pl-4 pr-16">
+            <h3 class="text-base font-bold text-secondary dark:text-white">{{user?.first_name}} {{user?.last_name}}
+              <ng-container *ngIf="user?.flag_active">
+                <ng-container *ngIf="user?.status">
+                  <ng-container [ngSwitch]="user?.status?.s">
+                    <em *ngSwitchCase="'available'" title="Available" class="ph-duotone ph-check-circle text-green-600"></em>
+                    <em *ngSwitchCase="'busy'" title="Busy" class="ph-duotone  ph-prohibit text-neutral"></em>
+                    <em *ngSwitchCase="'off'" title="Off Duty" data-tip="hello" class="ph-duotone ph-minus-circle text-base-300"></em>
+                  </ng-container>
+                </ng-container>
+              </ng-container>
+            </h3>
+            <span *ngIf="user?.profile?.dept && user?.profile?.title" class="text-gray-600 text-xs dark:text-base-100 block pt-1">{{user?.profile?.dept}} | {{user?.profile?.title}}</span>
+          </div>
+          <div class="my-1 px-4 py-0 text-gray-600 text-sm dark:text-base-100 break-all">
+            <p class="text-base text-primary dark:text-accent">{{user?.profile?.iname}}</p>
+            <p class="break-all"><span class="font-semibold">{{'uid' | translate}}:</span> {{user?.uid?.iid}}:{{user?.uid?.id}} </p>
+            <p class="break-all"><span class="font-semibold">{{'email' | translate}}:</span> {{user?.email}} </p>
+            <p class="break-all" *ngIf="user?.api_key"><span class="font-semibold">{{'api' | translate}}:</span> {{user?.api_key}} </p>
+          </div>
+          <div class="flex flex-wrap items-center justify-start gap-x-1 text-sm font-medium pt-1 px-4">
+              <span *ngIf="isAdmin(user?.admin)" class="m-1 ml-0 bg-green-600 rounded px-2  text-white">{{'admin' | translate}}</span>
+              <span *ngIf="user?.phi_iids?.length" class="m-1 ml-0 bg-primary rounded px-2 text-white">{{'canViewPhi' | translate}}</span>
+              <span *ngIf="isSuperAdmin(user?.admin)" class="m-1 ml-0 bg-neutral rounded px-2 text-white">{{'superAdmin' | translate}}</span>
+              <span *ngIf="user?.has_pin" class="m-1 ml-0 bg-yellow-500 rounded px-2 text-white">{{'pinSET' | translate}}</span>
+            </div>
+        </div>
+      </ng-container>
+    </div>
+    <!-- List view -->
+    <ng-template  #listview>
+      <div class="flex flex-col gap-y-2">
+        <ng-container *ngFor="let user of allUsersListData">
+          <div class="py-2 group shadow relative border border-gray-200 hover:opacity-90 bg-gray-50 dark:bg-primary/10 dark:border-gray-600 cursor-pointer grid sm:grid-cols-3 gap-x-1 sm:pr-14 pr-0" (click)="navigateToDetails(user)">
+            <div class="mb-3 text-right absolute top-0 right-0">
+              <span [ngClass]="user?.flag_active ? 'bg-green-600 text-white' : 'bg-base-100 text-black'"
+              class="rounded-bl px-2 text-xs flex items-center justify-end">
+              {{ user?.flag_active ? ('active' | translate) : ('inactive' | translate) }}
+            </span>
+              <span *ngIf="user?.flag_locked"><em class="ph-fill ph-lock-simple text-gray-500 text-2xl top-1 relative mr-4"></em></span>
+            </div>
+            <div class="pl-4 sm:pr-0 pr-14">
+              <h3 class="text-base font-bold text-secondary dark:text-white">{{user?.first_name}} {{user?.last_name}}
+                <ng-container *ngIf="user?.flag_active">
+                  <ng-container *ngIf="user?.status">
+                    <ng-container [ngSwitch]="user?.status?.s">
+                      <em *ngSwitchCase="'available'" title="Available" class="ph-duotone ph-check-circle text-green-600"></em>
+                      <em *ngSwitchCase="'busy'" title="Busy" class="ph-duotone  ph-prohibit text-neutral"></em>
+                      <em *ngSwitchCase="'off'" title="Off Duty" data-tip="hello" class="ph-duotone ph-minus-circle text-base-300"></em>
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+              </h3>
+              <span *ngIf="user?.profile?.dept && user?.profile?.title" class="text-gray-600 text-xs dark:text-base-100 block py-1">{{user?.profile?.dept}} | {{user?.profile?.title}}</span>
+              <p class="text-base text-primary dark:text-accent">{{user?.profile?.iname}}</p>
+            </div>
+            <div class="my-1 px-4 py-0 text-gray-600 text-sm dark:text-base-100">
+              <p class="break-all"><span class="font-semibold">{{'uid' | translate}}:</span> {{user?.uid?.iid}}:{{user?.uid?.id}} </p>
+              <p class="break-all"><span class="font-semibold">{{'email' | translate}}:</span> {{user?.email}} </p>
+              <p class="break-all" *ngIf="user?.api_key"><span class="font-semibold">{{'api' | translate}}:</span> {{user?.api_key}} </p>
+            </div>
+            <div class="flex flex-wrap items-center justify-start gap-x-1 text-sm font-medium py-1 px-4">
+              <span *ngIf="isAdmin(user?.admin)" class="m-1 ml-0 bg-green-600 rounded px-2  text-white">{{'admin' | translate}}</span>
+              <span *ngIf="user?.phi_iids?.length" class="m-1 ml-0 bg-primary rounded px-2 text-white">{{'canViewPhi' | translate}}</span>
+              <span *ngIf="isSuperAdmin(user?.admin)" class="m-1 ml-0 bg-neutral rounded px-2 text-white">{{'superAdmin' | translate}}</span>
+              <span *ngIf="user?.has_pin" class="m-1 ml-0 bg-yellow-500 rounded px-2 text-white">{{'pinSET' | translate}}</span>
+            </div>
+          </div>
+        </ng-container >
+      </div>
+    </ng-template>
+  </ng-container>
+
+  <div class="text-center dark:text-base-100 text-2xl" *ngIf="isUserSearch && !allUsersListData.length">
+    <p class="dark:text-base-100">{{'noResultsFound' | translate}}!</p>
+</div>
+
+<web-messenger-loader-model *ngIf="showLoader"></web-messenger-loader-model>

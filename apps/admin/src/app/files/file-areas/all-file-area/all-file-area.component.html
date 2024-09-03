@@ -1,0 +1,103 @@
+<div class="p-4 bg-gray-50 m-0 md:px-12 px-4 dark:bg-white/[0.05] dark:border-b dark:border-gray-700  dark:text-white">
+    <div class="flex gap-x-3 w-full md:flex-nowrap flex-wrap">
+        <h1 class="font-semibold mt-2 text-lg">{{ "allFileAreas" | translate }}</h1>
+        <div class="ml-auto flex gap-2">
+            <label for="createFileArea" class="btn-sm btn btn-primary text-white px-4 rounded text-sm">
+                {{ "createFileArea" | translate }}
+            </label>
+            <button type="button" (click)="getAllFileAreaData()" class="btn-sm btn btn-primary text-white px-4 rounded text-sm tooltip tooltip-primary"
+                data-tip="Refresh">
+                <em class="ph-bold ph-arrow-clockwise"></em>
+            </button>
+        </div>
+    </div>
+</div>
+<div class="md:px-12 px-4 mt-6 overflow-auto sm:h-[calc(100vh-14rem)] h-[calc(100vh-20rem)]">
+    <table class="table w-full">
+        <!-- head -->
+        <thead class="sticky top-0">
+            <tr>
+                <th>{{ "name" | translate }}</th>
+                <th>{{ "users" | translate }}</th>
+                <th>{{ "Actions" | translate }}</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor=" let fileAreasBucketData of fileareasData">
+                <td>
+                    <a (click)="navigateToBucket(fileAreasBucketData.name)" class="text-primary dark:text-accent cursor-pointer">{{fileAreasBucketData.name}}/</a></td>                
+                <td><label for="usersListing" class="text-primary dark:text-accent cursor-pointer">{{usersAccessFileAreas.length}}</label></td>
+                <td class="w-[140px]">
+                    <a (click)="deleteSelectedFolderBucket(fileAreasBucketData.name)" class="link link-neutral no-underline flex items-center gap-1"><em
+                        class="ph-bold ph-trash"></em> {{ "delete" | translate }}</a>
+                </td>
+            </tr>
+            <tr *ngIf="showLoader">
+                <td colspan="5" class="text-center dark:text-base-100 text-2xl"><web-messenger-loader-model></web-messenger-loader-model></td>
+              </tr>
+        </tbody>
+    </table>
+</div>
+<input type="checkbox" id="createFileArea" class="modal-toggle" />
+<form [formGroup]="createNewDirectoryForm" class="modal bg-black/70">
+    <div
+            class="modal-box max-w-xl bg-white dark:bg-black rounded p-0 relative overflow-y-hidden dark:border-primary/60 dark:border dark:shadow-xl dark:shadow-primary/20">
+            <div class="flex justify-between text-white items-center bg-primary p-3">
+                <h3 class="font-bold dark:text-white">{{ "newFileArea" | translate }}</h3>
+                <label class="w-7 h-7" (click)="closeEditModalPopup('createFileArea')">
+                    <em class="ph-bold ph-x cursor-pointer text-xl hover:text-accent"></em>
+                </label>
+            </div>
+            <div class="p-4 text-gray-600 dark:text-base-100 text-sm max-h-[60vh] overflow-y-auto">
+                <label class="font-medium mb-2 block">{{ "enterTheFileAreaName" | translate }}</label>
+                <textarea name="directoryName" id="directoryName" formControlName="directoryName"
+                    class="border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded 
+                    w-full py-2 px-3" [ngClass]="{ 'is-invalid': submitted && h.directoryName.errors }"></textarea>
+                <div *ngIf="submitted && h.directoryName.errors" class="invalid-feedback">
+                    <p *ngIf="h.directoryName.errors.required"  class="text-neutral text-xs mt-0.5">
+                        {{"enterTheFileAreaRequired" | translate}}
+                    </p>
+                    <p *ngIf="h.directoryName.errors.minlength" class="text-neutral text-xs mt-0.5">
+                        {{"enterTheFileAreaMinLength" | translate}}
+                    </p>
+                    <p *ngIf="h.directoryName.errors.maxlength" class="text-neutral text-xs mt-0.5">
+                        {{"enterTheFileAreaMaxLength" | translate}}
+                    </p>
+                </div>    
+                <div class="flex justify-end items-center mt-4 px-2">
+                    <button type="button" (click)="createNewFileBucket('createFileArea')" class="btn btn-primary text-white">
+                        {{"ok" | translate}}
+                    </button>
+                </div>
+            </div>
+        </div>
+</form>
+<input type="checkbox" id="usersListing" class="modal-toggle" />
+<div class="modal bg-black/70">
+    <div
+        class="modal-box max-w-xl bg-white dark:bg-black rounded p-0 relative overflow-y-hidden dark:border-primary/60 dark:border dark:shadow-xl dark:shadow-primary/20">
+        <div class="flex justify-between text-white items-center bg-primary p-3">
+            <h3 class="font-bold dark:text-white"> {{"usersWithAccesstoDropbox" | translate}}</h3>
+            <label for="usersListing" class="w-7 h-7">
+                <em class="ph-bold ph-x cursor-pointer text-xl hover:text-accent"></em>
+            </label>
+        </div>
+        <div class="p-4 text-gray-600 dark:text-base-100 text-sm max-h-[60vh] overflow-y-auto">
+            <div *ngFor="let usersAccess of usersAccessFileAreas" class="py-3 flex items-center border-b dark:border-gray-700">
+                <img class="w-12 h-12 rounded-full" [src]="usersAccess?.user_proj?.image_id ? getImageUrl(usersAccess?.user_proj?.image_id) : 'assets/images/user.svg'" />
+                    <div class="w-[calc(100%-3.1rem)] ml-3">
+                        <a class="table font-medium text-base text-secondary dark:text-white cursor-pointer">
+                            {{usersAccess.user_proj?.first_name}} {{usersAccess?.user_proj?.last_name}} ({{usersAccess?.user_proj?.profile?.ishort}})
+                        </a>
+                        <p>{{"permission" | translate}}: {{getFileAreaPermission(usersAccess?.user_grants[0]?.actions[0])}} / {{getFileAreaPermission(usersAccess?.user_grants[0]?.actions[1])}} </p>
+                        <p>{{usersAccess?.user_proj?.email}}</p>
+                    </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<web-messenger-modal *ngIf="showSuccessPopup == true" [modalId]="'success-modal'" [modalTitle]='modalTitleMessage'
+[modalMessage]='modalShowMessage' (closePopup)="deleteFile(deleteFileName)" [modalCloseText]="'Ok' | translate" 
+(cancelPopup)="cancelpopup()" [cancelText]="'no' | translate">
+</web-messenger-modal>

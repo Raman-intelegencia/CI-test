@@ -1,0 +1,154 @@
+<h2 class="font-semibold text-base text-secondary dark:text-white">{{"apilog" | translate}}</h2>
+<div class="p-4 bg-gray-50 m-0 px-4 dark:bg-white/[0.05] dark:border-b dark:border-gray-700  dark:text-white">
+    <form class="" [formGroup]="eventSearchForm">
+        <div class="flex flex-wrap gap-x-4 ">
+        <div class="mb-4">
+            <span class="mr-2 text-secondary dark:text-base-100 whitespace-nowrap">{{'API URL' | translate}}</span>
+            <input type="text" formControlName="url_prefixes" 
+            class="border bg-transparent border-base-300 
+            dark:text-white text-gray-600 rounded w-full py-1.5 px-3" 
+            [placeholder]="'commaSeparated' | translate"
+            />
+        </div>
+       
+        <web-messenger-time-select-search  #childComponentRef (getFromUTCDateTime)="receiveFromDateTime($event)"  
+        (getToUTCDateTime)="receiveToDateTime($event)" (checkForendDate)="DateRangeShowError($event)"></web-messenger-time-select-search>
+        
+        <div *ngIf="showInvalidDateTime" class="mb-2 text-red-500">
+            {{'dateRangeValidationMsg' | translate}}
+        </div>
+        <button type="submit" class="justify-center w-1/10 btn-sm btn btn-primary  text-white px-4 rounded text-sm mt-6"
+        (click)="searchUserEvents(false)">
+            {{'searchAPILog' | translate}}
+        </button>
+        <label class="cursor-pointer label justify-start text-secondary dark:text-base-100 text-sm py-0 gap-x-1">
+            <input type="checkbox" 
+            class="checkbox checkbox-xs checkbox-primary rounded" 
+            name="showOnlyErrors" 
+            id="showOnlyErrors" 
+            formControlName="showOnlyErrors"
+            (click)="toggleChangeStatusShowOnlyErrors()"
+            />
+            {{'showOnlyErrors' | translate}}
+        </label>
+        </div>
+        <div class="flex flex-wrap">
+        <ng-container *ngIf="showLoader">
+            <svg class="animate-spin -ml-1 mr-3 h-6 w-6 top-1 text-base-300 flex mt-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </ng-container>
+        </div>
+
+      </form>
+</div>
+
+
+    <div class="md:px-0 px-4 mt-6 overflow-scroll h-[45vh]" *ngIf="searchAPIData.length>0; else noDataScreen">
+            <table class="table w-full">
+                <thead class="sticky top-0">
+                  <tr>
+                    <th>{{'Time' | translate}}</th>
+                    <th>{{'url' | translate}}</th>
+                    <th>{{'responseCode' | translate}}</th>
+                    <th>{{'duration' | translate}}</th>
+                    <th>{{'details' | translate}}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <ng-container *ngIf="searchAPIData.length">
+                    <tr *ngFor="let event of searchAPIData">
+                        <td>{{dateUtilSvc.convertUtcToLocalTime(event?.time_created) | date: 'MMM d, y, h:mm:ss a'}}</td>
+                        <td>{{event.url }}</td>
+                        <td>{{event.response_code}}</td>
+                        <td>{{event.request_duration}}</td>
+                        <td>
+                            <label (click)="showSearchApiLogsDetailsModal(event)" for="apiLogDetails" class="bg-primary text-white rounded px-4 py-1 text-sm cursor-pointer" >Show</label>
+                        </td>
+                      </tr>
+                  </ng-container>
+                </tbody>
+              </table>
+              <button class="mb-10 text-primary" *ngIf="eventLogResultsLimited" (click)="searchUserEvents(true)">{{'loadMore' | translate}}</button>
+
+    </div>
+    <web-messenger-modal *ngIf="showFullEventData" [modalId]="'seeAllEventData'" [modalTitle]="'Event Data'"
+      [modalMessage]="fullEventData" (closePopup)="closeFullEventDataModal()" (cancelPopup)="closeFullEventDataModal()"
+      [modalCloseText]="'Close'"></web-messenger-modal>
+
+
+
+<ng-template  #noDataScreen>
+    <h1 class="text-center dark:text-base-100 text-2xl py-4" *ngIf="showNoDataMessage"> {{'noResultsFound' | translate}}!</h1>
+</ng-template>
+
+<input type="checkbox" id="apiLogDetails" class="modal-toggle" />
+<div *ngIf="showSelectedApiLogsDetailsModal" class="modal bg-black/70">
+    <div
+        class="modal-box max-w-2xl bg-white dark:bg-black rounded p-0 relative overflow-y-hidden dark:border-primary/60 dark:border dark:shadow-xl dark:shadow-primary/20">
+        <div class="flex justify-between text-white items-center bg-primary p-3">
+            <h3 class="font-bold dark:text-white">{{'apiLogDetail' | translate}}</h3>
+            <label for="apiLogDetails"> 
+                <em class="ph-bold ph-x cursor-pointer text-xl hover:text-accent"></em>
+            </label>
+        </div>
+        <div class="p-4 text-gray-600 dark:text-base-100 text-sm max-h-[60vh] overflow-y-auto md:grid md:grid-cols-2 md:gap-x-8">
+            <div class="mb-3">
+                <label class="font-semibold">{{'id' | translate}}:</label>
+                <p class="break-all">{{selectedApiLogsData.id}}</p>
+            </div>
+            <div class="mb-3">
+                <label class="font-semibold">{{'Time' | translate}}:</label>
+                <p class="break-all">{{dateUtilSvc.convertUtcToLocalTime(selectedApiLogsData.time_created) | date: 'MMM d, y, h:mm:ss a'}}</p>
+            </div>
+            <div class="mb-3">
+                <label class="font-semibold">{{'url' | translate}}:</label>
+                <p class="break-all">{{selectedApiLogsData.url}}</p>
+            </div>
+            <div class="mb-3">
+                <label class="font-semibold">{{'userID' | translate}}:</label>
+                <p class="break-all">{{selectedApiLogsData.user_id}}</p>
+            </div>
+            <div class="mb-3">
+                <label class="font-semibold">{{'responseCode' | translate}}:</label>
+                <p class="break-all">{{selectedApiLogsData.response_code}}</p>
+            </div>
+            <div class="mb-3">
+                <label class="font-semibold">{{'responseContentType' | translate}}:</label>
+                <p class="break-all">{{selectedApiLogsData.response_content_type}}</p>
+            </div>
+            <div class="mb-3">
+                <label class="font-semibold">{{'responseLength' | translate}}:</label>
+                <p class="break-all">{{selectedApiLogsData.response_length}}</p>
+            </div>
+            
+            <div class="mb-3">
+                <label class="font-semibold">{{'requestContentType' | translate}}:</label>
+                <p class="break-all">{{selectedApiLogsData.request_content_type}}</p>
+            </div>
+            <div class="mb-3">
+                <label class="font-semibold">{{'requestDuration' | translate}}:</label>
+                <p class="break-all">{{selectedApiLogsData.request_duration}} seconds</p>
+            </div>
+            <div class="mb-3">
+                <label class="font-semibold">{{'requestLength' | translate}}:</label>
+                <p class="break-all">{{selectedApiLogsData.request_length}}</p>
+            </div>
+            
+            <div class="mb-3">
+                <label class="font-semibold">{{'remoteIP' | translate}}:</label>
+                <p class="break-all"></p>
+            </div>
+            <div class="mb-3">
+                <label class="font-semibold">{{'requestBody' | translate}}:</label>
+                <p class="break-all">
+                    <code class="text-xs"> <pre data-prefix="{"></pre> 
+                        {{selectedApiLogsData.request_body}} 
+                        <pre data-prefix="}"></pre></code>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+

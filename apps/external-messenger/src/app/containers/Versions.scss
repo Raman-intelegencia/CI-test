@@ -1,0 +1,34 @@
+@import '../style/_util.scss';
+
+.versions {
+    text-align: center;
+}
+
+.versions__heading {
+    font-size: 13vw;
+    text-transform: uppercase;
+}
+
+.versions__list {
+    list-style: none;
+    padding-left: 0;
+}
+
+.versions__elli {
+    animation: blink 1s linear infinite;
+}
+
+.version__link {
+    color: $color-white;
+
+    &:hover,
+    &:active {
+        color: $color-offwhite;
+    }
+}
+
+@keyframes blink {
+    50% {
+        opacity: 0;
+    }
+}

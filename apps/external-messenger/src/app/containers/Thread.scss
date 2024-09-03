@@ -1,0 +1,23 @@
+@import '../style/_util.scss';
+
+.thread {
+    position: relative;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+// control thread layout here vs. in individual components
+// as arrangement is a product of the .thread
+.thread__layouttop {
+    flex: none;
+}
+
+.thread__layoutmiddle {
+    flex: 1;
+}
+
+.thread__layoutbottom {
+    flex: none;
+}

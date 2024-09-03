@@ -1,0 +1,49 @@
+@import '../style/_util.scss';
+
+.masthead {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+    padding: 50px;
+    background-image: url("./../assets/AMSConnect_WebLogin.jpg");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: bottom;
+    position: relative;
+    &::before{
+        content: "";
+        position: absolute;
+        background-color:rgba($color: $color-black, $alpha: 0.6) ;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        left: 0;
+    }
+    h1,h2,p{ position: relative;}
+}
+
+.masthead--centered {
+    text-align: center;
+    align-items: center;
+}
+
+.masthead__logo {
+    width: 292px;
+    height: auto;
+}
+
+.masthead__slogan {
+    max-width: 13em;
+    font-size: 36px;
+    line-height: 47px;
+    font-weight: $weight-light;
+}
+
+.masthead__button {
+    @include visualbutton();
+
+    // changes for the large visual button
+    font-size: 16px;
+    padding: 12px 24px;
+}

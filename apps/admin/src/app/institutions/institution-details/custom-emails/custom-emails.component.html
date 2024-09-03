@@ -1,0 +1,255 @@
+<div class="h-full overflow-hidden relative md:flex block md:gap-2">
+  <aside
+    class="w-72 bg-blue-50 dark:bg-gray-900 h-[calc(100%-4rem)] flex flex-col md:relative z-50 md:left-auto -left-[18rem] absolute text-gray-600 dark:text-base-100"
+  >
+    <div class="overflow-y-auto h-full px-6">
+      <a
+        class="text-primary text-sm cursor-pointer dark:text-accent my-3 table"
+        (click)="returnToInstitutionDetails()"
+        ><em class="ph ph-arrow-left"></em
+        >{{ 'returnToInstitutionDetails' | translate }}</a
+      >
+      <div class="mt-4 flex flex-col gap-2 text-sm">
+        <a [ngClass]="{'font-semibold': active_status===customEmailEnum.InactiveUser}"
+          (click)="changeTab('inactive-user', 'idle_email')"
+          class="link link-primary dark:link-accent text-left link-hover font-medium mt-2"
+        >
+          {{ 'inactiveuser' | translate }}</a
+        >
+        <a  [ngClass]="{'font-semibold': active_status===customEmailEnum.SecondChannel}"
+          (click)="changeTab('2-channel-notification', 'second_channel')"
+          class="link link-primary dark:link-accent text-left link-hover font-medium mt-2"
+          >{{ 'secondchannel' | translate }}</a
+        >
+        <a [ngClass]="{'font-semibold': active_status===customEmailEnum.ActivationEmailNonSSO}"
+          (click)="changeTab('activation-email-non-sso', 'activation_reset')"
+          class="link link-primary dark:link-accent text-left link-hover font-medium mt-2"
+          >{{ 'activateEmailNonSSO' | translate }}</a
+        >
+        <a [ngClass]="{'font-semibold': active_status===customEmailEnum.UnactiveUserResetLink}"
+          (click)="changeTab('unactivated-user-reset-link', 'inactive_reset')"
+          class="link link-primary dark:link-accent text-left link-hover font-medium mt-2"
+          >{{ 'unactive' | translate }}</a
+        >
+        <a  [ngClass]="{'font-semibold': active_status===customEmailEnum.ActivationEmailSSO}"
+          (click)="changeTab('activation-email-sso', 'activation_sso')"
+          class="link link-primary dark:link-accent text-left link-hover font-medium mt-2"
+          >{{ 'activationemailsso' | translate }}</a
+        >
+      </div>
+    </div>
+  </aside>
+
+  <!-- second half section -->
+  <div class="p-6 w-full text-gray-600 dark:text-base-100">
+    <div class="h-[calc(100vh-12rem)] overflow-y-auto">
+      <ng-container [ngSwitch]="active_status">
+        <h2
+          *ngSwitchCase="'inactive-user'"
+          class="font-semibold text-lg text-secondary dark:text-white mb-3"
+        >
+          {{ 'inactiveUser' | translate }}
+        </h2>
+        <h2
+          *ngSwitchCase="'2-channel-notification'"
+          class="font-semibold text-lg text-secondary dark:text-white mb-3"
+        >
+          {{ 'secondChannel' | translate }}
+        </h2>
+        <h2
+          *ngSwitchCase="'activation-email-non-sso'"
+          class="font-semibold text-lg text-secondary dark:text-white mb-3"
+        >
+          {{ 'activationemail' | translate }}
+        </h2>
+        <h2
+          *ngSwitchCase="'unactivated-user-reset-link'"
+          class="font-semibold text-lg text-secondary dark:text-white mb-3"
+        >
+          {{ 'unactivatedUser' | translate }}
+        </h2>
+        <h2
+          *ngSwitchDefault
+          class="font-semibold text-lg text-secondary dark:text-white mb-3"
+        >
+          {{ 'activationEmailsso' | translate }}
+        </h2>
+      </ng-container>
+      <form [formGroup]="customEmailForm" class="lg:w-3/6 md:w-4/6 mt-4">
+        <div class="mb-3">
+          <label class="mb-1.5 font-medium">{{ 'subject' | translate }}</label>
+          <input
+            type="text"
+            formControlName="subject"
+            class="border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-2 px-3"
+          />
+        </div>
+        <div
+          class="mb-3"
+          *ngIf="
+            active_status === customEmailEnum.InactiveUser ||
+            active_status === customEmailEnum.SecondChannel
+          "
+        >
+          <label class="mb-1.5 font-medium">{{
+            'newmessage' | translate
+          }}</label>
+          <ng-container
+            *ngIf="
+              active_status === customEmailEnum.InactiveUser;
+              else showSecondChannelFrequency
+            "
+          >
+            <select
+              formControlName="frequency"
+              class="border bg-transparent border-base-300 dark:border-gray-600 dark:text-white dark:bg-black text-gray-600 rounded w-full h-10 px-3"
+            >
+              <option
+                *ngFor="let day of showTmplOptionFrequency"
+                [value]="day[0]"
+              >
+                {{day[1]}}
+              </option>
+            </select>
+          </ng-container>
+          <ng-template #showSecondChannelFrequency>
+            <select formControlName="frequency"
+              class="border bg-transparent border-base-300 dark:border-gray-600 dark:text-white dark:bg-black text-gray-600 rounded w-full h-10 px-3"
+            >
+              <option
+                *ngFor="let day of showTmplOptionFrequency"
+                [value]="day[0]"
+              >
+                {{ day[1] }}
+              </option>
+            </select>
+          </ng-template>
+        </div>
+        <label
+          *ngIf="active_status === customEmailEnum.InactiveUser"
+          class="cursor-pointer label justify-start flex gap-2 mb-3"
+        >
+          <input
+            type="checkbox"
+            class="checkbox checkbox-xs checkbox-primary dark:checkbox-accent rounded"
+            [checked]="pendingMessage"
+            (change)="onChangeCheckbox($event)"
+          />
+          {{ 'sendonlyusers' | translate }}
+        </label>
+        <div class="mb-3">
+          <label class="mb-1.5 font-medium">{{ 'message' | translate }}</label>
+          <textarea
+            rows="6"
+            class="border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-2 px-3"
+            formControlName="body"
+          ></textarea>
+        </div>
+        <label class="mb-1.5 mt-4 font-medium">{{
+          'dynamicTags' | translate
+        }}</label>
+        <ng-container *ngFor="let dynamicTag of showDynamicTemplateTags">
+          <p>{{ dynamicTag[0] }} = {{ dynamicTag[1] }}</p>
+        </ng-container>
+        <div>
+          <button
+            class="btn btn-primary text-white mt-4 px-6 mr-12"
+            (click)="sendEmail()"
+          >
+            {{ 'sendTestMail' | translate }}
+          </button>
+          <span>{{ 'sendMailTo' | translate }} {{ usersEmail }}</span>
+        </div>
+      </form>
+    </div>
+    <div class="flex gap-3 mt-4">
+      <button
+        type="submit"
+        class="btn btn-primary mt-4 text-white px-6"
+        (click)="createAdminEmailTemplate()"
+        [disabled]="!showOnSave"
+      >
+        {{ 'save' | translate }}
+      </button>
+      <button
+        type="button"
+        class="btn btn-primary mt-4 text-white px-6"
+        (click)="restoreToDefault()"
+        [disabled]="!restoreDefault"
+      >
+        {{ 'restoreToDefault' | translate }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<input type="checkbox" [checked]="ShowDiscardModal || showResetDefaultModal" class="modal-toggle" />
+<div class="modal bg-black/70">
+  <div
+    class="modal-box max-w-xl bg-white dark:bg-black rounded p-0 relative overflow-y-hidden dark:border-primary/60 dark:border dark:shadow-xl dark:shadow-primary/20"
+  >
+    <div class="flex justify-between text-white items-center bg-primary p-3">
+      <h3 class="font-bold dark:text-white">
+        {{ 'discardEmail' | translate }}
+      </h3>
+      <label class="w-7 h-7">
+        <button (click)="cancelTabChange()">
+          <em
+            class="ph-bold ph-x cursor-pointer text-xl hover:text-accent"
+          ></em>
+        </button>
+      </label>
+    </div>
+    <div class="max-h-[65vh] overflow-y-auto p-4 dark:text-base-100">
+      <div class="'pb-1" *ngIf="ShowDiscardModal">
+          <p>{{ 'unsaveChanges' | translate }}</p>
+      </div>
+      <div class="'pb-1" *ngIf="showResetDefaultModal">
+          <p>{{ 'restoreDefault' | translate }}</p>
+      </div>
+
+
+      <div class="flex justify-end items-center mt-4" *ngIf="ShowDiscardModal">
+        <button
+          type="button"
+          class="btn btn-primary border-black bg-white text-black px-6 hover:text-white mr-3"
+          (click)="cancelTabChange()"
+        >
+          {{ 'close' | translate }}
+        </button>
+        <button
+          type="button"
+          class="btn btn-primary text-white px-6"
+          (click)="discardAndChangeTab()"
+        >
+          {{ 'discard' | translate }}
+        </button>
+      </div>
+      <div class="flex justify-end items-center mt-4" *ngIf="showResetDefaultModal">
+        <button
+          type="button"
+          class="btn btn-primary border-black bg-white text-black px-6 hover:text-white mr-3"
+          (click)="cancelRestoreDefault()"
+        >
+          {{ 'close' | translate }}
+        </button>
+        <button
+          type="button"
+          class="btn btn-primary text-white px-6"
+          (click)="restoreDefaultDiscard()"
+        >
+          {{ 'discard' | translate }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<web-messenger-modal *ngIf="showSuccessPopup" [modalId]="'success-modal'" 
+[modalTitle]='modalTitleMessage'
+[modalMessage]='modalShowMessage'
+(closePopup)=" cancelpopup()"  
+[modalCloseText]="'Ok' | translate" 
+(cancelPopup)="cancelpopup()" 
+[cancelText]="'no'|translate">
+</web-messenger-modal>

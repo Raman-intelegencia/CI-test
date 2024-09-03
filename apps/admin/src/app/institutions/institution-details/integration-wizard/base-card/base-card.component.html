@@ -1,0 +1,67 @@
+<!-- TODO: (improvement not necessarily needed for feature complete) 
+    calculate height of element and set max-height to that when showing. -->
+<!-- Uses max-height to transition. Customize [class.max-h-12] and [class.max-h-40] to determine
+    size of collapsed/expanded. -->
+<div class="select-none text-left p-2.5 px-[12px] pt-[6px] dark:border-white w-60
+    overflow-hidden transition-all relative h-full max-h-full cursor-pointer"
+    [class.dark:text-black]="isSelected"
+    [class.bg-[#E6FDE7]]="inCardList && isSelected"
+    [class.border]="inCardList"
+    [class.border-[#C9C9C9]]="inCardList" 
+    [class.rounded]="inCardList"
+    [class.mb-3]="inCardList"
+    (click)="onSelect($event)"
+>
+    <div class="z-10 absolute right-0 top-0">
+        <div class="flex flex-row gap-1">
+            <p *ngIf="cardData.disabledMessage" 
+                class="px-1 rounded bg-[#E5E7EA] dark:bg-gray-800 font-bold text-[12px] text-black dark:text-white">
+                {{ cardData.disabledMessage | translate }}
+            </p>
+            <p *ngIf="cardData.infoMessage" 
+                class="px-1 rounded bg-[#E5E7EA] dark:bg-gray-800 font-bold text-[12px] text-black dark:text-white">
+                {{ cardData.infoMessage | translate }}
+            </p>
+        </div>
+    </div>
+
+    <div [class.opacity-50]="cardData.disabledMessage">
+        <h3 class="font-bold text-base" [ngClass]="getHeaderClass()">{{ cardData.header }}</h3>
+        <h4 class="font-bold text-[12px] -mt-[4px]" *ngIf="cardData.subheader" [ngClass]="getSubheaderClass()">{{ cardData.subheader }}</h4>
+    
+        <ul class="text-sm mt-[3px]">
+            <li class="flex flex-row" *ngFor="let item of cardDataRowsWithIcon ?? []">
+                <div class="mr-2 mt-[3px]">
+                    <img class="transition-all" 
+                        [class.icon-invertable]="!isSelected" 
+                        [src]="getIconURL(item.icon)" />
+                </div>
+                <div class="break-all whitespace-pre-line mb-[5px] w-10/12" [ngClass]="getRowClass(item)">{{ item.text }}</div>
+            </li>
+            <ng-container *ngIf="(cardDataRowsWithIcon?.length ?? 0) < 3">
+              <li class="flex flex-row" *ngFor="let item of cardDataRowsNoIcon ?? []; let i = index">
+                <ng-container *ngIf="i < 3 - (cardDataRowsWithIcon?.length ?? 0)">
+                  <div class="break-all whitespace-pre-line mb-[5px] w-10/12" [ngClass]="getRowClass(item)">{{ item.text }}</div>
+                </ng-container>
+              </li>
+            </ng-container>
+        </ul>
+        <ul class="text-sm" [class]="((cardDataRowsWithIcon?.length ?? 0) > 0) ? 'pt-1.5' : 'pt-[3px]'" id="non-icon-card-content" [hidden]="!isShowingFullCard" *ngIf="(cardDataRowsWithIcon?.length ?? 0) > 0 || (cardDataRowsNoIcon?.length ?? 0) > 3">
+          <li class="flex flex-row" *ngFor="let item of cardDataRowsNoIcon ?? []; let i = index">
+            <ng-container *ngIf="i >= 3 - (cardDataRowsWithIcon?.length ?? 0)">
+              <div class="break-all whitespace-pre-line mb-[5px] w-10/12" [ngClass]="getRowClass(item)">{{ item.text }}</div>
+            </ng-container>
+          </li>
+        </ul>
+    </div>
+    
+    <div class="w-14 h-14 absolute right-[3px] bottom-[2px] cursor-pointer" (click)="toggleShowingCard($event)" [class.hidden]="(cardDataRowsNoIcon?.length ?? 0) + (cardDataRowsWithIcon?.length ?? 0) <= 3">
+        <button class="select-none absolute right-1 bottom-1 
+            cursor-pointer" 
+            [class.rotate-180]="isShowingFullCard">
+            <img class="card-icon" 
+                [class.icon-invertable]="!isSelected" 
+                src="/assets/images/Icon-Arrow.svg" />
+        </button>
+    </div>
+</div>

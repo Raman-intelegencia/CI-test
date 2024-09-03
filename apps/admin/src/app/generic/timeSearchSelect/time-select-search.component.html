@@ -1,0 +1,98 @@
+<form [formGroup]="timeDateUTXForm" class="flex flex-wrap gap-x-4">
+        <div  class="mb-4">
+            <label class="mr-2 text-secondary dark:text-base-100 whitespace-nowrap">{{'from' | translate}}</label>
+            <div class="flex items-center">
+            <input type="date" formControlName="fromDate" (change)="toDateIsLessFromDate()"
+            [max]="currentDate"
+            class="border bg-transparent border-base-300 dark:text-white 
+            text-gray-600 rounded py-1.5 px-3" 
+             />
+            <div class="relative ml-1">           
+                <input 
+                    class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded py-1.5 px-3"
+                    type="text"
+                    name="fromTime"
+                    id="fromTime" 
+                    formControlName="fromTime"
+                    (focus)="institutionSearch(timeDateUTXForm.get('fromTime')?.value); 
+                    isFromDateTimeInputFocused = true"
+                    (keyup)="institutionSearch(timeDateUTXForm.get('fromTime')?.value)"
+                    (click)="clickFromDateTime($event)"
+                    [ngClass]="{ 'is-invalid': submitted && f['fromTime'].errors }"
+                     />
+    
+                <span *ngIf="timeDateUTXForm.get('fromTime')?.value" 
+                class="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer">
+                    <em class="ph ph-x" (click)="clearFromInput('fromDateTime')"></em>
+                </span>
+    
+                <div *ngIf="isFromDateTimeInputFocused"
+                    class="absolute z-50 w-full py-1 px-3 bg-white dark:bg-gray-800 border 
+                    border-gray-300 dark:border-gray-700 rounded mt-1 max-h-60 overflow-auto">
+                    <div *ngFor="let fromDateTime of times;">
+                        <div class="hover:bg-gray-100 dark:hover:bg-gray-900 px-3 py-2 cursor-pointer"
+                            (pointerdown)="selectFromTime($event,fromDateTime)">
+                            <p class="font-medium text-secondary dark:text-base-100"
+                                [innerHTML]="fromDateTime | highlightSearchTxt:searchFromDateTimeTerm"></p>
+                            <p class="text-sm" [innerHTML]="fromDateTime | highlightSearchTxt:searchFromDateTimeTerm"></p>
+                        </div>
+                    </div>
+                </div>
+                <div *ngIf="submitted && f['fromTime'].errors" class="invalid-feedback">
+                    <p *ngIf="f['fromTime'].errors['required']" class="text-neutral text-xs mt-0.5">
+                      {{"emailRequired" | translate}}
+                    </p>
+                    <p *ngIf="f['fromTime'].errors['pattern']" class="text-neutral text-xs mt-0.5">
+                      {{"emailPatternError" | translate}}
+                    </p>
+                </div>
+            </div>
+            </div>
+        </div>
+        <div class="mb-4">
+            <label class="mr-2 text-secondary dark:text-base-100 whitespace-nowrap">{{'to' | translate}}</label>
+            <div class="flex items-center">
+            <input type="date" formControlName="toDate" (change)="toDateIsLessFromDate()"
+            [max]="currentDate" 
+            class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded  py-1.5 px-3" />
+            <div class="relative ml-1">           
+                <input 
+                    class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded py-1.5 px-3"
+                    type="text" 
+                    formControlName="toTime"
+                    (focus)="institutionSearch(timeDateUTXForm.get('toTime')?.value); 
+                    isToDateTimeInputFocused = true"
+                    (keyup)="institutionSearch(timeDateUTXForm.get('toTime')?.value)"
+                    (click)="clickFromDateTime($event)"
+                    [ngClass]="{ 'is-invalid': submitted && f['toTime'].errors }"
+                     />
+    
+                <span *ngIf="timeDateUTXForm.get('toTime')?.value" 
+                class="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer">
+                    <em class="ph ph-x" (click)="clearFromInput('toDateTime')"></em>
+                </span>
+    
+                <div *ngIf="isToDateTimeInputFocused"
+                    class="absolute z-50 w-full py-1 px-3 bg-white dark:bg-gray-800 
+                    border border-gray-300 dark:border-gray-700 rounded mt-1 max-h-60 overflow-auto">
+                    <div *ngFor="let toDateTime of times;">
+                        <div class="hover:bg-gray-100 dark:hover:bg-gray-900 px-3 py-2 cursor-pointer"
+                            (pointerdown)="selectToTime($event,toDateTime)">
+                            <p class="font-medium text-secondary dark:text-base-100"
+                                [innerHTML]="toDateTime | highlightSearchTxt:searchToDateTimeTermTerm"></p>
+                            <p class="text-sm" [innerHTML]="toDateTime | highlightSearchTxt:searchToDateTimeTermTerm"></p>
+                        </div>
+                    </div>
+                </div>
+                <div *ngIf="submitted && f['toTime'].errors" class="invalid-feedback">
+                    <p *ngIf="f['toTime'].errors['required']" class="text-neutral text-xs mt-0.5">
+                      {{"emailRequired" | translate}}
+                    </p>
+                    <p *ngIf="f['toTime'].errors['pattern']" class="text-neutral text-xs mt-0.5">
+                      {{"emailPatternError" | translate}}
+                    </p>
+                </div>
+            </div>
+        </div>
+        </div> 
+</form>

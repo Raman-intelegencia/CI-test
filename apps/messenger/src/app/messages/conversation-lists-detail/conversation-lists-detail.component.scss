@@ -1,0 +1,53 @@
+textarea {
+    overflow-y: hidden; /* Initially hide the scrollbar */
+  }
+.conversation-body{
+    .chat{
+        .collapse{
+            .chat-bubble{
+                @apply rounded-xl;
+                &::before{
+                    @apply hidden;
+                }
+            }
+            &:last-child{
+                .chat-bubble{
+                    &::before{
+                        @apply block;
+                    }
+                }
+            }
+        }
+        &.chat-start{
+            .collapse{
+                &:last-child{
+                    .chat-bubble{
+                        @apply rounded-bl-none;
+                    }
+                }
+            }
+        }
+        &.chat-end{
+            .collapse{
+                &:last-child{
+                    .chat-bubble{
+                        @apply rounded-br-none;
+                    }
+                }
+            }
+        }
+    }
+}
+/* For .otpEntered class */
+.otpEntered {
+    @apply btn btn-primary;
+  }
+  /* For .otpNotEntered class */
+  .otpNotEntered {
+    @apply bg-gray-300 text-gray-600  cursor-default ;
+  }
+  .no-new-line {
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  

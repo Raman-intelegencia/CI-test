@@ -1,0 +1,57 @@
+<input type="checkbox"  [checked]="isSpecialties" class="modal-toggle" />
+<div class="modal bg-black/70">
+    <div
+        class="modal-box max-w-2xl bg-white dark:bg-black rounded p-0 relative overflow-y-hidden dark:border-primary/60 dark:border dark:shadow-xl dark:shadow-primary/20">
+        <div class="flex justify-between text-white items-center bg-primary p-3">
+            <h3 class="font-bold dark:text-white">{{"selectspecialties" | translate }}</h3>
+            <label class="w-7 h-7">
+                <em (click)="closemodal()" class="ph-bold ph-x cursor-pointer text-lg hover:text-accent"></em>
+            </label>
+        </div>
+        <div class="p-4 text-gray-600 dark:text-base-100 text-sm">
+            <div class="max-h-[50vh] overflow-y-auto mt-4">
+                <label class="cursor-pointer label justify-start flex gap-2 border-b dark:border-gray-700">
+                    <input type="checkbox" class="checkbox checkbox-xs checkbox-primary dark:checkbox-accent rounded"
+                        [(ngModel)]="allSpecialtiesChecked" (change)="checkAllSpecialties()" />
+                    <span class="mr-4">{{"All" | translate }}</span>
+                </label>
+
+                <div *ngIf="searchSpecialtiesTerm; else showAllSpecialties">
+                    <div *ngFor="let specialty of filteredSpecialties; let i = index">
+                        <ng-container *ngFor="let specialtiesState of specialtiesCheckboxStates; let j = index">
+                          <div *ngIf="specialty === specialtiesState.specialties">
+                            <label class="cursor-pointer label justify-start flex gap-2 border-b dark:border-gray-700">
+                              <input type="checkbox"
+                                     class="checkbox checkbox-xs checkbox-primary dark:checkbox-accent rounded"
+                                     [checked]="specialtiesState.selected" (change)="onCheckboxChange(j, specialty)" />
+                              <span class="mr-4">{{ specialtiesState.specialties }}</span>
+                            </label>
+                          </div>
+                          </ng-container>
+                    </div>
+                </div>
+                <ng-template #showAllSpecialties>
+                    <div *ngFor="let specialty of settingsArrayStates?.filteredSpecialties; let i = index">
+                        <label class="cursor-pointer label justify-start flex gap-2 border-b dark:border-gray-700">
+                            <input type="checkbox"
+                            class="checkbox checkbox-xs checkbox-primary dark:checkbox-accent rounded"
+                            [checked]="specialtiesCheckboxStates[i].selected"
+                            (change)="onCheckboxChange(i, specialty)" />
+                            <span class="mr-4" [innerHTML]="specialty | sanitizeHtml"></span>
+                        </label>
+                    </div>
+                </ng-template>
+            </div>
+
+            <div class="flex justify-end items-center mt-4 px-2">
+                <button type="button" class="btn btn-primary" (click)="saveSpecialties()">
+                    Save
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<web-messenger-modal *ngIf="isDiscard" [modalId]="'error-modal'" [modalTitle]="'discardChanges' | translate"
+    [modalMessage]="isDiscard" (closePopup)="discardPopup()" (cancelPopup)="cancelPopup()"
+    [modalCloseText]="'Discard' | translate"></web-messenger-modal>

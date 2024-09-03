@@ -1,0 +1,6 @@
+@import '../style/_util.scss';
+
+.threadcontent {
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+}

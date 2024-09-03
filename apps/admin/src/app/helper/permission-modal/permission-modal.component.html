@@ -1,0 +1,61 @@
+  <form [formGroup]="form">
+  <input type="checkbox" [checked]="isCheckboxModal" class="modal-toggle" />
+  <!-- Modal structure -->
+  <div class="modal bg-black/70">
+    <div class="modal-box max-w-2xl bg-white dark:bg-black rounded p-0 relative overflow-y-hidden dark:border-primary/60 dark:border dark:shadow-xl dark:shadow-primary/20">
+      <div class="flex justify-between text-white items-center bg-primary p-3">
+        <h3 class="font-bold dark:text-white">{{ title }}</h3>
+        <!-- Button to close the modal -->
+        <button type="button" (click)="showModalMessage()">
+          <em class="ph-bold ph-x cursor-pointer text-xl hover:text-accent"></em>
+        </button>
+      </div>
+      <div class="p-4 text-gray-600 dark:text-base-100 text-sm">
+        <div class="max-h-[60vh] overflow-y-auto px-2">
+          <!-- Looping through form controls (options) -->
+          <ng-container *ngIf="overrideModal; else filterFeatureBlock">
+            <label
+            *ngFor="let option of overrideData; let i=index"
+            class="cursor-pointer label justify-start flex gap-2 border-b dark:border-gray-700"
+          >
+          <input type="checkbox" 
+          (change)="toggleSelection(option)" class="checkbox checkbox-xs checkbox-primary dark:checkbox-accent rounded" 
+          [checked]="option.valid"
+          />
+          <span class="mr-4">{{option.description}}</span>
+          </label>
+          </ng-container>
+
+          <ng-template #filterFeatureBlock>
+            <label
+            *ngFor="let option of intialFilteredFeatureData; let i=index"
+            class="cursor-pointer label justify-start flex gap-2 border-b dark:border-gray-700"
+          >
+          <input type="checkbox" 
+          (change)="toggleSelection(option)" class="checkbox checkbox-xs checkbox-primary dark:checkbox-accent rounded" 
+          [checked]="option.valid" 
+          />
+          <span class="mr-4">{{option.description}}</span>
+          </label>
+          </ng-template>
+        </div>
+        <div class="flex justify-end items-center mt-8 px-2">
+          <!-- Button to save changes -->
+          <button type="button" [disabled]="saveButtonDisabled" class="btn btn-primary" (click)="onSaveClick()" >
+            {{ 'save' | translate }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+
+<web-messenger-modal *ngIf="showSuccessPopup" [modalId]="'success-modal'" 
+[modalTitle]='modalTitleMessage'
+[modalMessage]='modalShowMessage'
+(closePopup)="onCloseClick()"  
+[modalCloseText]="'Ok' | translate" 
+(cancelPopup)="cancelpopup()" 
+[cancelText]="'no'|translate">
+</web-messenger-modal>
+

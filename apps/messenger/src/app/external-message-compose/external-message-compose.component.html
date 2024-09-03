@@ -1,0 +1,123 @@
+<div *ngIf="composeArrayIndex < 2">
+  <div
+    [ngClass]="{'md:w-[30rem] shadow dark:shadow dark:shadow-primary': formStates.collapseVisible, 'md:w-[20rem] shadow mr-2': !formStates.collapseVisible}"
+    *ngIf="!(composeArrayLength > 2 && composeArrayIndex === 1)">
+    <div class="flex items-center  px-4 bg-primary rounded-t-md py-3">
+      <h3 class="text-base w-full flex items-center justify-between text-base-100 cursor-pointer"
+        (click)="toggleCollapse()">
+        <span>
+          {{ "newSecureExternalMessage" | translate}}
+          <span class="ml-1" *ngIf="composeData.phoneNumberDataList.length">
+            to {{composeData.phoneNumberDataList[0]}} {{composeData.phoneNumberDataList[0]}}
+          </span>
+        </span>
+        <em class="ph-bold" [class.ph-minus]="formStates.collapseVisible"
+          [class.ph-square]="!formStates.collapseVisible"></em>
+      </h3>
+      <span>
+        <em class="ph-bold text-base-100 ph-x cursor-pointer ml-3"
+          (click)="closePopup()"></em>
+      </span>
+    </div>
+    <form autocomplete="off" class="message-body p-4 bg-white dark:bg-black border-gray-400 border dark:border-primary/60 dark:border dark:shadow-xl dark:shadow-primary/20" *ngIf="formStates.collapseVisible"
+      [formGroup]="composeForm">
+      <div class="max-h-[60vh] overflow-y-auto">
+
+        <label class="mb-2 text-secondary text-sm dark:text-base-100">{{"from department" | translate}}</label>
+        <input
+          class="bg-base-100/[0.3] dark:border dark:border-gray-700 dark:bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-2 px-3"
+          type="text" placeholder="{{'optional' | translate}}"
+          [formControlName]="'department'"
+          (keyup)="updateDataValue('department',composeForm.controls['department'].value)" />
+
+        <label class="mb-2 text-secondary text-sm dark:text-base-100">{{"toMessage" | translate}}</label>
+        <div tabindex="0"
+          class="collapse rounded bg-base-100/[0.3] dark:border dark:border-gray-700 dark:bg-transparent  mb-2">
+          <div class=" flex flex-wrap gap-1 items-center m-2">
+            <input  #toSearchInput
+              class="bg-transparent flex-grow outline-none focus:ring-0 border-0 dark:text-white" type="text" name=""
+              id="toSearchInput" [formControlName]="'to'" 
+              [placeholder]="composeData.phoneNumberDataList.length > 0 ? '' : ('mobilePhoneNumber' | translate)"
+              (keyup)="updateDataValue('to',composeForm.controls['to'].value)"  (keypress)="numberOnly($event)" maxlength="14" />
+          </div>
+        </div>
+
+        <label class="mb-2 text-secondary text-sm dark:text-base-100">{{"recipientName" | translate}}</label>
+        <input
+          class="bg-base-100/[0.3] dark:border dark:border-gray-700 dark:bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-2 px-3"
+          type="text" name="" id="recipient_name" placeholder="{{'required' | translate}}"
+          [formControlName]="'recipient_name'"
+          (keyup)="updateDataValue('recipient_name',composeForm.controls['recipient_name'].value)" />
+
+        <div class="px-6 py-4 bg-gray-100 dark:bg-gray-900 dark:text-white rounded mt-4">
+          {{"externalMessageDescription" | translate }}<br />
+          {{"externalMessageDescription1" | translate }}
+        </div>
+      </div>
+      <div autocomplete="off" class="py-3 flex left-0 right-0 z-40 bg-white dark:bg-black">
+        <div class="relative w-full flex items-center">
+            <textarea #textareaInputField id="message" 
+            placeholder="{{ 'typeSomething' | translate }}" 
+            class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-2 px-3 pr-7 max-h-[6em] overflow-y-hidden"
+            [formControlName]="'message'"
+             value="selectedMsg" 
+            [ngStyle]="getStyle()" 
+            (scroll)="adjustOverflowY()"
+            [ngClass]="{ 'focused': formStates.isMessageFocused }" 
+            (focus)="formStates.isMessageFocused = true" 
+            (blur)="formStates.isMessageFocused = false" 
+            (input)="onInput($event)" 
+            (keyup.enter)="handleEnterKeyboardEvent($event)"></textarea>
+        </div>
+        <span class="chat chat-end -mr-6 ml-3">
+          <span *ngIf="!(composeFormControls['message'].value && composeFormControls['to'].value) else sendButton ">
+            <web-messenger-quick-messages (dataEvent)="selectedQuickMessage($event)"></web-messenger-quick-messages>
+          </span>
+          <ng-template #sendButton>
+            <span>
+              <button
+                class="cursor-pointer bg-primary text-white hover:btn-secondary dark:btn-accent dark:hover:btn-primary flex items-center p-2 justify-center h-10 rounded-xl"
+                (click)="createThread()">{{'send' | translate}}</button>
+            </span>
+          </ng-template>
+        </span>
+      </div>
+      <div class="flex justify-between">
+        <label class="flex items-center justify-end cursor-pointer text-secondary dark:text-accent">
+          <input type="checkbox" class="checkbox checkbox-xs mr-1 rounded checkbox-primary"
+            [formControlName]="'enterToSend'" (click)="setQuick_send()">
+          <span class="text-xs dark:text-base-100">{{"enterToSendMessage" | translate}}</span>
+        </label>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- discard modal -->
+<input type="checkbox" id="discard-modal" class="modal-toggle" [checked]="formStates.showDiscardModal" />
+<div class="modal bg-black/70">
+  <div
+    class="modal-box max-w-md bg-white dark:bg-black rounded p-0 relative overflow-y-hidden dark:border-primary/60 dark:border dark:shadow-xl dark:shadow-primary/20">
+    <div class="flex justify-between text-white items-center bg-primary p-3">
+      <h4 class="font-bold">{{"cancelNewConversation" | translate}}?</h4>
+      <label for="discard-modal" class="w-7 h-7">
+        <em class="ph-bold ph-x text-base-100 hover:bg-base-100/[0.08] p-2 rounded-full cursor-pointer"
+          (click)="formStates.showDiscardModal=!formStates.showDiscardModal"></em>
+      </label>
+    </div>
+    <div class="p-4 max-h-[65vh] overflow-y-auto">
+      <h2 class="text-secondary dark:text-base-100 text-lg font-bold">
+        {{"discardNewMessage" | translate}}?
+      </h2>
+      <div class="flex justify-end mt-3">
+        <button class="btn btn-neutral text-white" (click)="confirmDiscard()">{{"discard" | translate}}</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<web-messenger-modal *ngIf="showErrorMessage" [modalId]="'error-modal'" [modalTitle]="'error' | translate"
+  [modalMessage]="showErrorMessage" (closePopup)="showErrorMessage = ''" [modalCloseText]="'close' | translate"
+  (cancelPopup)="showErrorMessage = ''"></web-messenger-modal>

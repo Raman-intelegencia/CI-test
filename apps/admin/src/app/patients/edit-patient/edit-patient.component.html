@@ -1,0 +1,240 @@
+<!--Tabs navigation-->
+<div class="p-4 bg-gray-50 m-0 md:px-12 px-4 dark:bg-white/[0.05] dark:border-b dark:border-gray-700  dark:text-white">
+    <a (click)="cancelEditPatientForm()" class="link link-primary dark:link-accent text-sm table no-underline"><em class="ph ph-arrow-left mr-1"></em>
+        {{'Returntopatientsearch' | translate}}</a>
+    <h1 class="font-semibold mt-2">{{'editPatient' | translate}}</h1>
+</div>
+<!--Content Details -->
+<div class="h-[calc(100%-10rem)] md:px-12 px-4 py-6 overflow-y-auto">
+    <form [formGroup]="editPatentsForm" (keydown)="onKeyDown($event)" class="grid grid-cols-1 md:grid-cols-12 text-secondary dark:text-white">
+        <div class="lg:col-span-5 md:col-span-6">
+            <div class="md:flex items-center mb-4">
+                <label class="font-bold text-secondary text-sm dark:text-base-100 md:w-[12rem]">{{'PatientID' | translate}} :</label>
+                <div class="w-full">
+                <input
+                    class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1.5 px-3"
+                    type="text" name="pid" id="pid" formControlName="pid" [attr.placeholder]="'PatientIDAsterisk' | translate" 
+                    [ngClass]="{ 'is-invalid': submitted && f['pid'].errors }"/>
+                    <div *ngIf="submitted && f['pid'].errors" class="invalid-feedback">
+                        <p *ngIf="f['pid'].errors['required']" class="text-neutral text-xs mt-0.5">
+                          {{"PatientIDRequired" | translate}}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <span formGroupName="name">
+                <div class="md:flex items-center mb-4">
+                    <label class="font-bold text-secondary text-sm dark:text-base-100 md:w-[12rem]">{{'Nameprefix' | translate}} :</label>
+                    <input
+                        class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1.5 px-3"
+                        type="text" name="prefix" id="prefix" formControlName="prefix"  />   
+                </div>
+                <div class="md:flex items-center mb-4">
+                    <label class="font-bold text-secondary text-sm dark:text-base-100 md:w-[12rem]">{{'firstName' | translate}} :</label>
+                    <div class="w-full">
+                        <input
+                        class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1.5 px-3"
+                        type="text" name="given" id="given" formControlName="given" [attr.placeholder]="'FirstNameAsterisk' | translate"
+                        [ngClass]="{ 'is-invalid': submitted && n['given'].errors }" />
+                        
+                        <div *ngIf="submitted && n['given'].errors" class="invalid-feedback">
+                            <p *ngIf="n['given'].errors['required']" class="text-neutral text-xs mt-0.5">
+                              {{"FirstNameRequired" | translate}}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="md:flex items-center mb-4">
+                    <label class="font-bold text-secondary text-sm dark:text-base-100 md:w-[12rem]">{{'Middlename' | translate}} :</label>
+                    <input
+                        class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1.5 px-3"
+                        type="text" name="middle" id="middle" formControlName="middle" />
+                </div>
+                <div class="md:flex items-center mb-4">
+                    <label class="font-bold text-secondary text-sm dark:text-base-100 md:w-[12rem]">{{'lastName' | translate}} :</label>
+                    <div class="w-full">
+                    <input
+                        class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1.5 px-3"
+                        type="text" [attr.placeholder]="'LastNameAsterisk' | translate" name="family" id="family" formControlName="family" 
+                        [ngClass]="{ 'is-invalid': submitted && n['family'].errors }" />
+                        <div *ngIf="submitted && n['family'].errors" class="invalid-feedback">
+                            <p *ngIf="n['family'].errors['required']" class="text-neutral text-xs mt-0.5">
+                              {{"Last Name Required" | translate}}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="md:flex items-center mb-4">
+                    <label class="font-bold text-secondary text-sm dark:text-base-100 md:w-[12rem]">{{'Namesuffix' | translate}} :</label>
+                    <input
+                        class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1.5 px-3"
+                        type="text" name="suffix" id="suffix" formControlName="suffix" />
+                </div>
+            </span>
+    
+            <div class="md:flex items-center mb-4">
+                <label class="font-bold text-secondary text-sm dark:text-base-100 md:w-[12rem]">{{'dob' | translate}}</label>
+                <div class="w-full">
+                <input
+                    class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1.5 px-3"
+                    type="date" [attr.placeholder]="'DOBAsterisk' | translate" name="dob" id="dob" formControlName="dob"  [max]="currentDate"
+                    [ngClass]="{ 'is-invalid': submitted && f['dob'].errors }" />
+                    <div *ngIf="submitted && f['dob'].errors" class="invalid-feedback">
+                        <p *ngIf="f['dob'].errors['required']" class="text-neutral text-xs mt-0.5">
+                          {{"DOBRequired" | translate}}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="md:flex mb-4 items-center">
+                <label class="font-bold text-secondary text-sm dark:text-base-100 md:w-[12rem]">{{'sex' | translate}}:</label>
+                <div class="w-full flex gap-4">
+                    <ng-container *ngFor="let gender of genderList">
+                        <label class="label cursor-pointer dark:text-base-100">
+                          <input type="radio" formControlName="sex" class="radio radio-xs radio-primary dark:radio-accent mr-1" 
+                          [value]="gender.value" [ngClass]="{ 'is-invalid': submitted && f['sex'].errors }"  required />
+                          {{ gender.display }}
+                        </label>
+                      </ng-container>
+                </div>
+                <div *ngIf="submitted" class="invalid-feedback">
+                    <p class="text-neutral text-xs mt-0.5">
+                      {{"genderRequired" | translate}}
+                    </p>
+                </div>
+               
+            </div>
+            <span formGroupName="address">
+                <div class="md:flex items-center mb-4">
+                    <label class="font-bold text-secondary text-sm dark:text-base-100 md:w-[12rem]">{{'address' | translate}}:</label>
+                    <div class="flex gap-3 w-full">
+                        <input
+                            class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1.5 px-3"
+                            type="text" [attr.placeholder]="'AddressLine1' | translate"  name="street_address" id="street_address" formControlName="street_address" />
+                        <input
+                            class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1.5 px-3"
+                            type="text" [attr.placeholder]="'AddressLine2' | translate"  name="street_other" id="street_other" formControlName="street_other" />
+                    </div>
+                </div>
+                <div class="md:flex items-center mb-4">
+                    <label class="font-bold text-secondary text-sm dark:text-base-100 md:w-[12rem]">{{'location' | translate}} :</label>
+                    <input
+                        class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1.5 px-3"
+                        type="text" name="location" id="location" formControlName="location" />
+                </div>
+                <div class="md:flex items-center mb-4">
+                    <label class="font-bold text-secondary text-sm dark:text-base-100 md:w-[12rem]">{{'city' | translate}} :</label>
+                    <input
+                        class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1.5 px-3"
+                        type="text" name="city" id="city" formControlName="city" />
+                </div>
+                <div class="md:flex items-center mb-4">
+                    <label class="font-bold text-secondary text-sm dark:text-base-100 md:w-[12rem]">{{'state' | translate}} :</label>
+                    <select formControlName="state"
+                        class="border bg-transparent border-base-300 dark:text-white dark:bg-black text-gray-600 rounded w-full h-8 px-3">
+                        <option value=""></option>
+                        <option *ngFor="let state of statesList" [value]="state.value">{{state.display}}</option>
+                    </select>
+                </div>
+                <div class="md:flex items-center mb-4">
+                    <label class="font-bold text-secondary text-sm dark:text-base-100 md:w-[12rem]">{{'zip' | translate}} :</label>
+                    <input
+                        class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1.5 px-3"
+                        type="text" name="zip" id="zip" formControlName="zip" />
+                </div>
+                <div class="md:flex items-center mb-4">
+                    <label class="font-bold text-secondary text-sm dark:text-base-100 md:w-[12rem]">{{'country' | translate}} :</label>
+                    <input
+                        class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1.5 px-3"
+                        type="text" name="country" id="country" formControlName="country" />
+                </div>
+            </span>
+        </div>
+        <div class="col-span-1"></div>
+        <div class="lg:col-span-4 md:col-span-5">
+            <div class="md:flex   mb-4">
+                <label class="font-bold text-secondary text-sm dark:text-base-100 md:w-[12rem]">{{'AssocOUs' | translate}} :</label>
+                <div class="collapse collapse-arrow border border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-1.5 pl-3">
+                    <p class="flex flex-wrap gap-1">
+                        <span *ngFor="let inst of associatedOuArray.value"
+                            class="bg-gray-50 dark:bg-gray-700 rounded px-2 py-0.5 text-sm">
+                            <em class="ph ph-x mr-1 cursor-pointer" (click)="removeAssociatedOu($event, inst.id)"></em>
+                            {{ inst.name }}
+                    </span>
+                    </p>
+                    <input type="checkbox" class="peer min-h-0 p-0" [checked]="isCollapseOpen" (change)="toggleCollapse($event)" />
+                    <div class="collapse-title p-0 min-h-0 gap-2">
+                        <span>{{'selectInstitutions' | translate}}</span>
+                    </div>
+                    <div class="collapse-content p-0 pr-3">
+                        <input #instSearch type="text" placeholder="{{'Search' | translate}}"
+                            (input)="onSearchChange($event, instSearch.value)"
+                            (blur)="closeCollapseOnBlur($event)"
+                            class="mt-3 border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1.5 px-3">
+                        <p class="my-2 hover:bg-gray-100 dark:hover:bg-gray-900 cursor-pointer rounded px-1" *ngFor="let child of filteredChildInst" (click)="addAssociatedOu($event, child)">
+                                <b class="block" [innerHTML]="child.name | highlightSearchTxt:instSearch.value"></b>
+                                <span [innerHTML]="child.id | highlightSearchTxt:instSearch.value"></span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="md:flex items-center mb-4">
+                <label class="font-bold text-secondary text-sm dark:text-base-100 md:w-[12rem]">{{'snn' | translate}} :</label>
+                <input
+                    class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1.5 px-3"
+                    type="text" name="ssn" id="ssn" formControlName="ssn" />
+            </div>
+
+            <div class="md:flex items-center mb-4">
+                <label class="font-bold text-secondary text-sm dark:text-base-100 md:w-[12rem]">{{'MedicaidID' | translate}} :</label>
+                <input
+                    class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1.5 px-3"
+                    type="text" name="medicaid_id" id="medicaid_id" formControlName="medicaid_id" />
+            </div>
+            <div class="md:flex items-center my-6">
+                <label class="font-bold text-secondary text-sm dark:text-base-100 md:w-[9rem]">{{'PCMEnabled' | translate}}</label>
+                <div class="flex items-center space-x-2">
+                    <span>{{'disabled' | translate}}</span>
+                    <input type="checkbox" class="toggle toggle-primary" name="pcm_enabled" id="pcm_enabled" formControlName="pcm_enabled"/> 
+                    <span>{{'enabled' | translate}}</span>
+                </div>
+            </div>
+            
+            <span formGroupName="primary_insurance">
+                <div class="md:flex items-center mb-4">
+                    <label class="font-bold text-secondary text-sm dark:text-base-100 md:w-[12rem]">{{'PolicyNumber' | translate}} :</label>
+                    <input
+                        class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1.5 px-3"
+                        type="text" name="policy_number" id="policy_number" formControlName="policy_number" />
+                </div>
+                <div class="md:flex items-center mb-4">
+                    <label class="font-bold text-secondary text-sm dark:text-base-100 md:w-[12rem]">{{'policyStart' | translate}} :</label>
+                    <input
+                        class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1.5 px-3"
+                        type="date" name="policy_start_date" id="policy_start_date" formControlName="policy_start_date" />
+                </div>
+                <div class="md:flex items-center mb-4">
+                    <label class="font-bold text-secondary text-sm dark:text-base-100 md:w-[12rem]">{{'policyEnd' | translate}} :</label>
+                    <input
+                        class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1.5 px-3"
+                        type="date"  min="1970-01-01" name="policy_end_date" id="policy_end_date" formControlName="policy_end_date" />
+                </div>
+            </span>
+            <div class="flex space-x-4 mt-6 justify-end">
+                <button (click)="cancelEditPatientForm()" class="btn bg-gray-300 hover:bg-gray-400 border-0 text-primary">{{'cancel' | translate}}</button>
+                <button (click)="editPatentsSubmit()" [disabled]="!disabledFormChanged" class="btn btn-primary text-white">{{'save' | translate}}</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+<web-messenger-modal *ngIf="showSuccessPopup == true" [modalId]="'success-modal'" 
+[modalTitle]='modalTitleMessage'
+[modalMessage]='modalShowMessage' 
+(closePopup)="performDiscardForm(modalTitleMessage)"  
+[modalCloseText]='modalCloseTextMessage' 
+(cancelPopup)="cancelpopup()" 
+[cancelText]="'no'|translate">
+</web-messenger-modal>

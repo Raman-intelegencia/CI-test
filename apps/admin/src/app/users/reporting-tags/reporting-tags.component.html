@@ -1,0 +1,115 @@
+<input type="checkbox"  class="modal-toggle"  [checked]="isReportingTag"/>
+    <div class="modal bg-black/70">
+        <div
+            class="modal-box max-w-xl bg-white dark:bg-black rounded p-0 relative overflow-y-hidden dark:border-primary/60 dark:border dark:shadow-xl dark:shadow-primary/20">
+            <div class="flex justify-between text-white items-center bg-primary p-3">
+              <ng-container *ngIf="showTitle; else otherTitle">
+                <h3 class="font-bold dark:text-white">{{ modaltitle }}</h3>
+              </ng-container>
+              <ng-container *ngIf="showQuickMessageTitle">
+                <h3 class="font-bold dark:text-white">{{ modaltitle }}</h3>
+              </ng-container>
+              <ng-template #otherTitle>
+                <h3 *ngIf="!showQuickMessageTitle" class="font-bold dark:text-white">{{ 'editReportingTags' | translate }}</h3>
+              </ng-template>
+                <label class="w-7 h-7 " (click)="closePopup()">
+                    <em class="ph-bold ph-x cursor-pointer text-xl hover:text-accent"></em>
+                </label>
+            </div>
+            <div class="p-4 text-gray-600 dark:text-base-100 text-sm">
+                <div class="max-h-[60vh] overflow-y-auto">
+                    <div class="flex text-sm font-medium mb-3 bg-gray-100 dark:bg-gray-900 rounded overflow-hidden">
+                        <a (click)="reporting_active_status = viewType.List"
+                            [class]="reporting_active_status=== viewType.List ? 'bg-primary text-white dark:bg-accent dark:text-secondary':'bg-tansparent cursor-pointer'"
+                            class="text-gray-600 font-semibold px-3 py-2">{{ "listView" | translate }}</a>
+                    <ng-container *ngIf="updateInstitutionPermission" >        
+                        <a (click)="reporting_active_status = viewType.FreeText"
+                            [class]="reporting_active_status=== viewType.FreeText ? 'bg-primary text-white dark:bg-accent dark:text-secondary':'bg-tansparent cursor-pointer'"
+                            class="text-gray-600 font-semibold  px-3 py-2">{{ "freeTextView" | translate }}</a>
+                    </ng-container>        
+                    </div>
+                    <div *ngIf="reporting_active_status=== viewType.List; else freeTextView"> 
+                      <ng-container *ngIf="updateInstitutionPermission" > 
+                        <h5 class="text-primary dark:text-accent cursor-pointer text-sm font-bold pb-2 text-left" *ngIf="!addbuttonToInput" (click)="changeAddbuttonToInput()">
+                            <em class="ph-bold ph-plus"></em> {{ "addText" | translate }}
+                          </h5>
+                      </ng-container>    
+                          <form class="w-full flex items-center my-3 pb-0" [formGroup]="reportingTagForm" *ngIf="addbuttonToInput">
+                            <input #addMessageInput type="text" class="resize-none bg-transparent w-full mr-4 overflow-y-hidden focus:outline-none dark:text-base-100"
+                              formControlName="tag" placeholder="{{ 'enterNew' | translate }}" id="error-modal"> 
+                            <button class="text-primary dark:text-accent cursor-pointer text-sm font-bold" (click)="savetags()">
+                              {{"Add" | translate}}
+                            </button>
+                            <em class="text-neutral ph-bold ph-x cursor-pointer text-lg ml-1 mr-4" (click)="closeaddbuttonInput()"></em>
+                          </form> 
+                        <div class="cursor-pointer label justify-between mb-1 rounded px-3 border dark:border-gray-700" *ngFor="let item of tags; let i =index">
+                            <span *ngIf="!isEditingTag(i)"><span [innerHTML]="item | sanitizeHtml"></span></span>
+                            <ng-template [ngIf]="isEditingTag(i)"> 
+                                <form class="w-full"  > 
+                                  <textarea #editMessageInput class="bg-transparent w-full mr-4 focus:outline-none cursor-text blinking-cursor leading-none resize-none pt-2" [(ngModel)]="editedValue" [ngModelOptions]="{standalone: true}" autofocus></textarea>
+                                </form>
+                            </ng-template>
+                        
+                            <div class="flex items-center gap-3" *ngIf="!isEditingTag(i)">
+                              <ng-container *ngIf="updateInstitutionPermission" > 
+                                <em class="text-primary dark:text-accent ph-bold ph-pencil-simple text-lg"  (click)="editValueAtIndex(i)"></em>
+                                <button type="button" class="tooltip tooltip-left tooltip-neutral text-lg" data-tip="Delete" (click)="deleteReportingTag(item)">
+                                    <em class="ph-fill ph-trash text-neutral cursor-pointer"></em>
+                                </button>
+                                <ng-container *ngIf="serviceTags?.includes(item)">
+                                  <button *ngIf="isaddUser" type="button" class="tooltip tooltip-left tooltip-neutral text-lg" data-tip="AddUser" 
+                                  (click)="addUserModal(i)">
+                                    <em class="ph-bold ph-user-plus text cursor-pointer"></em>
+                                  </button>
+                                </ng-container>
+                              </ng-container>  
+                              </div>
+                              <ng-container *ngIf="isEditingTag(i)">
+                                <div class="flex items-center gap-3">
+                                  <button type="submit" class="link link-primary dark:text-accent no-underline text-sm font-bold pr-4" (click)="saveEditedValue()">
+                                    {{"save" | translate}}
+                                  </button>
+                                  <em class="text-neutral ph-bold ph-x cursor-pointer text-lg" (click)="backtolist()"></em>
+                                </div>
+                              </ng-container>
+                            </div>
+                    </div>
+                    <ng-template #freeTextView>
+                        <label>{{ "valuesSeparateLines" | translate }}</label>
+                        <form>
+                        <textarea id="freetextarea-id" [(ngModel)]="newTagInput" [ngModelOptions]="{standalone: true}"
+                            class="min-h-[12rem] border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full p-2" (ngModelChange)="detectDeletedRows()">
+                        </textarea> 
+                        </form>
+                    </ng-template>
+                </div>
+                <div class="flex justify-end mt-4">
+                    <button *ngIf="showTitle;else serviceTeamButton" class="btn btn-primary" (click)="saveRoles()" >
+                      {{ "save" | translate }}
+                    </button>
+                    <ng-template #serviceTeamButton >
+                      <ng-container *ngIf="updateInstitutionPermission">
+                      <button type="button" class="btn btn-primary" (click)="saveReportingTags()">
+                        {{ "save" | translate }}
+                      </button>
+                    </ng-container>
+                  </ng-template>
+                </div>
+            </div>
+        </div>
+    </div>
+  <web-messenger-add-user-services *ngIf="addUser" 
+  [isServiceAddUser]="showAddUserInServiceTeam" 
+  [addUserInServiceData]=" addUserInServiceData" 
+  [renderDateTimeInputs]="addbuttonToInput" 
+  [institutionId]="institutionId" 
+  [roles]="roles" 
+  [modaltitle]="addUserModalTitle" 
+  (saveForm)="saveAddUser($event)" 
+  (notServiceAddUser)="changeShowModalvalue($event)"
+  (getDataAndCloseModal)="getDataAndCloseodalWindow($event)" [user]="selectedUser" [tagsValue]="tagsValue">
+  </web-messenger-add-user-services>
+
+ 
+
+  

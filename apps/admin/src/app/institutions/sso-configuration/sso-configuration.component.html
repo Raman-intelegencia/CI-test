@@ -1,0 +1,296 @@
+<div class="h-full overflow-hidden relative md:flex block md:gap-2">
+    <web-messenger-institute-leftpanel [institutionId]="instituteId" ></web-messenger-institute-leftpanel>
+
+    <div class="p-4 w-full dark:text-base-100">
+        <a class="link link-primary dark:link-accent text-sm table no-underline" (click)="navigateBackToSource()">
+            <em class="ph ph-arrow-left mr-1"></em>{{'returntoViewInstitution' | translate}}</a>
+        <h1 class="mb-4 pt-4 px-4 font-semibold">{{'ssoConfiguration' | translate}}</h1>
+        <div class="flex text-sm font-medium -mb-[1px] px-1 gap-1">
+            <ng-container *ngFor="let configKeys of configDataKeys">
+                <a (click)="changeTab(configKeys)" [class]="activeSection === active_status ? 
+            'text-primary bg-white dark:text-accent dark:text-secondary'
+            :'bg-gray-100 dark:bg-gray-700 cursor-pointer'"
+                    class="text-gray-600 dark:text-base-100 px-4 py-2 border-gray-100 border border-b-0 rounded-t dark:border-gray-700">
+                    <em class="ph-fill ph-plus-circle"></em>
+                    {{configKeys | titlecase}}</a>
+            </ng-container>
+
+        </div>
+
+        <div [ngSwitch]="active_status"
+            class="p-4 border w-full  border-gray-100 dark:border-gray-700 rounded w-full shadow-sm md:h-[calc(100vh-15rem)] h-[calc(100vh-20rem)] overflow-y-auto">
+
+            <!-- Initial Form Render -->
+            <div *ngSwitchCase="'New'">
+                <form [formGroup]="commonDynamicForm" *ngIf="otherSSOFieldsData" class="lg:w-4/6">
+                    <div class="md:grid md:grid-cols-2 gap-x-6"
+                        *ngFor="let commonFieldsKey of getOnlyCommonFieldsKeys(commonDynamicFormDefaultKey)">
+                        <ng-container [formGroup]="getInitialCommonFormGroup(commonFieldsKey)">
+                            <ng-container *ngFor="let field of otherSSOFieldsData[commonFieldsKey]">
+                                <div class="mb-3 pt-5" *ngIf="field.type === 'boolean'">
+                                    <label class="cursor-pointer space-x-2 label justify-start py-0">
+                                        <input type="checkbox"
+                                            class="checkbox checkbox-primary dark:checkbox-accent rounded checkbox-xs"
+                                            [formControlName]="field.attribute" />
+                                        <span class="font-semibold text-secondary text-sm dark:text-base-100">{{
+                                            field.label }}</span>
+                                    </label>
+                                    <small class="ml-6 pl-0.5 dark:text-base-100">({{field.description}})</small>
+                        
+                                </div>
+
+                                <div class="mb-3" *ngIf="field.type === 'choice'">
+                                    <label class="font-semibold text-secondary text-sm dark:text-base-100">
+                                        {{ field.label }}<sup class="text-neutral top-0">*</sup>
+                                    </label>
+                                    <select id="type" name="type" required="" [formControlName]="field.attribute"
+                                        class="h-10 border bg-transparent border-base-300 dark:text-white dark:bg-black text-gray-600 rounded w-full px-3">
+                                        <option [value]=""></option>
+                                        <option *ngFor="let type of field.choices" [value]="type">{{ type }}</option>
+                                    </select>
+                                    <small class="dark:text-base-100">({{field.description}})</small>
+                                </div>
+
+                                <div class="mb-3" *ngIf="field.type === 'string'">
+                                    <label class="font-semibold text-secondary text-sm dark:text-base-100">
+                                        {{ field.label }}
+                                    </label>
+                                    <input type="text"
+                                        class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1.5 px-3"
+                                        [formControlName]="field.attribute" />
+                                    <small class="dark:text-base-100">({{field.description}})</small>
+                                </div>
+
+                                <div class="mb-3" *ngIf="field.type === 'date'">
+                                    <label class="font-semibold text-secondary text-sm dark:text-base-100">
+                                        {{ field.label }} 
+                                    </label>
+                                    <input type="date"
+                                        class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1.5 px-3"
+                                        readonly="" />
+                                    <small class="dark:text-base-100">({{field.description}})</small>
+                                </div>
+                            </ng-container>
+                        </ng-container>
+                    </div>
+                </form>
+
+                <form [formGroup]="dynamicForm" *ngIf="otherSSOFieldsData" class="lg:w-4/6">
+                    <div class="md:grid md:grid-cols-2 gap-x-6"
+                        *ngFor="let otherSSOFieldExceptCommon of getOtherSSOSchemaKeysExceptCommon(this.ssoTypeSelect)">
+                        <ng-container [formGroup]="getInitialDynamicFormGroup(otherSSOFieldExceptCommon)">
+                            <ng-container *ngFor="let field of otherSSOFieldsData[otherSSOFieldExceptCommon]">
+                                <div class="mb-3 pt-5" *ngIf="field.type === 'boolean'">
+                                    <label class="cursor-pointer space-x-2 label justify-start py-0">
+                                        <input type="checkbox"
+                                            class="checkbox checkbox-primary dark:checkbox-accent rounded checkbox-xs"
+                                            [formControlName]="field.attribute" />
+                                        <span class="font-semibold text-secondary text-sm dark:text-base-100">{{
+                                            field.label }}</span>
+                                    </label>
+                                    <small class="ml-6 pl-0.5">({{field.description}})</small>
+                                </div>
+
+                                <div class="mb-3" *ngIf="field.type === 'choice'">
+                                    <label class="font-semibold text-secondary text-sm dark:text-base-100">
+                                        {{ field.label }} <sup class="text-neutral top-0">*</sup>
+                                    </label>
+                                    <select id="type" name="type" required="" [formControlName]="field.attribute"
+                                        class="h-10 border bg-transparent border-base-300 dark:text-white dark:bg-black text-gray-600 rounded w-full px-3">
+                                        <option [value]=""></option>
+                                        <option *ngFor="let type of field.choices" [value]="type">{{ type }}</option>
+                                    </select>
+                                    <small class="dark:text-base-100">({{field.description}})</small>
+                                </div>
+
+                                <div class="mb-3" *ngIf="field.type === 'string'">
+                                    <label class="font-semibold text-secondary text-sm dark:text-base-100">
+                                        {{ field.label }}
+                                    </label>
+                                    <input type="text"
+                                        class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1.5 px-3"
+                                        [formControlName]="field.attribute" />
+                                    <small class="dark:text-base-100">({{field.description}})</small>
+                                </div>
+
+                                <div class="mb-3" *ngIf="field.type === 'password'">
+                                    <label class="font-semibold text-secondary text-sm dark:text-base-100">
+                                        {{ field.label }}
+                                    </label>
+                                    <input type="password"
+                                        class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1.5 px-3"
+                                        [formControlName]="field.attribute" />
+                                    <small class="dark:text-base-100">({{field.description}})</small>
+                                </div>
+
+                                <div class="mb-3" *ngIf="field.type === 'date'">
+                                    <label class="font-semibold text-secondary text-sm dark:text-base-100">
+                                        {{ field.label }}
+                                    </label>
+                                    <input type="date"
+                                        class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1.5 px-3" />
+                                    <small class="dark:text-base-100">({{field.description}})</small>
+                                </div>
+
+                                <div class="mb-3" *ngIf="field.type === 'file'">
+                                    <label class="font-semibold text-secondary text-sm dark:text-base-100">
+                                        {{ field.label }}
+                                    </label>
+                                    <input type="file"
+                                        class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1.5 px-3"
+                                        (change)="uploadFile($event)" [formControlName]="field.attribute" />
+                                    <small class="dark:text-base-100">({{field.description}})</small>
+                                </div>
+                            </ng-container>
+                        </ng-container>
+                    </div>
+                </form>
+                <div class="flex space-x-4 mt-4">
+                    <button type="submit" (click)="onConfirmPopUP()" [disabled]="isButtonDisabled"
+                        class="btn btn-primary text-white">{{'save' | translate}}</button>
+                    <button class="btn bg-gray-300 hover:bg-gray-400 border-0 text-primary"
+                        (click)="navigateBackToSource()">{{'cancel' | translate}}</button>
+                </div>
+            </div>
+
+            <!-- Pre-Filled Form Render -->
+            <ng-container *ngSwitchCase="selectedTab">
+                <form [formGroup]="preFilledCommonDynamicForm" *ngIf="otherSSOFieldsData" class="lg:w-4/6">
+                    <div class="md:grid md:grid-cols-2 gap-x-6"
+                        *ngFor="let commonFieldsKey of getOnlyCommonFieldsKeys(commonDynamicFormDefaultKey)">
+                        <ng-container [formGroup]="getPreFilledCommonFormGroup(commonFieldsKey)">
+                            <ng-container *ngFor="let field of otherSSOFieldsData[commonFieldsKey]">
+                                <div class="mb-3 pt-5" *ngIf="field.type === 'boolean'">
+                                    <label class="cursor-pointer space-x-2 label justify-start py-0">
+                                        <input type="checkbox"
+                                            class="checkbox checkbox-primary dark:checkbox-accent rounded checkbox-xs"
+                                            [formControlName]="field.attribute" />
+                                        <span class="font-semibold text-secondary text-sm dark:text-base-100">{{
+                                            field.label }}</span>
+                                    </label>
+                                    <small class="ml-6 pl-0.5 dark:text-base-100">({{field.description}})</small>
+                                </div>
+
+                                <div class="mb-3" *ngIf="field.type === 'choice'">
+                                    <label class="font-semibold text-secondary text-sm dark:text-base-100">
+                                        {{ field.label }}<sup class="text-neutral top-0">*</sup>
+                                    </label>
+                                    <select [formControlName]="field.attribute"
+                                        class="h-10 border bg-transparent border-base-300 dark:text-white dark:bg-black text-gray-600 rounded w-full px-3">
+                                        <option [value]=""></option>
+                                        <option *ngFor="let type of field.choices" [value]="type">{{ type }}</option>
+                                    </select>
+                                    <small class="dark:text-base-100">({{field.description}})</small>
+                                </div>
+
+                                <div class="mb-3" *ngIf="field.type === 'string'">
+                                    <label class="font-semibold text-secondary text-sm dark:text-base-100">
+                                        {{ field.label }}
+                                    </label>
+                                    <input type="text"
+                                        class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1.5 px-3"
+                                        [formControlName]="field.attribute" />
+                                    <small class="dark:text-base-100">({{field.description}})</small>
+                                </div>
+
+                                <div class="mb-3" *ngIf="field.type === 'date'">
+                                    <label class="font-semibold text-secondary text-sm dark:text-base-100">
+                                        {{ field.label }}
+                                    </label>
+                                    <input type="text"
+                                        class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1.5 px-3"
+                                        readonly="" [formControlName]="field.attribute"/>
+                                    <small class="dark:text-base-100">({{field.description}})</small>
+                                </div>
+                            </ng-container>
+                        </ng-container>
+                    </div>
+                </form>
+
+                <form [formGroup]="preFilledDynamicForm" *ngIf="otherSSOFieldsData" class="lg:w-4/6">
+                    <div class="md:grid md:grid-cols-2 gap-x-6"
+                        *ngFor="let preFilledSSOData of getPrefilledConfigurationsKeys(preFilledDynamicFormType)">
+                        <ng-container [formGroup]="getPreFilledOtherSSOformGroup(preFilledSSOData)">
+                            <ng-container *ngFor="let field of otherSSOFieldsData[preFilledSSOData]">
+                                <div class="mb-3 pt-5" *ngIf="field.type === 'boolean'">
+                                    <label class="cursor-pointer space-x-2 label justify-start py-0">
+                                        <input type="checkbox"
+                                            class="checkbox checkbox-primary dark:checkbox-accent rounded checkbox-xs"
+                                            [formControlName]="field.attribute" />
+                                        <span class="font-semibold text-secondary text-sm dark:text-base-100">{{
+                                            field.label }}</span>
+                                    </label>
+                                    <small  class="ml-6 pl-0.5 dark:text-base-100">({{field.description}})</small>
+                                </div>
+
+                                <div class="mb-3" *ngIf="field.type === 'choice'">
+                                    <label class="font-semibold text-secondary text-sm dark:text-base-100">
+                                        {{ field.label }} <sup class="text-neutral top-0">*</sup>
+                                    </label>
+                                    <select [formControlName]="field.attribute"
+                                        class="h-10 border bg-transparent border-base-300 dark:text-white dark:bg-black text-gray-600 rounded w-full px-3">
+                                        <option [value]=""></option>
+                                        <option *ngFor="let type of field.choices" [value]="type">{{ type }}</option>
+                                    </select>
+                                    <small class="dark:text-base-100">({{field.description}})</small>
+                                </div>
+
+                                <div class="mb-3" *ngIf="field.type === 'string'">
+                                    <label class="font-semibold text-secondary text-sm dark:text-base-100">
+                                        {{ field.label }}
+                                    </label>
+                                    <input type="text"
+                                        class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1.5 px-3"
+                                        [formControlName]="field.attribute" />
+                                    <small class="dark:text-base-100">({{field.description}})</small>
+                                </div>
+
+                                <div class="mb-3" *ngIf="field.type === 'date'">
+                                    <label class="font-semibold text-secondary text-sm dark:text-base-100">
+                                        {{ field.label }}
+                                    </label>
+                                    <input type="date"
+                                        class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1.5 px-3"
+                                        readonly="" [formControlName]="field.attribute" />
+                                    <small class="dark:text-base-100">({{field.description}})</small>
+                                </div>
+
+                                <div class="mb-3" *ngIf="field.type === 'file'">
+                                    <label class="font-semibold text-secondary text-sm dark:text-base-100">
+                                        {{ field.label }}
+                                    </label>
+                                    <input type="file"
+                                        class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-1.5 px-3"
+                                        (change)="uploadFile($event)"
+                                        [formControlName]="field.attribute" />
+                                    <small class="dark:text-base-100">({{field.description}})</small>
+                                </div>
+                            </ng-container>
+                            <button *ngIf="preFilledCommonDynamicForm.value.common.type !== 'saml'"
+                                class="btn bg-gray-300 hover:bg-gray-400 border-0 text-primary"
+                                (click)="onDeleteConfirmPopUP(preFilledCommonDynamicForm.value.common.alt)">{{'deleteConfiguration' | translate}}</button>
+
+                                <ng-container *ngIf="downloadMetaDataLink != '' ">
+                                    <button (click)="downloadMetaDataFile(downloadMetaDataLink)" class="btn bg-gray-300 hover:bg-gray-400 border-0 text-primary">
+                                        {{'downloadMetaData' | translate}}
+                                    </button>
+                                </ng-container>
+                        </ng-container>
+                    </div>
+                </form>
+                <div class="flex space-x-4 mt-4">
+                    <button type="submit" (click)="onEditConfirmPopUP()" class="btn btn-primary text-white">{{'save' |
+                        translate}}</button>
+                    <button (click)="navigateBackToSource()"
+                        class="btn bg-gray-300 hover:bg-gray-400 border-0 text-primary">{{'cancel' |
+                        translate}}</button>
+                </div>
+            </ng-container>
+        </div>
+    </div>
+</div>
+
+<web-messenger-modal *ngIf="showSuccessPopup == true" [modalId]="'success-modal'" [modalTitle]='modalTitleMessage'
+    [modalMessage]='modalShowMessage' (closePopup)="performPopUPMessage(modalTitleMessage)"
+    [modalCloseText]="'Ok' | translate" (cancelPopup)="cancelpopup()" [cancelText]="'no'|translate">
+</web-messenger-modal>

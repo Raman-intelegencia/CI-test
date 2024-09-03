@@ -1,0 +1,70 @@
+@import '../style/_util.scss';
+
+.login {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    justify-content: flex-start;
+    overflow: auto;
+    text-align: center;
+    width: 100%;
+
+    > * {
+        // keep the scrollable area full width, but content narrow
+        max-width: 300px;
+    }
+}
+
+// so content below doesn't jump keep open, for 2 lines of text even when empty
+.login__statusbox {
+    min-height: 5em;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    color: $color-gold;
+    font-weight: $weight-bold;
+}
+
+.login__statusbox--error {
+    color: $color-red;
+}
+
+// .login__text {
+// }
+.login__text--long {
+    text-align: left;
+}
+
+.login__button {
+    @include button--link();
+}
+
+.login__input {
+    input[type="number"] {
+        font-family: $fontStack-Mono;
+        border-radius: 0.5rem;
+        border: $border-default;
+        box-shadow: none;
+        margin: 4px;
+        text-align: center;
+        width: 36px;
+        height: 42px;
+        font-size: 32px;
+        box-sizing: border-box;
+        color: $color-black;
+        background-color: $color-white;
+        -moz-appearance: textfield; // stylelint-disable-line property-no-vendor-prefix
+
+        &::-webkit-inner-spin-button,
+        &::-webkit-outer-spin-button {
+            -webkit-appearance: none; // stylelint-disable-line property-no-vendor-prefix
+            margin: 0;
+        }
+        @media (prefers-color-scheme: dark) {
+            background-color: $color-black;
+            border-color:$color-bluegray;
+            color: $color-white;
+        }
+    }
+}

@@ -1,0 +1,29 @@
+
+
+<div class="flex flex-row justify-between mb-2.5 mt-5 bg-[#F0F6FE] px-3 py-1.5 rounded-lg" *ngIf="lastAutomatchCount ?? 0 > 0">
+  <p>{{ lastAutomatchCount 
+    | i18nPlural: { '=1': 'integrationWizard.autoMatchedCountSingular', 'other': 'integrationWizard.autoMatchedCountPlural' }
+    | translate: { count: lastAutomatchCount, type: (cardType | translate) } 
+  }}</p>
+  <div class="flex flex-row gap-1">
+    <button class="font-bold text-primary dark:text-primary hover:underline hover:cursor-pointer" 
+      (click)="unmatchSuggestions()">{{ 'integrationWizard.buttons.unmatchAutoMatched' | translate }}</button>
+    <img class="w-[14px]" alt="icon of links breaking" src="assets/unmatch.svg" />
+  </div>
+</div>
+
+<div class="relative">
+  <input class="w-full mb-4 border border-solid border-base-300 px-[6px] py-[6px] rounded"
+    type="text" [(ngModel)]="searchTerm" name="searchTerm" [placeholder]="searchPlaceholder"
+    />
+  <span class="search-icon"></span>
+</div>
+<div class="grid grid-cols-2 grid-rows-1 gap-0 pb-2">
+  <h3 class="text-base">AMSConnect</h3>
+  <h3 class="text-base">{{ vendorName ? vendorName : "Vendor" }}</h3>
+</div>
+<cdk-virtual-scroll-viewport itemSize="60" class="h-[30vh] w-[496px] mr-[-16px]">
+  <ng-container *cdkVirtualFor="let item of filteredItems">
+    <web-messenger-matched-card-pair [onSelectCallback]="onSelectBaseCard" [match]="item" [(isSelected)]="item.isSelected"/>
+  </ng-container>
+</cdk-virtual-scroll-viewport>

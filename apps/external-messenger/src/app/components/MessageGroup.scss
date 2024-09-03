@@ -1,0 +1,125 @@
+@import '../style/_util.scss';
+
+// so we can easily change to test lack of grid support
+$supportsProp: grid;
+
+.messagegroup {
+    position: relative;
+    margin: 20px 0;
+
+    // override these in grid
+
+    // grid but benign without
+    grid-template-rows: auto 1fr;
+
+    @supports (display: $supportsProp) {
+        display: grid;
+    }
+}
+
+.messagegroup--received {
+    padding-left: 0;
+
+    // grid but benign without
+    grid-template-columns: $gutter auto;
+    grid-template-areas:
+        "profile messages"
+        "profile metadata";
+
+    @media #{$mq-showExtras} {
+        padding-left: 80px; // override this in grid
+        grid-template-columns: minmax(80px, min-content) auto;
+    }
+
+    @supports (display: $supportsProp) {
+        padding-left: 0;
+    }
+}
+
+.messagegroup--sent {
+    padding-right: 0;
+
+    // grid but benign without
+    grid-template-columns: auto $gutter;
+    grid-template-areas:
+        "messages profile"
+        "metadata profile";
+
+    @media #{$mq-showExtras} {
+        padding-left: 80px; // override this in grid
+        grid-template-columns: auto minmax(80px, min-content);
+    }
+
+    @supports (display: $supportsProp) {
+        padding-right: 0;
+    }
+}
+
+.messagegroup__profile {
+    display: none;
+    margin-bottom: $gutter;
+    text-align: center;
+    padding: calc($gutter / 2); //0 $gutter / 2;
+
+    // override these in grid
+    position: absolute;
+    bottom: 0;
+    width: 80px;
+
+    // grid, but benign without
+    grid-area: profile;
+    align-self: end;
+
+    @supports (display: $supportsProp) {
+        position: static;
+        width: auto;
+    }
+
+    @media #{$mq-showExtras} {
+        display: block;
+    }
+}
+
+// explicitly call out non-grid positioning -  can't use parent's grid regions
+.messagegroup--received .messagegroup__profile {
+    left: 0;
+
+    @supports (display: $supportsProp) {
+        left: auto;
+    }
+}
+
+.messagegroup--sent .messagegroup__profile {
+    right: 0;
+
+    @supports (display: $supportsProp) {
+        right: auto;
+    }
+}
+
+.messagegroup__messages {
+    grid-area: messages;
+}
+
+.messagegroup__meta {
+    grid-area: metadata;
+    color: $color-darkgray;
+    clear: both;
+    font-size: 12px;
+    @media (prefers-color-scheme: dark) {
+        color: $color-bluegray;
+    }
+    .messagegroup--sent & {
+        text-align: right;
+        padding-right: $arrowSize;
+    }
+
+    .messagegroup--received & {
+        text-align: left;
+        padding-left: $arrowSize;
+    }
+
+    .messagegroup--system & {
+        display: none;
+    }
+}

@@ -1,0 +1,129 @@
+<div class="mb-4 bg-gray-50 dark:bg-gray-900 rounded px-3 py-2" *ngIf="currentServiceTeam.length">
+    <h4 class="font-bold text-secondary dark:text-base-100 text-base mb-2">
+      {{"currentServiceTeam"|translate}}
+    </h4>
+<ng-container *ngFor="let shift of currentServiceTeam;trackBy: trackByShiftId">
+    <div class="flex text-secondary dark:text-base-100 dark:border-gray-700 border p-2 rounded mb-0.5"
+    [ngClass]="{'bg-gray-500': serviceTeamHelperService.endDateExpiresChangeCss(shift)}">
+      <div class="w-full mr-3">
+        <h4 class="text-base">{{ shift.roles }}
+          <span *ngIf="shift.roles && shift.tag"  class="ml-1 text-xs font-bold bg-accent rounded p-1 dark:text-black">{{ shift.tag }}</span>
+        </h4>
+        <ng-container *ngIf="shift.scheduler_type === schedularType; else nonManual">
+          <p class="text-sm">{{ 'manuallySet' | translate }}</p>
+        </ng-container>
+        <ng-template #nonManual>
+          <ng-container *ngIf="!shift.recurring && shift.scheduler_type !== schedularType; else recurring">
+            <p class="text-sm">{{ shift.start | calculateDateTimePipe }}</p>
+            <p class="text-sm" *ngIf="shift.end">{{ shift.end | calculateDateTimePipe }}</p>
+          </ng-container>
+          <ng-template #recurring>
+            <p class="text-sm"> <em class="ph ph-arrows-clockwise"></em>
+              {{ shift.start | date: 'MMMM d, y' }} <ng-container *ngIf="shift.end">
+                to {{ shift.end | date: 'MMMM d, y' }}
+              </ng-container>(repeating)</p>
+            <p class="text-sm">{{ shift.recurring?.days| dayOfWeekDisplay }}</p>
+            <p class="text-sm">{{ (shift?.recurring?.start_time|| '') | timeFormat}} - {{
+              (shift?.recurring?.end_time||'') |timeFormat}}</p>
+          </ng-template>
+        </ng-template>
+      </div>
+
+      <span class="flex self-start gap-2" *ngIf="showEnterServiceSchedule && !shift?.role_types?.includes('restricted') && !(shift.role_types?.[0] ==='integrated')">
+        <button type="button" class="tooltip tooltip-primary" data-tip="Edit"
+          (click)="editCurrentServiceTeam(shift.roles, shift.scheduler_type,shift.id)">
+          <em class="ph-bold ph-pencil-simple text-primary dark:text-accent cursor-pointer"></em>
+        </button>
+        <button type="button" class="tooltip p-0" data-tip="Delete" (click)="openDeleteCSTModal(shift.id)">
+          <em class="ph-fill ph-trash text-neutral cursor-pointer" title="Delete"></em>
+        </button>
+      </span>
+      <em *ngIf="!showEnterServiceSchedule || shift?.role_types?.includes('restricted') || (shift.role_types?.[0] ==='integrated')" class="ph-fill text-base-300 ph-lock"></em>
+    </div>
+    <ng-container *ngIf="showDeleteModal">
+      <web-messenger-modal [modalId]="'error-modal'" [showCancelButton]='true'
+        [modalTitle]="'deleteShift' | translate" (cancelPopup)="closeDeletePopup()"
+        [cancelText]="'cancel'|translate"
+        [modalMessage]="showErrorMessage ? showErrorMessage :'deleteWarningMsg'|translate"
+        (closePopup)="deleteCurrentServiceTeam()"
+        [modalCloseText]="'delete' | translate"></web-messenger-modal>
+    </ng-container>
+  </ng-container>
+ 
+</div>
+<ng-container *ngIf="scheduledServiceTeam.length">
+  <div class="mb-4 bg-gray-50 dark:bg-gray-900 rounded px-3 py-2">
+    <h4 class="font-bold text-secondary dark:text-base-100 text-base mb-2"> {{"scheduledServiceTeams"|translate}}
+    </h4>
+    <ng-container *ngFor="let shift of scheduledServiceTeam;trackBy: trackByShiftId">
+      <div
+        class="flex text-secondary dark:text-base-100 dark:border-primary/[0.3] border-[1px] p-2 rounded mb-0.5  opacity-50"
+        [ngClass]="{'bg-gray-500': serviceTeamHelperService.endDateExpiresChangeCss(shift)}">
+        <div class="w-full mr-3" *ngIf="shift"> 
+                  <h4 class="text-base" *ngIf="shift.roles">{{ shift.roles }}
+                    <span *ngIf="shift.roles && shift.tag"  class="ml-1 text-xs font-bold bg-accent rounded p-1 dark:text-black">{{ shift.tag }}</span>
+        </h4>
+
+          <ng-container *ngIf="shift.scheduler_type === schedularType; else nonManual">
+            <p class="text-sm">{{ 'manuallySet' | translate }}</p>
+          </ng-container>
+
+          <ng-template #nonManual>
+            <ng-container *ngIf="!shift.recurring; else recurring">
+              <p class="text-sm">{{ shift.start | calculateDateTimePipe }}</p>
+              <p class="text-sm" *ngIf="shift.end">{{ shift.end | calculateDateTimePipe }}</p>
+            </ng-container>
+            <ng-template #recurring>
+              <p class="text-sm"> <em class="ph ph-arrows-clockwise"></em>
+                {{ shift.start | date: 'MMMM d, y' }} <ng-container *ngIf="shift.end">
+                  to {{ shift.end | date: 'MMMM d, y' }}
+                </ng-container>(repeating)</p>
+              <p class="text-sm">{{ shift.recurring?.days| dayOfWeekDisplay }}</p>
+              <p class="text-sm">{{ (shift?.recurring?.start_time|| '')|timeFormat }} - {{
+                (shift?.recurring?.end_time||'') | timeFormat}}</p>
+            </ng-template>
+          </ng-template>
+        </div>
+
+        <span class="flex self-start gap-2" *ngIf="showEnterServiceSchedule && !shift?.role_types?.includes('restricted') && !(shift.role_types?.[0] ==='integrated')">
+          <button type="button" class="tooltip tooltip-primary" data-tip="Edit"
+            (click)="editScheduledServiceTeamList(shift.roles,shift.id)">
+            <em class="ph-bold ph-pencil-simple text-primary dark:text-accent cursor-pointer"></em>
+          </button>
+          <button type="button" class="tooltip p-0" data-tip="Delete" (click)="openDeleteSSTModal(shift.id)">
+            <em class="ph-fill ph-trash text-neutral cursor-pointer" title="Delete"></em>
+          </button>
+        </span>
+        <em *ngIf="!showEnterServiceSchedule || shift?.role_types?.includes('restricted') || (shift.role_types?.[0] ==='integrated')" class="ph-fill text-base-300 ph-lock"></em>
+      </div>
+      <ng-container *ngIf="closeDeleteScheduledPopup">
+        <web-messenger-modal [modalId]="'error-modal'" [showCancelButton]='true'
+          [modalTitle]="'deleteShift' | translate" (cancelPopup)="closeSchdeuledDeletePopup()"
+          [cancelText]="'cancel'|translate"
+          [modalMessage]="showErrorMessage ? showErrorMessage :'deleteWarningMsg'|translate"
+          (closePopup)="deleteScheduledServiceTeam()"
+          [modalCloseText]="'delete' | translate"></web-messenger-modal>
+      </ng-container>
+    </ng-container>
+
+  </div>
+</ng-container>
+
+<ng-container *ngIf="showServiceTeamList">
+    <web-messenger-service-team-pop-up [selectedServiceTeam]="selectedServiceRoleList"
+      [userId]="userId? userId:selectedChatIds.selectedProfileUserId" (backToUserProfileModal)="backToFirstServiceTeamScreen()" [userProfileResponse]="userProfileResponse"
+      [currentServiceTeam]="currentServiceTeam" [scheduledServiceTeam]="scheduledServiceTeam" 
+      [showServiceTeam]="showServiceTeamList"  (backClickedEvent)="backToFirstServiceTeamScreen()">
+    </web-messenger-service-team-pop-up>
+  </ng-container>
+  <ng-container *ngIf="showSelectedScheduledServiceTeamsList">
+    <web-messenger-service-team-pop-up [selectedServiceTeam]="selectedScheduledServiceRoleList"
+      [userId]="userId ? userId : selectedChatIds.selectedProfileUserId"
+      (backToUserProfileModal)="backToFirstServiceTeamScreen()" 
+      [currentServiceTeam]="currentServiceTeam"
+      [scheduledServiceTeam]="scheduledServiceTeam"
+      [showSelectedScheduledServiceTeamsList]="showSelectedScheduledServiceTeamsList"
+      [showServiceTeam]="showSelectedScheduledServiceTeamsList"
+      [userProfileResponse]="userProfileResponse"  (backClickedEvent)="backToFirstServiceTeamScreen()"
+      ></web-messenger-service-team-pop-up>
+  </ng-container>

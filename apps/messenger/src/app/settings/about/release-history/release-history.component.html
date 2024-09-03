@@ -1,0 +1,32 @@
+<div class="px-6 h-full overflow-y-auto">
+    <h2 class="text-secondary text-xl font-medium dark:text-white mb-4">{{ "releaseHistory" | translate }}</h2>
+    <h2 class="text-secondary text-lg font-medium dark:text-white mb-4">{{ "latestRelease" | translate }}</h2>
+   <!-- new release -->
+    <div class="hover:bg-accent/[0.08] sm:px-4 py-4 border border-base-300 dark:border-gray-600 text-gray-600 cursor-pointer mb-9 flex justify-between" *ngFor="let release of newRelease">
+        <div class="flex items-center w-full">   
+          <div class="w-full ml-3 dark:text-base-100">
+            <p class="font-bold text-secondary dark:text-base-100">{{release.name}}</p> 
+          </div>
+        </div>
+        <div class="justify-end sm:w-48 ml-auto text-right" >
+       <button class="text-primary dark:text-accent font-medium sm:text-sm text-xs text-right" (click)="openReleaseNoteModel(release.name,'new-release')">{{ "viewReleaseNotes" | translate }}</button>  
+    </div>
+    </div>
+
+    <h2 class="text-secondary text-lg font-medium dark:text-white mb-4">{{ "previousReleases" | translate }}</h2>
+    <!-- all release -->
+  <div *ngFor="let release of allRelease">
+    <div class="hover:bg-accent/[0.08] sm:px-4 py-3 border border-base-300 dark:border-gray-600 text-gray-600 cursor-pointer flex justify-between">
+        <div class="flex items-center w-full">   
+          <div class="w-full ml-3 dark:text-base-100">
+            <p class="font-bold text-secondary dark:text-base-100">{{release.name}}</p> 
+          </div>
+        </div>
+        <div class="justify-end sm:w-48 ml-auto text-right" >
+       <button class="text-primary dark:text-accent font-medium sm:text-sm text-xs text-right" (click)="openReleaseNoteModel(release.name)">{{ "viewReleaseNotes" | translate }}</button>
+      </div>
+    </div>
+</div> 
+</div>
+<web-messenger-release-note-model  *ngIf="showReleaseNote" [showReleaseNote]="showReleaseNote" (showReleaseNoteEvent)="showReleaseNoteEvent($event)"
+[selectedName]="selectedName" [selectedDate]="selectedDate" [selectedSummary]="selectedSummary"></web-messenger-release-note-model>

@@ -1,0 +1,9 @@
+<div class="text-base text-gray-600 dark:text-base-100 px-6 h-full overflow-y-auto">
+    <h2 class="text-secondary text-xl font-medium dark:text-white mb-4">{{ "helpPopUps" | translate }}</h2>
+    <p>{{ "hintsToUseTheSite" | translate }}</p>
+    <p class="my-3 italic text-sm">{{ "clickBelow" | translate }} </p>
+    <button class="btn btn-primary  btn-outline dark:btn-accent dark:btn-outline dark:text-secondary mt-4 text-white px-6" (click)="restoreHelpPopUps()" > {{ "restoreHelpPopUps" | translate }} </button>
+    <span class="pl-3 text-base-300" *ngIf="isRestoreHelpPopUps">
+      {{ "popUpsRestored" | translate }} 
+  </span>
+  </div> 

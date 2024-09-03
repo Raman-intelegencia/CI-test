@@ -1,0 +1,50 @@
+<div class="relative w-60">
+  <input class="w-full mb-4 border border-solid border-base-300 px-[9px] py-[6px] rounded"
+    type="text" [(ngModel)]="searchTerm" name="searchTerm" [placeholder]="searchPlaceholder"
+    />
+  <span class="search-icon"></span>
+</div>
+<div class="max-h-[60vh] overflow-auto mr-[-32px]">
+  <cdk-virtual-scroll-viewport itemSize="60" class="h-[48vh] w-[256px]" *ngIf="selectableItems.length > 0">
+    <ng-container *cdkVirtualFor="let item of selectableFilteredItems">
+      <web-messenger-base-card [cardData]="item.transformToCardData()" [onSelectCallback]="onSelect(item)" [(isSelected)]="item.isSelected" (clickSelectEmitter)="onClickSelect(item)" (shiftClickSelectEmitter)="onShiftClickSelect(item)" [inCardList]="true" />
+    </ng-container>
+  </cdk-virtual-scroll-viewport>
+  <div *ngIf="selectableItems.length === 0" class="h-[28vh] w-[256px] flex flex-row justify-center">
+    <p class="font-bold text-[#B9B9B9] text-[17px] text-center mt-8 max-w-[175px]">{{ 'integrationWizard.allMatched' | translate: { type: entityType } }}</p>
+  </div>
+  <div class="collapse">
+    <input type="checkbox" class="peer" />
+    <div class="w-full flex flex-row items-center collapse-title group px-0">
+      <div class="flex flex-row items-center">
+        <div class="flex flex-row items-center w-[8px] h-[8px]">
+          <img
+                  class="transition-all peer-checked:group-[]:-rotate-180 origin-[4px_4px] icon-invertable -rotate-90"
+                  src="assets/Icon-Arrow.svg"
+                  [alt]="'arrow pointing'" />
+        </div>
+        <h3 class="ml-1.5 text-[15px] font-bold m-0">
+          Ignored ({{ignoredFilteredItems.length}})
+        </h3>
+      </div>
+      <div class="flex flex-row hover:underline hover:cursor-pointer z-20"
+        (click)="unignoreUsers($event)">
+        <button [disabled]="!isUnignoreAllowed" 
+          class="ml-20 mr-4 font-bold text-primary dark:text-primary hover:cursor-pointer disabled:text-gray-500" >
+          {{ 'integrationWizard.buttons.unignoreSelected' | translate }}
+        </button>
+      </div>
+    </div>
+    <div class="collapse-content p-0">
+      <cdk-virtual-scroll-viewport itemSize="60" class="h-[25vh] w-[256px]" *ngIf="ignoredFilteredItems.length > 0">
+        <ng-container *cdkVirtualFor="let item of ignoredFilteredItems">
+          <web-messenger-base-card class="opacity-40"
+                  [cardData]="item.transformToCardData()" [onSelectCallback]="onSelect(item)" [(isSelected)]="item.isSelected" (clickSelectEmitter)="onClickSelect(item)" (shiftClickSelectEmitter)="onShiftClickSelect(item)" [inCardList]="true" />
+        </ng-container>
+      </cdk-virtual-scroll-viewport>
+      <div *ngIf="ignoredFilteredItems.length === 0">
+        <p class="font-bold text-[#B9B9B9] text-[17px] text-center mt-4">{{ 'integrationWizard.noIgnored' | translate: { type: entityType } }}</p>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,259 @@
+{
+  "name": "admin",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/admin/src",
+  "prefix": "web-messenger",
+  "targets": {
+    "build": {
+      "executor": "@angular-devkit/build-angular:browser",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/apps/admin",
+        "index": "apps/admin/src/index.html",
+        "main": "apps/admin/src/main.ts",
+        "polyfills": ["zone.js"],
+        "tsConfig": "apps/admin/tsconfig.app.json",
+        "inlineStyleLanguage": "scss",
+        "assets": ["apps/admin/src/favicon.ico", "apps/admin/src/assets",
+        {"glob": "**/*",
+        "input": "./libs/shared-assets",
+        "output": "./assets"}
+      ],
+      "styles": ["./libs/shared-assets/scss/style.scss",
+      "apps/admin/src/styles.scss"
+      ],
+        "scripts": []
+      },
+      "configurations": {
+        "live": {
+          "fileReplacements": [
+            {
+              "replace": "libs/shared/src/lib/config/environment.ts",
+              "with": "libs/shared/src/lib/config/prod.environment.ts"
+            }
+          ],
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "5mb",
+              "maximumError": "7mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "6kb",
+              "maximumError": "15kb"
+            }
+          ],
+          "outputHashing": "all"
+        },
+        "dev": {
+          "fileReplacements": [
+            {
+              "replace": "libs/shared/src/lib/config/environment.ts",
+              "with": "libs/shared/src/lib/config/dev.environment.ts"
+            }
+          ],
+          "buildOptimizer": false,
+          "optimization": false,
+          "vendorChunk": true,
+          "extractLicenses": false,
+          "sourceMap": true,
+          "namedChunks": true
+        },
+        "play-qa2": {
+          "fileReplacements": [
+            {
+              "replace": "libs/shared/src/lib/config/environment.ts",
+              "with": "libs/shared/src/lib/config/qa.environment.ts"
+            }
+          ],
+          "buildOptimizer": false,
+          "optimization": false,
+          "vendorChunk": true,
+          "extractLicenses": false,
+          "sourceMap": true,
+          "namedChunks": true,
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "5mb",
+              "maximumError": "7mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "6kb",
+              "maximumError": "15kb"
+            }
+          ]
+        },
+        "play-dev1": {
+          "fileReplacements": [
+            {
+              "replace": "libs/shared/src/lib/config/environment.ts",
+              "with": "libs/shared/src/lib/config/play-dev1.environment.ts"
+            }
+          ],
+          "buildOptimizer": false,
+          "optimization": false,
+          "vendorChunk": true,
+          "extractLicenses": false,
+          "sourceMap": true,
+          "namedChunks": true,
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "5mb",
+              "maximumError": "7mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "6kb",
+              "maximumError": "15kb"
+            }
+          ]
+        },
+        "play-fgl": {
+          "fileReplacements": [
+            {
+              "replace": "libs/shared/src/lib/config/environment.ts",
+              "with": "libs/shared/src/lib/config/play-fgl.environment.ts"
+            }
+          ],
+          "buildOptimizer": false,
+          "optimization": false,
+          "vendorChunk": true,
+          "extractLicenses": false,
+          "sourceMap": true,
+          "namedChunks": true,
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "5mb",
+              "maximumError": "7mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "6kb",
+              "maximumError": "15kb"
+            }
+          ]
+        },
+        "play": {
+          "fileReplacements": [
+            {
+              "replace": "libs/shared/src/lib/config/environment.ts",
+              "with": "libs/shared/src/lib/config/play.environment.ts"
+            }
+          ],
+          "buildOptimizer": false,
+          "optimization": false,
+          "vendorChunk": true,
+          "extractLicenses": false,
+          "sourceMap": true,
+          "namedChunks": true,
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "5mb",
+              "maximumError": "7mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "6kb",
+              "maximumError": "15kb"
+            }
+          ]
+        },
+        "play-retention1": {
+          "fileReplacements": [
+            {
+              "replace": "libs/shared/src/lib/config/environment.ts",
+              "with": "libs/shared/src/lib/config/play-retention1.environment.ts"
+            }
+          ],
+          "buildOptimizer": false,
+          "optimization": false,
+          "vendorChunk": true,
+          "extractLicenses": false,
+          "sourceMap": true,
+          "namedChunks": true,
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "5mb",
+              "maximumError": "7mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "6kb",
+              "maximumError": "15kb"
+            }
+          ]
+        }
+      },
+      "defaultConfiguration": "play-qa2"
+    },
+    "serve": {
+      "executor": "@nrwl/angular:webpack-dev-server",
+      "configurations": {
+        "production": {
+          "browserTarget": "admin:build:production"
+        },
+        "dev": {
+          "browserTarget": "admin:build:dev",
+          "ssl": true,
+          "sslKey": ".ssl/beta.amsconnectapp.com.key.pem",
+          "sslCert": ".ssl/beta.amsconnectapp.com.crt.pem",
+          "proxyConfig": "proxy.conf.json",
+          "host": "beta.amsconnectapp.com",
+          "port": 5102
+        },
+        "qa": {
+          "browserTarget": "admin:build:play-qa2"
+        },
+        "play": {
+          "browserTarget": "admin:build:play"
+        },
+        "play-fgl": {
+          "browserTarget": "admin:build:play-fgl"
+        },
+        "play-dev1": {
+          "browserTarget": "admin:build:play-dev1"
+        },
+        "play-retention1": {
+          "browserTarget": "admin:build:play-retention1"
+        }
+      },
+      "defaultConfiguration": "dev"
+    },
+    "extract-i18n": {
+      "executor": "@angular-devkit/build-angular:extract-i18n",
+      "options": {
+        "browserTarget": "admin:build"
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["apps/admin/**/*.ts", "apps/admin/**/*.html"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "apps/admin/jest.config.ts",
+        "passWithNoTests": true
+      },
+      "configurations": {
+        "ci": {
+          "ci": true,
+          "codeCoverage": true
+        }
+      }
+    }
+  },
+  "tags": []
+}

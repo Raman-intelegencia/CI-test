@@ -1,0 +1,107 @@
+// ::ng-deep .cdk-overlay-container {
+//   position: relative;
+  
+//   .cdk-global-overlay-wrapper {
+//     .mat-datepicker-dialog {
+//       ngx-mat-datepicker-content {
+//         position: absolute;
+//         top: 0;
+//         left: 0;
+//         z-index: 1000;
+//         width: 10vw;
+//         background: red;
+//         height: 100vh;
+//       }
+//     }
+//   }
+// }
+
+// ::ng-deep .cdk-overlay-container {
+//   position: relative; /* Use fixed to position relative to the viewport */
+  
+//   .cdk-global-overlay-wrapper {
+//     position: relative;
+//     display: flex; /* Ensures that child elements can be positioned using flexbox */
+//     justify-content: center; /* Centers horizontally */
+//     align-items: flex-start; /* Aligns to the top of the screen */
+
+//     .cdk-overlay-pane {
+//       position: absolute;
+//       top: 0; /* Adjust this value based on your input field's position */
+//       left: 50%; /* Center align */
+//       transform: translateX(-50%); /* Center align */
+//     }
+//   }
+// }
+
+// ::ng-deep .cdk-overlay-container {
+//   position: static; /* Reset to default to avoid global impact */
+
+//   .cdk-global-overlay-wrapper {
+//     position: fixed; /* Position relative to the viewport */
+//     top: 150px; /* Adjust this value based on the position of your input field */
+//     left: 20%; /* Center horizontally */
+//     transform: translateX(-50%); /* Ensure it's centered horizontally */
+//     width: 10vw;
+//     height: 10vh;
+//     // background: red;
+    
+//     .mat-datepicker-dialog {
+//         ngx-mat-datepicker-content {
+//           background: yellow;
+//         }
+//   }
+// }
+// }
+
+// ::ng-deep .cdk-overlay-container {
+//   position: static; /* Reset to default to avoid global impact */
+
+//   .cdk-global-overlay-wrapper {
+//     position: fixed; /* Position relative to the viewport */
+//     top: 150px; /* Adjust this value based on the position of your input field */
+//     left: 20%; /* Adjust based on horizontal position */
+//     transform: translateX(-50%); /* Center horizontally */
+//     background: red;
+
+//     .mat-datepicker-dialog {
+//       background: blue;
+//       ngx-mat-datepicker-content {
+//         background: yellow;
+//         width: 700px; /* Set a specific width */
+//         height: auto; /* Set height to auto for natural sizing */
+//         max-height: 200px; /* Set a maximum height if needed */
+//         /* Additional styling for datepicker content */
+//       }
+//     }
+//   }
+// }
+
+::ng-deep .cdk-overlay-container {
+  position: static; /* Avoid global impact */
+
+  .cdk-global-overlay-wrapper {
+    position: fixed;
+    top: 150px;
+    left: 35%;
+    bottom: 100%; /* Position above the triggering element */
+    right: auto;
+    transform: translateX(-50%); /* Adjust based on your layout */
+  }
+  .cdk-overlay-pane {
+    background: red;
+    height: 300px;
+    .mat-datepicker-dialog {
+      ngx-mat-datepicker-content {
+        z-index: 1000;
+        width: 250px; /* Smaller width */
+        height: 300px; /* Let it adjust height based on content */
+        max-height: 300px; /* Maximum height */
+        background: yellow; /* Your desired background color */
+      }
+    }
+  }
+
+}
+
+

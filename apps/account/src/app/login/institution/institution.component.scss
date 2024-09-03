@@ -1,0 +1,8 @@
+/* For .institutionSelected class */
+.institutionSelected {
+  @apply btn-primary text-white py-2 px-4 rounded-md cursor-pointer w-full transition-colors;
+}
+/* For .institutionNotSelected class */
+.institutionNotSelected {
+  @apply bg-gray-300 text-gray-600 py-2 px-4 rounded-md cursor-default w-full;
+}

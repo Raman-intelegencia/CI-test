@@ -1,0 +1,205 @@
+<div
+    class="w-full md:px-12 px-4 bg-gray-100 dark:bg-gray-700/20 dark:border-b dark:border-gray-700 dark:text-white py-4">
+    <h2 class="text-secondary text-xl font-bold dark:text-white">{{"institutionreporting" | translate }}</h2>
+</div>
+
+<div
+    class="w-full md:h-[calc(100vh-7rem)] h-[calc(100vh-9.5rem)] py-4 md:px-12 px-4 text-gray-600 dark:text-base-100 overflow-y-auto ">
+
+    <form class="lg:w-3/6 md:w-4/6 mt-4" [formGroup]="createInstituteReportForm" (ngSubmit)="createInstituteReport()">
+        <div class="mb-4 mt-6">
+                <div class="mb-4">
+                    <label class="mb-1 block font-semibold text-secondary text-sm dark:text-base-100">{{"Report" | translate }}</label>
+                    <select formControlName="reports" class="mt-3 border bg-transparent border-base-300 dark:border-gray-600 text-gray-600 dark:text-white dark:bg-black rounded w-full h-10 px-3">
+                        <option *ngFor="let reportlist of instituteDetails" [value]="reportlist.id">{{reportlist.report_name}}</option>
+                    </select>
+                </div>
+                
+        </div>
+        <div class="mb-4 mt-6">
+            <label class="mb-1 block font-semibold text-secondary text-sm dark:text-base-100">{{"Institutions" |
+                translate }} </label>
+          <div
+           class="collapse border border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-2 pl-3" (click)="toggleDropdown($event)">
+            <input type="checkbox" name="IIDs" placeholder="" [ngClass]=" isSelectedInstitute ? 'w-10 ml-auto' : 'peer min-h-0 p-0'"  />
+            <div class="collapse-title p-0 min-h-0 gap-2">
+                <div class="flex flex-wrap gap-1 items-center m-2 rounded px-2 py-0.5 text-sm" >
+                    <em class="absolute right-2 top-1 font-bold" (click)="!showDropdown" [ngClass]= "showDropdown ? 'ph ph-caret-up' : 'ph ph-caret-down'"></em>
+                    <ng-container *ngFor="let institute of selectedInstitute; let k = index">
+                        <span  class="bg-gray-100 dark:bg-gray-900 rounded px-2 py-0.5 text-sm"
+                            >
+                            <span>
+                                 <em (click)="unselectInstitution(institute.name,$event);" class="ph ph-x mr-1 cursor-pointer"></em>{{institute.name}}
+                            </span>
+                        </span>
+                        </ng-container>
+                </div>
+            </div>
+            <div class="collapse-content p-0 pr-3">
+                <form [formGroup]="instituteSearchForm">
+                <input type="text" formControlName="searchQuery" [placeholder]="'Select institutions' | translate"
+                        autocomplete="off" name="institution" (click)="institutionSearch(instituteSearchForm.get('institution')?.value); isInstituteInputFocused = true"
+                        formControlName="institution" 
+                        (keyup)="institutionSearch(instituteSearchForm.get('institution')?.value)"  
+                        class="border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-2 px-3"
+                         #institute />
+                  <ng-container *ngIf="isInstituteInputFocused">
+                    <ul class="select2-results max-h-24 overflow-y-auto mt-2">
+                        <li *ngFor="let institute of allInstitutions; let i = index"
+                            [ngClass]="{'bg-blue-50 dark:bg-gray-900 dark:text-base-100': i === selectedIndex}"
+                            (click)="selectInstitution(institute); selectedIndex = -1;">
+                            <p class="font-medium text-secondary dark:text-base-100"
+                                    [innerHTML]="institute?.name | highlightSearchTxt:searchTerm"></p>
+                                <p class="text-sm" [innerHTML]="institute?.id | highlightSearchTxt:searchTerm"></p>
+                        </li>
+                    </ul>
+                  </ng-container>
+                </form>
+                </div>
+            </div>
+        </div>
+        <div class="mb-4 mt-6" *ngIf="isMsg_content()">
+            <div class="mb-4">
+                <label class="mb-1 block font-semibold text-secondary text-sm dark:text-base-100">{{"ThreadType" | translate }}</label>
+                <select formControlName="threadType" class="mt-3 border bg-transparent border-base-300 dark:border-gray-600 text-gray-600 dark:text-white dark:bg-black rounded w-full h-10 px-3">
+                    <option *ngFor="let threadlist of threadtype" [value]="threadlist.id">{{threadlist.name}}</option>
+                </select>
+            </div> 
+        </div>
+        <div class="mb-4 mt-6" *ngIf="isPeerToPeer()">
+            <div class="mb-4">
+                <label class="mb-1 block font-semibold text-secondary text-sm dark:text-base-100">{{"MessageType" | translate }}</label>
+                <select formControlName="message_id" class="mt-3 border bg-transparent border-base-300 dark:border-gray-600 dark:text-white dark:bg-black text-gray-600 rounded w-full h-10 px-3">
+                    <option *ngFor="let messagetype of messageType" [value]="messagetype.id">{{messagetype.name}}</option>
+                </select>
+            </div> 
+        </div>
+        <!--Service Team-->
+        <div *ngIf="isServiceOrMappedServiceReport()" class="pb-5">
+            <label class="mb-1.5">{{"ServiceTeam" | translate }}</label>
+            <div
+            class="border flex justify-between bg-transparent border-base-300 dark:border-gray-600 block dark:text-white text-gray-600 rounded w-full py-1 px-3">
+            <ng-container *ngIf="isShowServiceTeam; else NoServiceTeam">
+                <span>{{ "serviceTeamCount" | translate }}: {{ serviceTeam.length }}, {{ "institutionCount" | translate}}: {{ selectedInstitute.length }}
+                </span>
+            </ng-container>
+            <ng-template #NoServiceTeam>
+                <span>{{"addServiceTeam" | translate }}</span>
+            </ng-template>
+            <label for="chooseUsers" class="tooltip tooltip-primary cursor-pointer " data-tip="Edit">
+                <em class="text-primary text-base ph-bold ph-note-pencil" (click)="openServiceTeam()"></em> </label>
+            </div>
+        </div>
+        <!--Service Team--END-->
+        <div class="mb-4">
+            <label class="mb-1 block font-semibold text-secondary text-sm dark:text-base-100">{{"InstitutionTags" |
+                translate }}</label>
+            <input type="text" [placeholder]="'TagsSeparate' | translate" formControlName="instituteTags"
+                class="border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-2 px-3" />
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+            <div class="mb-4">
+              <label class="mb-1 block font-semibold text-secondary text-sm dark:text-base-100">{{ "DateFrom" | translate }}</label>
+              <input [placeholder]="'selectdate'|translate" class="border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-2 px-3" formControlName="dateFrom" type="date" [max]="currentDate">
+            </div>
+            <div class="mb-4">
+              <label class="mb-1 block font-semibold text-secondary text-sm dark:text-base-100">{{ "DateTo" | translate }}</label>
+              <input [placeholder]="'selectdate'|translate" class="border bg-transparent border-base-300 dark:border-gray-600 dark:text-white text-gray-600 rounded w-full py-2 px-3" formControlName="dateTo" type="date" [max]="currentDate">
+            </div>
+          </div>
+          
+
+<div *ngFor="let reportlist of instituteDetails">
+    <div >
+        <label class="label cursor-pointer justify-start" *ngIf="createInstituteReportForm.get('reports')?.value == reportlist.id && reportlist.can_run_daily">
+            <input type="radio" formControlName="reportfrequency" value="days" name="reportfrequency"
+                class="radio radio-primary dark:radio-accent radio-xs mr-2" />
+                {{"day" | translate }}
+        </label>
+        <label class="label cursor-pointer justify-start" *ngIf="createInstituteReportForm.get('reports')?.value == reportlist.id && reportlist.can_run_weekly">
+            <input type="radio" formControlName="reportfrequency" value="week" name="reportfrequency"
+                class="radio radio-primary dark:radio-accent radio-xs mr-2" />
+                {{"Week" | translate }}
+        </label>
+        <label class="label cursor-pointer justify-start"*ngIf="createInstituteReportForm.get('reports')?.value == reportlist.id && reportlist.can_run_monthly">
+            <input type="radio" formControlName="reportfrequency" value="month" name="reportfrequency"
+                class="radio radio-primary dark:radio-accent radio-xs mr-2" />
+                {{"Month" | translate }} 
+        </label>
+        <label class="label cursor-pointer justify-start" *ngIf="createInstituteReportForm.get('reports')?.value == reportlist.id && reportlist.can_run_by_child_ou">
+            <input type="checkbox" formControlName="childOU" (change)="updateChildUI($event)" name="childOU"
+                class="mr-2 checkbox checkbox-xs checkbox-primary dark:checkbox-accent rounded" />
+       <span>{{"ChildOU" | translate }}</span>
+        </label>
+    </div>
+    <div >
+        <label class="label cursor-pointer justify-start" *ngIf="createInstituteReportForm.get('reports')?.value == reportlist.id && reportlist.can_obscure_phi">
+            <input type="checkbox" formControlName="PHIHidden" (change)="updatePHIHidden($event)"   name="PHIHidden" class="mr-2 checkbox checkbox-xs checkbox-primary dark:checkbox-accent rounded" />
+            {{"PhIhidden" | translate}}
+        </label>
+        <label class="label cursor-pointer justify-start" *ngIf="reportlist.id === 'users' && createInstituteReportForm.get('reports')?.value === reportlist.id">
+            <input type="checkbox" formControlName="excludeLockedUsers" name="excludeLockedUsers" class="mr-2 checkbox checkbox-xs checkbox-primary dark:checkbox-accent rounded" (change)="getCheckboxInboxValue($event)" />
+            {{ "excludeLockedUsers" | translate }}      
+          </label>
+    </div>
+</div>
+    <div *ngIf="showMessage">
+        <p class="text-neutral text-xs mt-0.5">{{"DateToShouldDateFrom" | translate}}</p>
+    </div>
+    <button  class="btn btn-primary mt-4 text-white px-6" [disabled]="!createInstituteReportForm.valid">{{"Execute Report" | translate }} </button>
+    </form>
+
+</div>
+
+<input type="checkbox" [checked]="isChildVisibleServiceTeam" class="modal-toggle" />
+<div class="modal bg-black/70" *ngIf="isChildVisibleServiceTeam">
+        <div
+            class="modal-box max-w-2xl bg-white dark:bg-black rounded p-0 relative overflow-y-hidden dark:border-primary/60 dark:border dark:shadow-xl dark:shadow-primary/20">
+            <div class="flex justify-between text-white items-center bg-primary p-3">
+                <h3 class="font-bold dark:text-white">{{"instituteServiceTeam" | translate }}</h3>
+                <label for="chooseUsers" class="w-7 h-7">
+                    <em class="ph-bold ph-x cursor-pointer text-lg hover:text-accent" (click)="closeServiceTeam()"></em>
+                </label>
+            </div>
+            <div class="p-4 text-gray-600 dark:text-base-100 text-sm">
+                <div class="max-h-[60vh] overflow-y-auto mt-4 pb-6">
+                    <div *ngIf="showCurrentServiceTeam.length">
+                        <div  class="border rounded dark:border-gray-700 mb-1 p-0 mb-4" *ngFor="let Service of showCurrentServiceTeam; let i=index">
+                            <h4 class="text-lg text-secondary dark:text-white py-2 px-3">
+                                {{Service.name }} ({{Service.iid}})
+                              </h4>
+                              <ng-container *ngIf="Service.teams.length; else noServiceTeam">
+                                <label class="cursor-pointer label justify-start flex gap-2 border-b dark:border-gray-700 px-3">
+                                    <input type="checkbox" class="checkbox checkbox-xs checkbox-primary dark:checkbox-accent rounded"
+                                        [(ngModel)]="allSpecialTeamChecked[i]" (change)="checkAllServiceTeam(i)" />
+                                    <span class="mr-4">{{"ALL" | translate }}</span>
+                                </label>
+                            </ng-container>
+                            <ng-template #noServiceTeam>
+                                <span class="px-3">{{ "noServiceAvailable" | translate }}</span>
+                            </ng-template>
+                              <div *ngIf="Service.teams.length">
+                                <div *ngFor="let team of Service.teams; let j=index">
+                                    <label class="cursor-pointer label justify-start flex gap-2 border-t dark:border-gray-700 px-3">
+                                        <input type="checkbox" class="checkbox checkbox-xs checkbox-primary dark:checkbox-accent rounded"
+                                        [(ngModel)]="allUserCheckboxStates[team._id]" (change)="onCheckboxChangeService(i, team._id, team)" />
+                                        <span class="mr-4">{{j + 1}}) {{team.description}} ({{team.role_type}})</span>
+                                      </label>
+                                </div>
+                              </div>
+                        </div>
+                      </div>
+                </div>
+            </div>
+        </div>
+</div>
+
+<web-messenger-success-modal *ngIf="showSuccessPopup" [showSuccessModal]="showSuccessPopup"
+[conditionForFileProcessed]="true" [jobIdFromQuickMessage]="jobId" (resetPopupvalue)="resetPopupvalue($event)">
+</web-messenger-success-modal>
+
+
+<web-messenger-modal *ngIf="showPHISuccessPopup" [modalId]="'success-modal'" [modalTitle]='modalPHITitleMessage'
+    [modalMessage]='modalPHIShowMessage' (closePopup)="executeReport()"
+    [modalCloseText]="'Execute Report' | translate" (cancelPopup)="cancelPHIpopup()" [cancelText]="'no'|translate">
+</web-messenger-modal>

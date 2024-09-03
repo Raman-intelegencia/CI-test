@@ -1,0 +1,402 @@
+<div class="w-full h-[calc(100vh-8.5rem)] bg-white dark:bg-black border border-base-100 dark:border-gray-600 rounded">
+    <div *ngIf="showChatThread; else emptyWindow" class="h-full flex flex-col h-full">
+        <div class="flex justify-between items-center p-3 border-base-100 dark:border-gray-600 border-b">
+            <label (click)="navigatetoBack()"> <em class="ph-bold ph-arrow-left text-primary dark:text-accent text-lg inline-block md:hidden"></em></label>
+            <div class="w-full text-center text-secondary dark:text-base-100">
+                <!-- To-Do changes to be shown here as per API response -->
+                <span *ngIf="selectedChatThread">
+                    <span *ngIf="selectedChatThread.thread.patient?.name" class="font-bold">{{ selectedChatThread.thread.patient.name }}<br /></span>
+                    <span *ngIf="!selectedChatThread.thread.patient?.name && selectedChatThread.thread.patient_name" class="font-bold">"{{ selectedChatThread.thread.patient_name }}"<br /></span>
+                    <span *ngIf="selectedChatThread.thread.subject">{{ selectedChatThread.thread.subject }}</span>
+                </span>
+            </div>
+            <web-messenger-conversation-settings
+                *ngIf="!getExternalMsgThreadEndsVal"
+                [hasUserLeftTheChat]="hasUserLeft"
+                (updatedRecipients)="updatedRecipients()"
+                (getLeaveResponse)="getUpdatedLeaveResponse($event)"
+                (getEndConversationResponse)="getEndConversationResponse()"
+                [selectedThreadId]="selectedThreadId"
+                [getExternalMsgThreadEndsVal]="getExternalMsgThreadEndsVal"
+                [selectedChatThreadData]="selectedChatThread"
+            ></web-messenger-conversation-settings>
+        </div>
+        <div #scrollContainerRef class="conversation-body h-full overflow-y-auto p-3 relative" (scroll)="scrollHandler($event)">
+            <span *ngIf="isLoadMore" class="-top-3 bg-base-100 mx-auto rounded px-3 py-1 z-50 table cursor-pointer">{{'loadingOlderMessages' | translate}}</span>
+            <span *ngIf="displayUnreadTop" class="sticky -top-3 bg-base-300 mx-auto rounded px-3 py-1 z-50 table cursor-pointer" (click)="scrollToFirstUnread()">
+                <em class="ph ph-arrow-up mr-2"></em>{{ "unreadMessages" | translate }}
+            </span>
+            <!--Date time Showen in this div-->
+            <div *ngFor="let message of threadMessagesData; let isLast = last; trackBy: trackByMessageId" [attr.id]="'message-' + message.message_id">
+                <!-- show the date & time for the first message of the day -->
+                <span 
+                    *ngIf="message?.isFirstMessageOfDay" 
+                    class="text-sm after:border-t before:border-t before:border-base-100 dark:before:border-gray-600 text-nowrap after:border-base-100 dark:after:border-gray-600 before:w-[35%] after:w-[35%] flex justify-center gap-4 items-center my-2 dark:text-base-100 text-gray-600">
+                    {{ message.time_created | date: 'EEE MMM d, h:mm a'}}
+                </span>
+                <div *ngIf="message.type === 'system'">
+                    <p
+                        class="text-secondary dark:text-base-100 border border-base-100 dark:border-gray-600 text-sm md:w-[45vw] m-auto text-center py-1 px-4 rounded-xl mt-2"
+                        [innerHTML]="checkBasicUserContentAndFormat(message.content)"
+                    >
+                    </p>
+                </div>
+                <ng-container *ngIf="message.user_id !== userId && (message.type === 'user' || message.type === 'pager')" >
+                    <div class="chat chat-start">
+                        <!-- Avatar Section -->
+                        <div class="chat-image avatar placeholder -top-2 cursor-pointer">
+                            <ng-container *ngIf="getUserInfo(message.user_id) as userInfo">
+                                <ng-container *ngIf="userInfo.isExternal; else nonExternalUserAvatar">
+                                    <!-- External user avatar -->
+                                    <div class="bg-base-100 text-secondary rounded-full w-12 h-12">
+                                        <img class="p-2" src="assets/icons/user_external.svg" alt="Profile-img" />
+                                    </div>
+                                </ng-container>
+
+                                <!-- Non-external user avatar -->
+                                <ng-template #nonExternalUserAvatar>
+                                    <div class="bg-base-100 text-secondary rounded-full w-12 h-12" (click)="openUserProfile(message)">
+                                        <!-- Check if the image_id is empty or undefined -->
+                                        <ng-container *ngIf="!userInfo.imageUrl; else imageAvatar">
+                                            <!-- Display initials for standard users if image_id is empty or undefined -->
+                                            <span class="text-base">
+                                                {{ userInfo.initials }}
+                                            </span>
+                                        </ng-container>
+
+                                        <!-- Template for image avatar -->
+                                        <ng-template #imageAvatar>
+                                            <!-- If image_id is available, show the image -->
+                                            <img [src]="userInfo.imageUrl" alt="Profile-img" />
+                                        </ng-template>
+                                    </div>
+                                </ng-template>
+                            </ng-container>
+                        </div>
+
+                        <span class="chat-header pl-1 text-gray-600 dark:text-base-100 flex items-center">
+                            <!-- To-Do changes to be shown here as per API response -->
+                            <!-- For external user -->
+                            <ng-container *ngIf="getUserInfo(message.user_id) as userInfo">
+                                <ng-container *ngIf="userInfo.isExternal; else nonExternalUserTemplate">
+                                    <!-- Display thread subject for external user -->
+                                    {{ selectedChatThread.thread.subject }}
+                                </ng-container>
+
+                                <!-- Template for non-external users -->
+                                <ng-template #nonExternalUserTemplate>
+                                    <!-- Display first name and last name for non-external users -->
+                                    <span [innerHTML]="message.first_name | sanitizeHtml"></span>
+                                    <span class="ml-1" [innerHTML]="message.last_name | sanitizeHtml"></span>
+                                    <ng-container *ngIf="message.user_status">
+                                        <ng-container [ngSwitch]="message.user_status">
+                                            <em *ngSwitchCase="'available'" class="ph-duotone ph-check-circle text-green-500 ml-1"></em>
+                                            <em *ngSwitchCase="'busy'" class="ph-duotone ph-prohibit text-neutral ml-1"></em>
+                                            <em *ngSwitchCase="'off'" class="ph-duotone ph-minus-circle text-base-300 ml-1"></em>
+                                        </ng-container>
+                                    </ng-container>
+                                </ng-template>
+                            </ng-container>
+                        </span>
+                        <div class="md:max-w-[45vw] min-w-[20vw]">
+                            <div class="collapse mb-2 -ml-3 overflow-visible relative w-full">
+                                <input type="checkbox" [checked]="expandedMessageId === message.message_id" class="min-h-0" #receiverMessageCheckbox hidden />
+                                <div class="collapse-title min-w-[15rem] p-0 pl-3 min-h-0" (click)="toggleCheckbox(receiverMessageCheckbox, message.message_id,message.user_id)">
+                                    <span class="chat-bubble break-word max-w-[calc(100%-0.75rem)] w-full bg-base-100 text-secondary bg-opacity-90 hover:bg-opacity-100">
+                                        <!-- attachment files -->
+                                        <div *ngIf="message.attachments.length">
+                                            <ng-container *ngFor="let file of message.attachments">
+                                                <!-- Image type attachment start-->
+                                                <div *ngIf="isImageType(file.mime_type)" (click)="fileClicked(file._id.$oid, file.name, $event)">
+                                                    <div><img class="max-h-[25vh]" [src]="getPreviewUrl(file._id.$oid)" /><em class="ph ph-cloud-arrow-down"></em></div>
+                                                    <span [innerHTML]="file.name | sanitizeHtml"> </span>
+                                                </div>
+                                                <!-- Image type attachment end-->
+                                                <!-- PDF file attachment -->
+                                                <div *ngIf="isPDFType(file.mime_type)" (click)="fileClicked(file._id.$oid, file.name, $event)">
+                                                    <em class="ph ph-file-pdf"></em>
+                                                    <span [innerHTML]="file.name | sanitizeHtml"> </span
+                                                    ><br />
+                                                    <span>{{ getFileSize(file.size) }}</span>
+                                                </div>
+                                                <!-- DOC type attachment -->
+                                                <div *ngIf="isDocType(file.mime_type)" (click)="fileClicked(file._id.$oid, file.name, $event)">
+                                                    <em class="ph ph-paperclip"></em>
+                                                    <span [innerHTML]="file.name | sanitizeHtml"> </span
+                                                    ><br />
+                                                    <span>{{ getFileSize(file.size) }}</span>
+                                                </div>
+                                                <!-- Default case -->
+                                                <div *ngIf="isOtherType(file.mime_type)" (click)="fileClicked(file._id.$oid, file.name, $event)">
+                                                    <em class="ph ph-paperclip"></em>
+                                                    <span [innerHTML]="file.name | sanitizeHtml"></span
+                                                    ><br />
+                                                    <span>{{ getFileSize(file.size) }}</span>
+                                                </div>
+                                            </ng-container>
+                                        </div>
+                                        <!-- To-Do changes to be shown here as per API response -->
+                                        <em *ngIf="message?.urgent" class="ph-fill ph-warning-circle absolute text-neutral -right-8 top-1 text-3xl"></em>
+                                        <div class="whitespace-pre-wrap break-word max-w-full overflow-hidden overflow-x-auto" [innerHTML]="message.content | sanitizeHtml">
+                                         
+                                        </div>
+                                        
+                                    </span>
+                                </div>
+                                <div *ngIf="isLast && expandedMessageId !== message.message_id" class="flex absolute -bottom-6 justify-between py-1 px-4 items-center text-xs text-base-300">
+                                    <span>{{ "sent" | translate }} {{ message.time_created | date: 'EEE MMM d, h:mm a'}}<em class="ph ph-check"></em></span>
+                                </div>
+                                <div class="collapse-content text-secondary" *ngIf="expandedMessageId === message.message_id && storeToggleCheckboxVal">
+                                    <ng-container *ngFor="let status of statusDataByMessage.get(message.message_id);trackBy: trackByStatusId">
+                                        <div class="flex justify-between py-1 items-center text-xs text-base-350 dark:text-base-300">
+                                            <span> 
+                                                <ng-container [ngSwitch]="findProfileForStatus(status.user_id.$oid).status">
+                  <em *ngSwitchCase="'available'" title="Available" class="ph-duotone ph-check-circle text-green-600"></em>
+                  <em *ngSwitchCase="'busy'" title="Busy" class="ph-duotone  ph-prohibit text-neutral"></em>
+                  <em *ngSwitchCase="'off'" title="Off Duty" class="ph-duotone ph-minus-circle text-base-300"></em>
+                  <em *ngSwitchCase="undefined" class="ph-duotone ph-circle border-base-300 text-base-300  bg-base/10"></em>
+                </ng-container>
+                {{ findProfileForStatus(status.user_id.$oid).firstAndLastName }}</span>
+                                                            <span *ngIf="status.status === 'read'">
+                                                <ng-container *ngIf="status?.user_id?.$oid === message?.user_id">
+                                                    {{ "sent" | translate }}</ng-container>
+                                                {{
+                                                    status.time_read?.$date
+                                                        | date
+                                                            : "MMM
+                            dd, h:mm a"
+                                                }}
+                                                <em class="ph ph-check"></em
+                                            ></span>
+                                            <span *ngIf="status.status === 'unread'">{{ "unread" | translate }}<em class="ph ph-x"></em></span>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </ng-container>
+                <ng-container *ngIf="message.user_id === userId && message.type === 'user'">
+                    <div class="chat chat-end">
+                        <div class="chat-image avatar cursor-pointer placeholder -top-2">
+                            <ng-container *ngIf="getUserInfo(message.user_id) as userInfo">
+                                <ng-container *ngIf="userInfo.isExternal; else nonExternalUserAvatar">
+                                    <!-- External user avatar -->
+                                    <div class="bg-base-100 text-secondary rounded-full w-12 h-12">
+                                        <img class="p-2" src="assets/icons/user_external.svg" alt="Profile-img" />
+                                    </div>
+                                </ng-container>
+
+                                <!-- Non-external user avatar -->
+                                <ng-template #nonExternalUserAvatar>
+                                    <div class="bg-base-100 text-secondary rounded-full w-12 h-12" (click)="openUserProfile(message)">
+                                        <!-- Check if the image_id is empty or undefined -->
+                                        <ng-container *ngIf="!userInfo.imageUrl; else imageAvatar">
+                                            <!-- Display initials for standard users if image_id is empty or undefined -->
+                                            <span class="text-base">
+                                                {{ userInfo.initials }}
+                                            </span>
+                                        </ng-container>
+
+                                        <!-- Template for image avatar -->
+                                        <ng-template #imageAvatar>
+                                            <!-- If image_id is available, show the image -->
+                                            <img [src]="userInfo.imageUrl" alt="Profile-img" />
+                                        </ng-template>
+                                    </div>
+                                </ng-template>
+                            </ng-container>
+                        </div>
+                        <div class="chat-bubble p-0 before:hidden bg-transparent md:max-w-[45vw]  min-w-[20vw] flex flex-col items-end">
+                            <div class="collapse mb-2 xl:-mr-3 overflow-visible relative w-full">
+                                <input type="checkbox" [checked]="expandedMessageId === message.message_id" class="min-h-0" #senderMessageCheckbox hidden />
+                               <!--messager load here-->
+                                <div
+                                    class="collapse-title sm:min-w-[15rem] min-w-[12rem] break-word max-w-[calc(100%-0.75rem)] p-3 min-h-0 chat-bubble bg-accent text-secondary bg-opacity-90 hover:bg-opacity-100"
+                                    (click)="toggleCheckbox(senderMessageCheckbox, message.message_id,message.user_id)"
+                                >
+                                    <!-- attachment files -->
+                                    <div *ngIf="message.attachments.length">
+                                        <ng-container *ngFor="let file of message.attachments">
+                                            <!-- Image type attachment start-->
+                                            <div class="text-center mb-2 group" *ngIf="isImageType(file.mime_type)" (click)="fileClicked(file._id.$oid, file.name, $event)">
+                                                <div class="relative table mx-auto">
+                                                    <img class="max-h-[25vh]" [src]="getPreviewUrl(file._id.$oid)" />
+                                                    <em
+                                                        class="ph-bold ph-cloud-arrow-down absolute hidden group-hover:block bottom-3 right-3 shadow-sm shadow-black rounded py-1 px-2.5 bg-primary text-white text-2xl"
+                                                    ></em>
+                                                </div>
+                                                <span class="text-sm" [innerHTML]="file.name | sanitizeHtml"></span>
+                                            </div>
+                                            <!-- Image type attachment end-->
+                                            <!-- PDF file attachment -->
+                                            <div class="flex flex-col gap-1 items-center" *ngIf="isPDFType(file.mime_type)" (click)="fileClicked(file._id.$oid, file.name, $event)">
+                                                <em class="ph ph-file-pdf text-3xl text-neutral bg-blue-50 rounded px-3 py-4"></em>
+                                                <span [innerHTML]="file.name | sanitizeHtml"></span>
+                                                <span class="text-sm">{{ getFileSize(file.size) }}</span>
+                                            </div>
+                                            <!-- DOC type attachment -->
+                                            <div class="flex flex-col gap-1 items-center" *ngIf="isDocType(file.mime_type)" (click)="fileClicked(file._id.$oid, file.name, $event)">
+                                                <em class="ph ph-paperclip text-3xl text-primary bg-blue-50 rounded px-3 py-4"></em>
+                                                <span [innerHTML]="file.name | sanitizeHtml"></span>
+                                                <span class="text-sm">{{ getFileSize(file.size) }}</span>
+                                            </div>
+                                            <!-- Default case -->
+                                            <div class="flex flex-col gap-1 items-center" *ngIf="isOtherType(file.mime_type)" (click)="fileClicked(file._id.$oid, file.name, $event)">
+                                                <em class="ph ph-paperclip text-3xl text-primary bg-blue-50 rounded px-3 py-4"></em>
+                                                <span [innerHTML]="file.name | sanitizeHtml"> </span>
+                                                <span class="text-sm">{{ getFileSize(file.size) }}</span>
+                                            </div>
+                                        </ng-container>
+                                    </div>
+
+                                    <em *ngIf="message?.urgent" class="ph-fill ph-warning-circle absolute text-neutral -left-8 top-1 text-3xl"></em>
+                                    <div class="whitespace-pre-wrap break-word" [innerHTML]="message.content | sanitizeHtml">
+                                    </div>
+                                </div>
+                                <div *ngIf="isLast && expandedMessageId !== message.message_id" class="flex absolute -bottom-6 justify-between py-1 px-4 items-center text-xs text-base-300">
+                                    <span>{{ "sent" | translate }}  {{ message.time_created | date: 'EEE MMM d, h:mm a'}}<em class="ph ph-check"></em></span>
+                                </div>
+                                <div class="collapse-content text-secondary" *ngIf="storeToggleCheckboxVal"> 
+                                    <ng-container *ngFor="let status of statusDataByMessage.get(message.message_id);trackBy: trackByStatusId">
+                                        <div class="flex justify-between py-1 items-center text-xs text-base-350 dark:text-base-300">
+                                            <span> 
+                                                <ng-container [ngSwitch]="findProfileForStatus(status.user_id.$oid).status">
+                  <em *ngSwitchCase="'available'" title="Available" class="ph-duotone ph-check-circle text-green-600"></em>
+                  <em *ngSwitchCase="'busy'" title="Busy" class="ph-duotone  ph-prohibit text-neutral"></em>
+                  <em *ngSwitchCase="'off'" title="Off Duty" class="ph-duotone ph-minus-circle text-base-300"></em>
+                  <em *ngSwitchCase="undefined" class="ph-duotone ph-circle border-base-300 text-base-300  bg-base/10"></em>
+                </ng-container>
+                {{ findProfileForStatus(status.user_id.$oid).firstAndLastName }}</span>
+                                            <span *ngIf="status.status === 'read'"
+                                                >
+                                                <ng-container *ngIf="status.user_id.$oid=== selectedChatThread.userProfile?._id?.$oid">
+                                                {{ "sent" | translate }}
+                                                </ng-container>
+                                                {{
+                                                    status.time_read?.$date
+                                                        | date
+                                                            : "MMM
+                            dd, h:mm a"
+                                                }}
+                                                <em class="ph ph-check"></em
+                                            ></span>
+                                            <span *ngIf="status.status === 'unread'">{{ "unread" | translate }}<em class="ph ph-x"></em></span>
+                                        </div>
+                                    </ng-container>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </ng-container>
+            </div>
+            <!-- show patient details -->
+            <div class="mt-6 px-8 table mx-auto" *ngIf="selectedChatThread">
+                <span
+                    class="text-primary dark:text-accent border border-primary ml-auto rounded px-4 py-2 flex cursor-pointer"
+                    *ngIf="selectedChatThread.thread.patient?.name"
+                    (click)="showPatientDetails()"
+                >
+                    <em class="ph-bold ph-user mr-3 text-2xl"></em>
+                    <p>
+                        <span>{{ "conversationBasedOnPatient" | translate }}</span
+                        ><br />
+                        <span class="font-medium flex items-center">{{ "viewThePatients" | translate }} <em class="ph ph-arrow-right ml-1"></em></span>
+                    </p>
+                </span>
+            </div>
+            <span *ngIf="displayUnreadBottom" class="sticky bottom-0 bg-base-300 mx-auto rounded px-3 py-1 z-[60] table cursor-pointer" (click)="scrollToLastUnread()">
+                <em class="ph ph-arrow-down mr-2"></em>{{ "unreadMessages" | translate }}
+            </span>
+        </div>
+        <p
+            *ngIf="isExternalThread && getExternalMsgThreadEndsVal"
+            class="text-secondary dark:text-base-100 border border-base-100 dark:border-gray-600 text-sm md:w-[45vw] m-auto text-center py-1 px-4 rounded-xl mt-2"
+        >
+            {{ "conversationEnded" | translate }}
+        </p>
+        <p
+            *ngIf="isExternalThread && getExpiresInDurationVal && !getExternalMsgThreadEndsVal"
+            class="text-secondary dark:text-base-100 border border-base-100 dark:border-gray-600 text-sm md:w-[45vw] m-auto text-center py-1 px-4 rounded-xl mt-2"
+        >
+            {{ "thisConversationWillEndIn" | translate }} {{ getExpiresInDurationVal }}
+        </p>
+        <p *ngIf="selectedChatThread && hasUserLeft" class="px-3 py-2 text-gray-600 dark:text-base-100">{{ "noLongerPartOfConversation" | translate }}</p>
+        <div
+            autocomplete="off"
+            class="py-3 flex left-0 gap-x-3 right-0 z-40 bg-white dark:bg-black"
+            *ngIf="!(hasUserLeft || isBasicUser || hasExternalMessageTimeExpired || checkIfThreadIsBroadcast || isPagerTypeMessage)"
+        >
+            <div class="relative w-full flex items-center pl-3">
+                <span *ngIf="!isExternalThread" class="mr-2 transform rotate-90">
+                    <em class="ph ph-paperclip-horizontal text-3xl text-base-300 hover:text-primary">
+                        <input type="file" multiple class="absolute left-0 w-full h-full opacity-0 z-10" (change)="uploadFile($event)" />
+                    </em>
+                </span>
+                <textarea #inputField id="message" placeholder="{{ 'typeSomething' | translate }}"
+                class="border bg-transparent border-base-300 dark:text-white text-gray-600 rounded w-full py-2 px-3 pr-7 max-h-[6em]"
+                style="white-space: pre-wrap;"
+                [(ngModel)]="message"
+                  (input)="onMessageChange()"
+                  [ngStyle]="getStyle()"
+                  (scroll)="adjustOverflowY()"
+                [ngClass]="{ 'focused': message }"  [ngModelOptions]="{ standalone: true }" autofocus></textarea>
+                <i *ngIf="!isExternalThread" class="ph-fill absolute right-1 ph-warning-circle text-2xl text-base-300 hover:text-neutral" [ngClass]="{ 'text-neutral': urgentMessage }" (click)="toggleUrgentState()"></i>
+            </div>
+            <span *ngIf="!(message || uploadedFiles.length)">
+                <web-messenger-quick-messages (dataEvent)="selectedQuickMessage($event)"></web-messenger-quick-messages>
+            </span>
+            <span class="mr-3" *ngIf="message || uploadedFiles.length">
+                <button class="cursor-pointer rounded btn-primary text-white dark:btn-accent dark:text-secondary py-2 px-3" (click)="newThreadPost()">{{ "Send" | translate }}</button>
+            </span>
+        </div>
+        <div class="px-4">
+            <span class="flex justify-end mb-2" *ngFor="let uploaded of uploadedFiles; let i = index">
+                <span class="rounded bg-primary/10 dark:bg-primary/30 text-secondary dark:text-base-100 text-xs flex items-center gap-3 p-0.5" [ngClass]="{ 'text-red-500': uploaded.isError }">
+                    <em *ngIf="!uploaded.isError" class="ph text-green-500 ph-check"></em> {{ uploaded.file.name }}
+                    <progress *ngIf="!uploaded.isComplete && !uploaded.isError" class="progress progress-primary w-24 h-1" [value]="uploaded.progress" max="100"></progress>
+                    <em class="ph text-neutral ph-x cursor-pointer" (click)="removeFile(i)"></em>
+                </span>
+            </span>
+        </div>
+    </div>
+</div>
+<ng-template #emptyWindow>
+    <div class="text-center flex h-full items-center justify-center py-3">
+        <div>
+            <img src="assets/icons/no-msg.png" class="m-auto" alt="chat" />
+            <p class="text-3xl my-4 text-secondary dark:text-base-100">{{ "noMessagesSelected" | translate }}</p>
+            <p class="text-secondary dark:dark:text-base-100">{{ "selectMessagesFromInbox" | translate }}</p>
+        </div>
+    </div>
+</ng-template>
+
+<ng-container *ngIf="openUserProfileModal">
+    <web-messenger-user-profile-modal 
+        [selectedChatThread]="selectedChatThread"  (sendCoverageIdToCompose)="addComposeQueryParamsForCoverageId($event)" (sendUserIdToCompose)="addComposeQueryParamsForUserId($event)"
+        [showUserProfileModal]="openUserProfileModal"
+        (closeModalEvent)="closeModal()"
+        [selectedChatIds]="selectedChatIds" (showUserProfile)="showUserProfile($event)"
+    ></web-messenger-user-profile-modal>
+</ng-container>
+
+<web-messenger-modal
+    *ngIf="showAttachmentPopUp"
+    [modalId]="'attachment'"
+    [modalTitle]="fileName"
+    [modalMessage]="'downloadAttachmentContent' | translate"
+    [modalCloseText]="'download' | translate"
+    [showCancelButton]="true"
+    [cancelText]="'cancel' | translate"
+    (cancelPopup)="closeAttachmentPopUp()"
+    (closePopup)="downloadAttachment()"
+></web-messenger-modal>
+
+<web-messenger-patient-profile-popup
+    *ngIf="showPatientProfilePopup"
+    [showPatientProfilePopup]="showPatientProfilePopup"
+    (closePopup)="closePatientPopUp()"
+    [patientId]="patientId"
+    [threadId]="threadId"
+    [patientName]="patientName"
+></web-messenger-patient-profile-popup>

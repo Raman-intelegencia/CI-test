@@ -1,0 +1,27 @@
+::ng-deep .cdk-overlay-container {
+    position: static; /* Avoid global impact */
+  
+    .cdk-global-overlay-wrapper {
+      position: fixed;
+      top: 150px;
+      left: 35%;
+      bottom: 100%; /* Position above the triggering element */
+      right: auto;
+      transform: translateX(-50%); /* Adjust based on your layout */
+    }
+    .cdk-overlay-pane {
+      background: red;
+      height: 300px;
+      .mat-datepicker-dialog {
+        ngx-mat-datepicker-content {
+          z-index: 1000;
+          width: 250px; /* Smaller width */
+          height: 300px; /* Let it adjust height based on content */
+          max-height: 300px; /* Maximum height */
+          background: yellow; /* Your desired background color */
+        }
+      }
+    }
+  
+  }
+  

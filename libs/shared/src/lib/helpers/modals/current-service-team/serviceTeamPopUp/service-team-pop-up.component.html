@@ -1,0 +1,93 @@
+<input type="checkbox"  class="modal-toggle" [checked]="showServiceTeamPopup" />
+
+<div class="modal bg-black/70">
+    <div class="modal-box max-w-xl bg-white dark:bg-black rounded p-0 relative overflow-y-hidden dark:border-primary/60 dark:border dark:shadow-xl dark:shadow-primary/20">
+        <div class="flex justify-between text-white items-center bg-primary p-3">
+            <h3 class="font-bold">{{showServiceTeamScheduleHeading}}</h3>
+            <label for="service-team-modal" class="w-7 h-7" (click)="closeServiceTeam($event)">
+                <em class="ph-bold ph-x cursor-pointer text-xl hover:text-accent"></em>
+            </label>
+        </div>
+
+        <div class="p-3 px-4">
+            <button class="flex items-center text-primary dark:text-accent" (click)="backToFirstServiceTeamScreen($event)"><em
+                class="ph ph-caret-left mr-1"></em>{{'back' | translate}}</button>
+            <div class="flex items-center justify-between text-secondary dark:text-base-100 my-3">
+                <span>{{'serviceTeamsSchedule' | translate}}</span>
+            </div>
+            <div class="rounded bg-base-100/[0.3] dark:bg-gray-700  flex items-center w-full px-3">
+                <input
+                 type="search" placeholder="Search all service teams"
+                    class="bg-transparent border-0 dark:text-white text-gray-600 rounded w-full py-2 pr-3"
+                    [ngModel]="serviceSearchTxt" (ngModelChange)="onServiceRoleSearch($event)">
+                <em *ngIf="this.serviceSearchTxt.length" class="ph ph-x-circle mr-2 dark:text-base-100"
+                    (click)="clearSearchInput()"></em>
+                <em class="ph ph-magnifying-glass dark:text-base-100"></em>
+            </div>
+            <div class="overflow-y-auto max-h-[30vh] h-full">
+                <div *ngIf="selectedServiceRoleList.length || selectedServiceTeam.length">
+                    <div class="flex items-center justify-between text-secondary dark:text-base-100 mt-3">
+                        <span>{{'selectedServices' | translate}}</span>
+                        <button class="text-primary dark:text-accent" type="button" (click)="clearAllSelected($event)" >Clear all selected</button>
+                    </div>
+                    <div *ngFor="let selectedRole of selectedServiceRoleList;let i =  index; trackBy: trackByRoleId">
+                        <div (click)="removeSelectedService(i,selectedRole)" 
+                            class="cursor-pointer border-b border-base-100 py-4 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-primary/10 space-x-2 label justify-start">
+                            <input type="checkbox" class="checkbox checkbox-primary dark:checkbox-accent rounded checkbox-xs" checked
+                                 />
+                            <span
+                                class="text-secondary text-sm dark:text-base-100">{{selectedRole.description}}</span>
+                        </div>
+                       
+                    </div>
+                </div>
+                <div *ngIf="filteredRecentServiceRoles.length">
+                    <div class="text-secondary dark:text-base-100 mt-3">
+                        <span>{{'recentServices' | translate}}</span>
+                    </div>
+                    <div *ngFor="let recentService of filteredRecentServiceRoles; trackBy: trackByRoleId">
+                        <div
+                            class="cursor-pointer border-b border-base-100 py-4 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-primary/10 space-x-2 label justify-start" (click)="onRecentOrOtherServiceChange(recentService,$event)">
+                            <input type="checkbox" class="checkbox checkbox-primary  dark:checkbox-accent rounded checkbox-xs"
+                                 />
+                            <span
+                                class="text-secondary text-sm dark:text-base-100">{{recentService.description}}</span>
+                        </div>
+                    </div>
+                </div>
+                <div *ngIf="filteredOtherServiceRoles.length">
+                    <div class="text-secondary dark:text-base-100 mt-3">
+                        <span> {{'otherServices' | translate}}</span>
+                    </div>
+                    <div *ngFor="let otherService of filteredOtherServiceRoles; trackBy: trackByRoleId">
+                         <div
+                            class="cursor-pointer border-b border-base-100 py-4 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-primary/10 space-x-2 label justify-start" (click)="onRecentOrOtherServiceChange(otherService,$event)">
+                            <input type="checkbox" class="checkbox checkbox-primary  dark:checkbox-accent rounded checkbox-xs"
+                                 />
+                            <span
+                                class="text-secondary text-sm dark:text-base-100">{{otherService.description}}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex space-x-4 justify-end mt-4">
+                <button *ngIf="!selectedServiceTeam.length || showSelectedScheduledServiceTeamsList" [disabled]="!selectedServiceRoleList.length" class="btn btn-primary text-white" (click)="showOnCallPopup()">{{'next' | translate}} <em
+                        class="ph ph-caret-right ml-1"></em></button>
+                        <button *ngIf="selectedServiceTeam.length && !showSelectedScheduledServiceTeamsList" class="btn btn-primary text-white" (click)="saveUpdatedCurrentServiceTeamList()">{{'save' | translate}} </button>
+            </div>
+        </div>
+    </div>
+</div>
+<ng-container *ngIf="openOnCallPopup">
+<web-messenger-on-call-pop-up (backOnCallClickedEvent)="backToFirstServiceTeamScreen($event)" [getSelectedRoleValue]="storeSelectedService" [storeSelectedRole]="storeSelectedRole" [userId]="userId" [selectedServiceRoleList]="setSelectedServiceRoleList"
+(callPopupBackClickedEvent)="backToFirstServiceTeamScreen($event)" [openOnCallPopup]="openOnCallPopup" [userProfileResponse]="userProfileResponse"
+(openServiceTeamListPopup)="openServiceTeamPopup($event)" [userData]="userData" [userDataFromMessenger]="userDataFromMessenger"
+></web-messenger-on-call-pop-up>
+</ng-container>
+<ng-container *ngIf="checkForOptOut">
+    <web-messenger-modal [modalId]="'opt_out'" [showCancelButton]='true' [modalTitle]="'serviceTeamChange' | translate"
+    (cancelPopup)="closeServiceTeamModal()" [cancelText]="'no'|translate"
+    [modalMessage]="optOutMsg"
+    (closePopup)="saveUpdatedCurrentServiceTeamList()"
+    [modalCloseText]="yesOptOutButtontext"></web-messenger-modal>
+</ng-container>

@@ -1,0 +1,16 @@
+<ng-container [ngSwitch]="status">
+  <div *ngSwitchDefault id="about-section"
+    class="text-base text-gray-600 dark:text-base-100 px-6 h-full overflow-y-auto">
+    <h2 class="text-secondary text-xl font-medium dark:text-white mb-4">{{ "about" | translate }}</h2>
+    <p class="text-sm mb-4 ">{{ "currentApplicationVersion" | translate }} <b>{{ "version" | translate }}</b></p>
+    <p>
+      {{ "aboutAMSConnect" | translate }}
+    </p>
+  </div>
+  <web-messenger-release-history *ngSwitchCase="'Release History'" id="release-history"></web-messenger-release-history>
+  <web-messenger-terms-of-use *ngSwitchCase="'Terms of Use'" id="terms-of-use-section"></web-messenger-terms-of-use>
+  <web-messenger-privacy-policy *ngSwitchCase="'Privacy Policy'"
+    id="privacy-policy-section"></web-messenger-privacy-policy>
+  <web-messenger-license *ngSwitchCase="'License'" id="license-section"></web-messenger-license>
+</ng-container>
+  

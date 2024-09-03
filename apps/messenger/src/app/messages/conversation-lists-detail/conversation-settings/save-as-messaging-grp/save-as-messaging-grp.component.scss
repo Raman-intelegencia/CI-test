@@ -1,0 +1,7 @@
+.save_as_group_not_disabled {
+    @apply  btn-primary text-white;
+}
+
+  .save_as_group_disabled {
+    @apply  btn-disabled bg-primary/40 text-white/70 cursor-default ;
+  }

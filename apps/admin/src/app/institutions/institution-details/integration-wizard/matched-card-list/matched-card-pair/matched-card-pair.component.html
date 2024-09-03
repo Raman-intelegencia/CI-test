@@ -1,0 +1,14 @@
+<div class="grid grid-cols-2 grid-rows-1 gap-0 mb-3 w-[480px]">
+  <web-messenger-base-card
+    [cardData]="match.firstItem.transformToCardData()"
+    [matchMeta]="match.matchMeta" 
+    [onSelectCallback]="onSelectBaseCardCallback(match)" 
+    [(isSelected)]="isSelected" (clickSelectEmitter)="onSelectBaseCard(match)" class="border border-base-300 rounded-l mr-[-1px]"
+    [class.bg-[#E6FDE7]]="isSelected" />
+  <web-messenger-base-card
+    [cardData]="match.secondItem.transformToCardData()"
+    [matchMeta]="match.matchMeta" 
+    [onSelectCallback]="onSelectBaseCardCallback(match)" 
+    [(isSelected)]="isSelected" (clickSelectEmitter)="onSelectBaseCard(match)" class="border border-base-300 rounded-r"
+    [class.bg-[#E6FDE7]]="isSelected" />
+</div>

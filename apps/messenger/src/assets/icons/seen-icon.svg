@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+  <g id="seen-icon" transform="translate(-1026 -407)">
+    <g id="Icon_ionic-ios-eye" data-name="Icon ionic-ios-eye" transform="translate(1027.5 405.823)">
+      <path id="Path_22" data-name="Path 22" d="M10.492,7.875c-2.961,0-5.3,1.863-8.086,4.908a.582.582,0,0,0,0,.784c2.39,2.64,4.5,4.912,8.09,4.912,3.55,0,6.212-2.861,8.1-4.934a.578.578,0,0,0,.018-.762C16.685,10.445,14.016,7.875,10.492,7.875Zm.162,8.613a3.314,3.314,0,1,1,3.156-3.156A3.315,3.315,0,0,1,10.654,16.488Z" fill="#486dc7"/>
+      <path id="Path_23" data-name="Path 23" d="M15.857,14.126a1.73,1.73,0,0,1,.114-.622c-.037,0-.074,0-.114,0a2.356,2.356,0,1,0,2.357,2.357c0-.048,0-.1,0-.144a1.633,1.633,0,0,1-.67.144A1.71,1.71,0,0,1,15.857,14.126Z" transform="translate(-5.358 -2.679)" fill="#486dc7"/>
+    </g>
+    <rect id="Rectangle_640" data-name="Rectangle 640" width="24" height="24" transform="translate(1026 407)" fill="none"/>
+  </g>
+</svg>

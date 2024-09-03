@@ -1,0 +1,5 @@
+<ng-container [ngSwitch]="status"> 
+  <web-messenger-profile *ngSwitchDefault id="profile-section"></web-messenger-profile>
+  <web-messenger-manage-multiple-accounts *ngSwitchCase="'Multiple Accounts'" id="multiple-accounts-section"></web-messenger-manage-multiple-accounts>
+  <web-messenger-password *ngSwitchCase="'Password'" id="password-section"></web-messenger-password>
+    </ng-container>

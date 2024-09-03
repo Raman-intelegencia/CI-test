@@ -1,0 +1,40 @@
+@import '../style/_util.scss';
+
+.composebox {
+    background: $color-white;
+    color: $color-darkgray;
+    border-top: $border-default;
+    display: flex;
+    align-items: center;
+    transition: $transition-size;
+    @media (prefers-color-scheme: dark) {
+        background: $color-black;
+        border-top: 1px solid $color-darkgray;
+    }
+}
+
+.composebox__field {
+    flex: 1;
+    border: none;
+    overflow: auto;
+    resize: none;
+    outline: none;
+    padding: 16px 20px;
+    border-right: $border-default;
+    box-sizing: content-box;
+    @media (prefers-color-scheme: dark) {
+        background: transparent;
+        border-right: 1px solid $color-darkgray;
+        color: $color-white;
+    }
+}
+
+.composebox__actions {
+    width: 93px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+// .composebox__button {
+// }

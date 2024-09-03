@@ -1,0 +1,150 @@
+<div class="py-4 px-6 bg-white dark:bg-black border border-base-100 dark:border-gray-600 rounded">
+  
+  <div class="flex justify-between flex-wrap">
+    <div class="text-sm text-gray-600 dark:text-base-100">
+      <h2 class="text-secondary dark:text-base-100 font-bold text-xl">
+        <label (click)="navigatetoBack()"> <em class="ph-bold ph-arrow-left text-primary dark:text-accent text-lg inline-block md:hidden cursor-pointer"></em></label>
+        {{patientInfo.name}}
+      </h2>
+      <p>{{patientInfo.sex}}</p>
+      <p>{{patientInfo.dob}}</p>
+      <p class="flex"><strong>{{"idNumber" | translate}}:</strong> {{patientInfo.id_number}}</p>
+    </div>
+    <div class="flex flex-col justify-between">
+      <span *ngIf="userType !== 'basic'">
+        <button class="btn btn-primary inline-flex items-center text-white" (click)="addComposeQueryParams()">
+          <em class="ph ph-note-pencil mr-2"></em>
+          {{"composeNewMessage" | translate}}
+        </button>
+      </span>
+      <button *ngIf="isPatientWatched" class="text-neutral inline-flex items-center"
+        (click)="addRemovePatient('remove')">
+        <em class="ph-bold ph-x-circle mr-2"></em>
+        {{"removeFromMyPatients" | translate}}
+      </button>
+      <button *ngIf="!isPatientWatched" class="text-neutral inline-flex items-center" (click)="addRemovePatient('add')">
+        <em class="ph-bold ph-plus-circle mr-2"></em>
+        {{"addToMyPatients" | translate}}
+      </button>
+    </div>
+  </div>
+</div>
+<div class="flex text-xl font-medium mt-6 ml-1 relative z-10 -mb-[1px] font-medium">
+  <button (click)="changeTab('patient-info')"
+    [class]="activeStatus=== 'patient-info' ? 'bg-white dark:bg-black border border-base-100 dark:border-gray-600':'bg-transparent hover:bg-blue-100 dark:hover:bg-primary/30'"
+    class="cursor-pointer text-secondary dark:text-white rounded-t px-6 py-1 border-b-0"> {{"patientInfo" |
+    translate}}</button>
+  <span *ngIf="patientThreads.length">
+    <button (click)="changeTab('history')"
+      [class]="activeStatus=== 'history' ? 'bg-white dark:bg-black border border-base-100 dark:border-gray-600':'bg-transparent hover:bg-blue-100 dark:hover:bg-primary/30'"
+      class="cursor-pointer text-secondary dark:text-white rounded-t px-6 py-1 border-b-0"> {{"history" |
+      translate}}</button>
+  </span>
+</div>
+<div
+  class="py-3 bg-white dark:bg-black border border-base-100 dark:border-gray-600 rounded h-[calc(100%-11.4rem)] overflow-y-auto">
+  <p class="bg-gray-50 rounded ml-auto mr-4 text-sm px-3 text-primary table dark:bg-gray-900 dark:text-white">{{label_annotation}} </p>
+  <div *ngIf="activeStatus=== 'patient-info';else history" class="text-sm text-gray-600 dark:text-base-100 px-6">
+    <p class="my-2 flex"><strong class="w-24">{{"institution" | translate}} :</strong> {{patientInfo.institution}}</p>
+    <p class="my-2 flex"><strong class="w-24">{{"idNumber" | translate}} :</strong> <span class="break-all w-[calc(100%-6rem)]"> {{patientInfo.id_number}}</span></p>
+    <p class="my-2 flex"><strong class="w-24">{{"name" | translate}} :</strong> {{patientInfo.name}}</p>
+    <p class="my-2 flex"><strong class="w-24">{{"dob" | translate}} :</strong> {{patientInfo.dob}}</p>
+    <p class="my-2 flex"><strong class="w-24">{{"sex" | translate}} :</strong> {{patientInfo.sex}}</p>
+    <p class="my-2 flex"><strong class="w-24">{{"address" | translate}} :</strong>{{patientInfo.address}}</p>
+  </div>
+  <ng-template #history>
+    <div *ngIf="patientThreads.length" class="h-full">
+      <p class="px-4 mb-3 text-secondary dark:text-base-100 font-semibold">{{"previousConversationsAboutThisPatient" |
+        translate}}</p>
+        <div *ngFor="let thread of patientThreads;">
+          <div *ngIf="thread.visibility === undefined && !isShowArchivedChats"
+            class="hover:bg-accent/[0.08] py-3 px-4 flex items-center text-gray-600 dark:text-base-100 border-base-100 dark:border-gray-600 border-t dark:border-opacity-50 cursor-pointer">
+                      <ng-container *ngIf="thread.sender_profile?.image_id; else userProfileImage">
+                        <!-- Display image based on image_id -->
+                        <img class="w-12 h-12 rounded-full bg-base-100" 
+                         [src]="getImageUrl(thread.sender_profile?.image_id)"
+                             (click)="openUserProfile(thread.sender_profile?._id)"
+                             alt="Profile-img">  
+                      </ng-container>
+                      
+                      <ng-template #userProfileImage>
+                        <ng-container *ngIf="!thread.sender_profile?.image_id && thread.matched_profiles.length == 0; else userProfileNoImage">
+                          <!-- Display image based on user.image_id -->
+                          <img class="w-12 h-12 rounded-full bg-base-100"
+                               [src]="getImageUrl(user.image_id)"
+                               (click)="openUserProfile(user.image_id)"
+                               alt="Profile-img">
+                        </ng-container>
+                      
+                        <ng-template #userProfileNoImage>
+                          <!-- Display first letters if no image IDs are available -->
+                          <span class="uppercase w-12 h-12 rounded-full border-2 border-base-100 bg-base-100 flex items-center justify-center text-primary"
+                                (click)="openUserProfile(thread.sender_profile?._id || user._id)">
+                            {{ (thread.sender_profile?.first_name || user.first_name) | slice:0:1 }}{{ (thread.sender_profile?.last_name || user.last_name) | slice:0:1 }}
+                          </span>
+                        </ng-template>
+                      </ng-template>
+            <div class="ml-3 w-full" (click)="toggleThreadSelection(thread.thread_id)">
+              <p class="font-medium flex items-center justify-between text-secondary dark:text-white">
+                <!-- To-Do changes to be shown here as per API response -->
+                <span *ngIf="getReceiversValues(thread.receivers) as receivers; else userProfile">{{ receivers | truncate: 40 }}</span>
+                <ng-template #userProfile><span>{{user.first_name}}  {{user.last_name}}</span></ng-template>
+                <span class="text-xs" *ngIf="thread.time_updated">{{thread.time_updated | istConversion | timeAgo:'custom' }} </span>
+              </p>
+              <p class="text-sm" *ngIf="thread.subject"><span class="font-medium">{{transformPatientName(thread.patient_name)}}</span> *  {{thread.subject}}</p>
+                <p class="text-sm" *ngIf="!thread.subject"><span class="font-medium">{{transformPatientName(thread.patient_name)}}</span></p>
+              <p class="text-sm"> {{thread?.latest_message_profile?.first_name}}: {{ thread.latest_message.content |
+                slice:0:110 }}{{ thread.latest_message.content.length > 110 ? '...' : '' }}</p>
+            </div>
+          </div> 
+        <div *ngIf="isShowArchivedChats"
+            class="hover:bg-accent/[0.08] py-3 px-4 flex items-center text-gray-600 dark:text-base-100 border-base-100 dark:border-gray-600 border-t dark:border-opacity-50 cursor-pointer">
+                      <ng-container *ngIf="thread.sender_profile?.image_id; else userProfileImage">
+                        <!-- Display image based on image_id -->
+                        <img class="w-12 h-12 rounded-full bg-base-100" 
+                         [src]="getImageUrl(thread.sender_profile?.image_id)"
+                             (click)="openUserProfile(thread.sender_profile?._id)"
+                             alt="Profile-img">  
+                      </ng-container>
+                      
+                      <ng-template #userProfileImage>
+                        <ng-container *ngIf="!thread?.sender_profile?.image_id && thread?.matched_profiles?.length === 0; else userProfileNoImage">
+                          <!-- Display image based on user.image_id -->
+                          <img class="w-12 h-12 rounded-full bg-base-100"
+                               [src]="getImageUrl(user.image_id)"
+                               (click)="openUserProfile(user.image_id)"
+                               alt="Profile-img">
+                        </ng-container>
+                      
+                        <ng-template #userProfileNoImage>
+                          <!-- Display first letters if no image IDs are available -->
+                          <span class="uppercase w-12 h-12 rounded-full border-2 border-base-100 bg-base-100 flex items-center justify-center text-primary"
+                                (click)="openUserProfile(thread.sender_profile?._id || user._id)">
+                            {{ (thread.sender_profile?.first_name || user.first_name) | slice:0:1 }}{{ (thread.sender_profile?.last_name || user.last_name) | slice:0:1 }}
+                          </span>
+                        </ng-template>
+                      </ng-template>
+            <div class="ml-3 w-full" (click)="toggleThreadSelection(thread.thread_id)">
+              <p class="font-medium flex items-center justify-between text-secondary dark:text-white"> 
+                <span *ngIf="getReceiversValues(thread.receivers) as receivers; else userProfile">{{ receivers | truncate: 40 }}</span>
+                <ng-template #userProfile><span>{{user.first_name}}  {{user.last_name}}</span></ng-template>
+                <span class="text-xs" *ngIf="thread.time_updated">{{thread.time_updated | istConversion | timeAgo:'custom' }} </span>
+              </p>
+              <p class="text-sm" *ngIf="thread.subject; else userSubject"><span class="font-medium">{{transformPatientName(thread.patient_name)}}</span> *  {{thread.subject}}</p>
+              <ng-template #userSubject> <p class="text-sm"><span class="font-medium">{{transformPatientName(thread.patient_name)}}</span></p></ng-template>
+                <p class="text-sm flex justify-between"> {{thread?.latest_message_profile?.first_name}}: {{ thread.latest_message.content |
+                  slice:0:110 }}{{ thread.latest_message.content.length > 110 ? '...' : '' }}  
+                  <span class="text-sm text-neutral " *ngIf="thread?.visibility === false">{{'archived' |
+                  translate}}</span></p>
+            </div>
+          </div> 
+        </div>
+        <div *ngIf="filteredData && !isShowArchivedChats" class="pl-5 text-base text-gray-700 dark:text-base-200">
+         <p>{{"noPatientThread" | translate}}</p>
+         <p>{{"goToSettings" | translate}}</p>
+        </div>  
+</div>
+</ng-template>
+<web-messenger-user-profile-modal *ngIf="showProfileModal" [showUserProfileModal]="showProfileModal" [userId]="userId" (sendCoverageIdToCompose)="addComposeQueryParamsForCoverageId($event)" 
+(showUserProfile)="showUserProfile($event)"
+(sendUserIdToCompose)="addComposeQueryParamsForUserId($event)"></web-messenger-user-profile-modal>
