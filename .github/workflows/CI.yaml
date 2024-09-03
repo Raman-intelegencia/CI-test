@@ -50,10 +50,10 @@ jobs:
         if echo "$changed_files" | grep -q '^apps/admin/'; then
           folder2_changed="true"
         fi
-        if echo "$changed_files" | grep -q '^apps/messenger/'; then
+        if echo "$changed_files" | grep -q '^apps/external-messenger/'; then
           folder3_changed="true"
         fi
-        if echo "$changed_files" | grep -q '^apps/external-messenger/'; then
+        if echo "$changed_files" | grep -q '^apps/messenger/'; then
           folder4_changed="true"
         fi
  
@@ -97,7 +97,7 @@ jobs:
       uses: actions/checkout@v2
  
     - name: Print Hello
-      run: echo "Hello from messenger"
+      run: echo "Hello from -external-messenger"
  
   messenger:
     needs: detect-changes
@@ -109,4 +109,4 @@ jobs:
       uses: actions/checkout@v2
  
     - name: Print Hello
-      run: echo "Hello from external-messenger"
+      run: echo "Hello from messenger"
