@@ -34,6 +34,8 @@ jobs:
         folder2_changed="false"
         folder3_changed="false"
         folder4_changed="false"
+        echo $folder1_changed
+		echo "hellllllllllllloooooooooooooo"
  
         # Get list of changed files
         changed_files=$(git diff --name-only $previous_commit $current_commit)
