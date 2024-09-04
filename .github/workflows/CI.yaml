@@ -7,6 +7,8 @@ on:
       - 'apps/admin/**'
       - 'apps/messenger/**'
       - 'apps/external-messenger/**'
+      - 'libs/**'   # Add this line to track changes in the /libs folder
+
  
 jobs:
   detect-changes:
@@ -16,6 +18,7 @@ jobs:
       folder2-changed: ${{ steps.detect.outputs.folder2-changed }}
       folder3-changed: ${{ steps.detect.outputs.folder3-changed }}
       folder4-changed: ${{ steps.detect.outputs.folder4-changed }}
+      libs-changed: ${{ steps.detect.outputs.libs-changed }}  # New output for /libs
  
     steps:
     - name: Checkout code
@@ -34,6 +37,7 @@ jobs:
         folder2_changed="false"
         folder3_changed="false"
         folder4_changed="false"
+        libs_changed="false"  # Initialize the /libs output variable
 
  
         # Get list of changed files
@@ -56,17 +60,22 @@ jobs:
         if echo "$changed_files" | grep -q '^apps/messenger/'; then
           folder4_changed="true"
         fi
+        if echo "$changed_files" | grep -q '^libs/'; then
+          libs_changed="true"
+        fi
  
         # Output the results
         echo "::set-output name=folder1-changed::$folder1_changed"
         echo "::set-output name=folder2-changed::$folder2_changed"
         echo "::set-output name=folder3-changed::$folder3_changed"
         echo "::set-output name=folder4-changed::$folder4_changed"
+        echo "::set-output name=libs_changed::$libs_changed"
  
   account:
     needs: detect-changes
     runs-on: ubuntu-latest
-    if: needs.detect-changes.outputs.folder1-changed == 'true'
+    if: ${{ needs.detect-changes.outputs.account-changed == 'true' || needs.detect-changes.outputs.libs-changed == 'true' }}
+
  
     steps:
     - name: Checkout code
