@@ -74,7 +74,7 @@ jobs:
   account:
     needs: detect-changes
     runs-on: ubuntu-latest
-    if: ${{ needs.detect-changes.outputs.account-changed == 'true' || needs.detect-changes.outputs.libs-changed == 'true' }}
+    if: ${{ needs.detect-changes.outputs.folder1-changed == 'true' || needs.detect-changes.outputs.libs-changed == 'true' }}
 
  
     steps:
