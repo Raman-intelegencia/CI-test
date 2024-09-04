@@ -7,17 +7,15 @@ on:
       - 'apps/admin/**'
       - 'apps/messenger/**'
       - 'apps/external-messenger/**'
-      - 'libs/**'   # Add this line to track changes in the /libs folder
  
 jobs:
   detect-changes:
     runs-on: ubuntu-latest
     outputs:
-      account-changed: ${{ steps.detect.outputs.account-changed }}
-      admin-changed: ${{ steps.detect.outputs.admin-changed }}
-      messenger-changed: ${{ steps.detect.outputs.messenger-changed }}
-      external-messenger-changed: ${{ steps.detect.outputs.external-messenger-changed }}
-      libs-changed: ${{ steps.detect.outputs.libs-changed }}  # New output for /libs
+      folder1-changed: ${{ steps.detect.outputs.folder1-changed }}
+      folder2-changed: ${{ steps.detect.outputs.folder2-changed }}
+      folder3-changed: ${{ steps.detect.outputs.folder3-changed }}
+      folder4-changed: ${{ steps.detect.outputs.folder4-changed }}
  
     steps:
     - name: Checkout code
@@ -32,11 +30,11 @@ jobs:
         current_commit=$(git rev-parse HEAD)
  
         # Initialize output variables
-        account_changed="false"
-        admin_changed="false"
-        messenger_changed="false"
-        external-messenger_changed="false"
-        libs_changed="false"  # Initialize the /libs output variable
+        folder1_changed="false"
+        folder2_changed="false"
+        folder3_changed="false"
+        folder4_changed="false"
+
  
         # Get list of changed files
         changed_files=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})
@@ -47,32 +45,28 @@ jobs:
  
         # Check changes for each folder
         if echo "$changed_files" | grep -q '^apps/account/'; then
-          account_changed="true"
+          folder1_changed="true"
         fi
         if echo "$changed_files" | grep -q '^apps/admin/'; then
-          admin_changed="true"
+          folder2_changed="true"
         fi
         if echo "$changed_files" | grep -q '^apps/external-messenger/'; then
-          messenger_changed="true"
+          folder3_changed="true"
         fi
         if echo "$changed_files" | grep -q '^apps/messenger/'; then
-          external-messenger_changed="true"
-        fi
-        if echo "$changed_files" | grep -q '^libs/'; then
-          libs_changed="true"
+          folder4_changed="true"
         fi
  
         # Output the results
-        echo "account-changed=$account_changed" >> $GITHUB_ENV
-        echo "admin-changed=$admin_changed" >> $GITHUB_ENV
-        echo "messenger-changed=$messenger_changed" >> $GITHUB_ENV
-        echo "external-messenger-changed=$external-messenger_changed" >> $GITHUB_ENV
-        echo "libs-changed=$libs_changed" >> $GITHUB_ENV  # Output for /libs
+        echo "::set-output name=folder1-changed::$folder1_changed"
+        echo "::set-output name=folder2-changed::$folder2_changed"
+        echo "::set-output name=folder3-changed::$folder3_changed"
+        echo "::set-output name=folder4-changed::$folder4_changed"
  
   account:
     needs: detect-changes
     runs-on: ubuntu-latest
-    if: ${{ needs.detect-changes.outputs.account-changed == 'true' || needs.detect-changes.outputs.libs-changed == 'true' }}
+    if: needs.detect-changes.outputs.folder1-changed == 'true'
  
     steps:
     - name: Checkout code
@@ -84,7 +78,7 @@ jobs:
   admin:
     needs: detect-changes
     runs-on: ubuntu-latest
-    if: ${{ needs.detect-changes.outputs.admin-changed == 'true' || needs.detect-changes.outputs.libs-changed == 'true' }}
+    if: needs.detect-changes.outputs.folder2-changed == 'true'
  
     steps:
     - name: Checkout code
@@ -96,19 +90,19 @@ jobs:
   external-messenger:
     needs: detect-changes
     runs-on: ubuntu-latest
-    if: ${{ needs.detect-changes.outputs.messenger-changed == 'true' || needs.detect-changes.outputs.libs-changed == 'true' }}
+    if: needs.detect-changes.outputs.folder3-changed == 'true'
  
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
  
     - name: Print Hello
-      run: echo "Hello from external-messenger"
+      run: echo "Hello from -external-messenger"
  
   messenger:
     needs: detect-changes
     runs-on: ubuntu-latest
-    if: ${{ needs.detect-changes.outputs.external-messenger-changed == 'true' || needs.detect-changes.outputs.libs-changed == 'true' }}
+    if: needs.detect-changes.outputs.folder4-changed == 'true'
  
     steps:
     - name: Checkout code
