@@ -38,7 +38,7 @@ jobs:
         folder3_changed="false"
         folder4_changed="false"
         libs_changed="false"  # Initialize the /libs output variable
-        echo libs_changed
+        echo "$libs_changed"
 
  
         # Get list of changed files
@@ -71,6 +71,7 @@ jobs:
         echo "::set-output name=folder3-changed::$folder3_changed"
         echo "::set-output name=folder4-changed::$folder4_changed"
         echo "::set-output name=libs_changed::$libs_changed"
+        echo "$libs_changed"
  
   account:
     needs: detect-changes
