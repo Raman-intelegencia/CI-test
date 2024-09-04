@@ -38,6 +38,7 @@ jobs:
         folder3_changed="false"
         folder4_changed="false"
         libs_changed="false"  # Initialize the /libs output variable
+        echo "test for print"
 
  
         # Get list of changed files
