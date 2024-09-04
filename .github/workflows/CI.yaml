@@ -87,7 +87,7 @@ jobs:
   admin:
     needs: detect-changes
     runs-on: ubuntu-latest
-    if: needs.detect-changes.outputs.folder2-changed == 'true'
+    if: ${{ needs.detect-changes.outputs.folder2-changed == 'true' || needs.detect-changes.outputs.libs-changed == 'true' }}
  
     steps:
     - name: Checkout code
@@ -99,7 +99,7 @@ jobs:
   external-messenger:
     needs: detect-changes
     runs-on: ubuntu-latest
-    if: needs.detect-changes.outputs.folder3-changed == 'true'
+    if: ${{ needs.detect-changes.outputs.folder3-changed == 'true' || needs.detect-changes.outputs.libs-changed == 'true' }}
  
     steps:
     - name: Checkout code
@@ -111,7 +111,7 @@ jobs:
   messenger:
     needs: detect-changes
     runs-on: ubuntu-latest
-    if: needs.detect-changes.outputs.folder4-changed == 'true'
+    if: ${{ needs.detect-changes.outputs.folder4-changed == 'true' || needs.detect-changes.outputs.libs-changed == 'true' }}
  
     steps:
     - name: Checkout code
