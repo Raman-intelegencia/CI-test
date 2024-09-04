@@ -70,7 +70,7 @@ jobs:
         echo "::set-output name=folder2-changed::$folder2_changed"
         echo "::set-output name=folder3-changed::$folder3_changed"
         echo "::set-output name=folder4-changed::$folder4_changed"
-        echo "::set-output name=libs_changed::$libs_changed"
+        echo "::set-output name=libs-changed::$libs_changed"
         echo "$libs_changed"
  
   account:
@@ -85,6 +85,8 @@ jobs:
  
     - name: Print Hello
       run: echo "Hello from account"
+           echo "$folder1-changed"
+           echo "$libs_changed"
  
   admin:
     needs: detect-changes
