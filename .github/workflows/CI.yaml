@@ -80,6 +80,15 @@ jobs:
     
     - name: Check nx version
       run: npx nx --version
+    
+    - name: List all nx projects
+      run: npx nx show projects
+
+    - name: List files
+      run: ls -la
+
+    - name: Run linting for external-messenger
+      run: npx nx run external-messenger:lint
 
     - name: Run lint
       run:  npm run lint
