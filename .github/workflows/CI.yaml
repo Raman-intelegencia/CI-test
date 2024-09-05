@@ -76,7 +76,7 @@ jobs:
       run: npm install
 
     - name: Run lint
-      run: npx nx run account:lint
+      run:  nx run account:lint
 
     - name: Print Hello
       run: echo "Hello from account"
