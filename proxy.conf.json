@@ -1,0 +1,24 @@
+{
+    "/api/*": {
+      "target": "https://api-dev1.play.amsconnectapp.com/",
+      "secure": false,
+      "changeOrigin": true
+    },
+    "/admin": {
+      "target": "https://admin-vm.dev:4200",
+      "secure": false,
+      "changeOrigin": true,
+      "pathRewrite": {
+        "^/admin": ""
+      }
+    },
+    "/account": {
+      "target": "https://account-dev.amsconnectapp:4201",
+      "secure": false,
+      "changeOrigin": true,
+      "pathRewrite": {
+        "^/account": ""
+      }
+    }
+  }
+  

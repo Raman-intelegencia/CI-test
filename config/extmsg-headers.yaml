@@ -1,0 +1,26 @@
+X-Frame-Options: deny
+Content-Security-Policy: >
+  script-src 'self' 'unsafe-eval' 'unsafe-inline'
+  https://d2wy8f7a9ursnm.cloudfront.net/
+  ;
+  style-src 'self' 'unsafe-inline'
+  ;
+  img-src 'self'
+  {profile_images_hostname}
+  {api_hostname}
+  data:
+  https://notify.bugsnag.com/
+  ;
+  connect-src 'self'
+  {api_hostname}
+  https://*.bugsnag.com/
+  ;
+  object-src 'self'
+  {api_hostname}
+  ;
+  frame-src
+  {api_hostname}
+  ;
+  frame-ancestors 'none'
+  ;
+  

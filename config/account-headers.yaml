@@ -1,0 +1,40 @@
+X-Frame-Options: deny
+Content-Security-Policy: >
+  script-src 'self' 'unsafe-eval' 'unsafe-inline'
+  https://d2wy8f7a9ursnm.cloudfront.net/
+  https://www.google-analytics.com/
+  https://assets.zendesk.com/embeddable_framework/main.js
+  https://ekr.zdassets.com/
+  https://static.zdassets.com/
+  https://unpkg.com/@phosphor-icons/web@2.1.1
+  ;
+  img-src 'self'
+  {profile_images_hostname}
+  {api_hostname}
+  https://*.googleusercontent.com/
+  data:
+  https://notify.bugsnag.com/
+  https://www.google-analytics.com/
+  https://stats.g.doubleclick.net
+  ;
+  connect-src 'self'
+  {notify_hostname}
+  {notify_wss_hostname}
+  {api_hostname}
+  https://cureatr.zendesk.com/
+  https://ekr.zdassets.com/
+  https://static.zdassets.com/
+  https://www.google-analytics.com/
+  https://stats.g.doubleclick.net/
+  https://*.bugsnag.com/
+  ;
+  object-src 'self'
+  {api_hostname}
+  ;
+  frame-src
+  {api_hostname}
+  {notify_hostname}
+  https://static.zdassets.com/
+  ;
+  frame-ancestors 'none'
+  ;
