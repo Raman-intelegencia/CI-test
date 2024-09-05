@@ -7,9 +7,8 @@ on:
       - 'apps/admin/**'
       - 'apps/messenger/**'
       - 'apps/external-messenger/**'
-      - 'libs/**'   # Add this line to track changes in the /libs folder
+      - 'libs/**'   # Track changes in the /libs folder
 
- 
 jobs:
   detect-changes:
     runs-on: ubuntu-latest
@@ -18,12 +17,12 @@ jobs:
       folder2-changed: ${{ steps.detect.outputs.folder2-changed }}
       folder3-changed: ${{ steps.detect.outputs.folder3-changed }}
       folder4-changed: ${{ steps.detect.outputs.folder4-changed }}
-      libs-changed: ${{ steps.detect.outputs.libs-changed }}  # New output for /libs
- 
+      libs-changed: ${{ steps.detect.outputs.libs-changed }}  # Output for /libs
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
- 
+
     - name: Detect changes in folders
       id: detect
       run: |
@@ -31,23 +30,21 @@ jobs:
         git fetch --depth=2
         previous_commit=$(git rev-parse HEAD^1)
         current_commit=$(git rev-parse HEAD)
- 
+
         # Initialize output variables
         folder1_changed="false"
         folder2_changed="false"
         folder3_changed="false"
         folder4_changed="false"
-        libs_changed="false"  # Initialize the /libs output variable
-        
+        libs_changed="false"
 
- 
         # Get list of changed files
-        changed_files=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})
- 
+        changed_files=$(git diff --name-only $previous_commit $current_commit)
+
         # Print changed files for debugging
         echo "Changed files:"
         echo "$changed_files"
- 
+
         # Check changes for each folder
         if echo "$changed_files" | grep -q '^apps/account/'; then
           folder1_changed="true"
@@ -64,60 +61,82 @@ jobs:
         if echo "$changed_files" | grep -q '^libs/'; then
           libs_changed="true"
         fi
- 
+
         # Output the results
         echo "::set-output name=folder1-changed::$folder1_changed"
         echo "::set-output name=folder2-changed::$folder2_changed"
         echo "::set-output name=folder3-changed::$folder3_changed"
         echo "::set-output name=folder4-changed::$folder4_changed"
         echo "::set-output name=libs-changed::$libs_changed"
-        
- 
+
   account:
     needs: detect-changes
     runs-on: ubuntu-latest
     if: ${{ needs.detect-changes.outputs.folder1-changed == 'true' || needs.detect-changes.outputs.libs-changed == 'true' }}
 
- 
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
- 
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Run lint for account
+      run: nx run account:lint:qa
+
     - name: Print Hello
       run: echo "Hello from account"
- 
+
   admin:
     needs: detect-changes
     runs-on: ubuntu-latest
     if: ${{ needs.detect-changes.outputs.folder2-changed == 'true' || needs.detect-changes.outputs.libs-changed == 'true' }}
- 
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
- 
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Run lint for admin
+      run: nx run admin:lint:qa
+
     - name: Print Hello
       run: echo "Hello from admin"
- 
+
   external-messenger:
     needs: detect-changes
     runs-on: ubuntu-latest
     if: ${{ needs.detect-changes.outputs.folder3-changed == 'true' || needs.detect-changes.outputs.libs-changed == 'true' }}
- 
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
- 
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Run lint for external-messenger
+      run: nx run external-messenger:lint:qa
+
     - name: Print Hello
-      run: echo "Hello from -external-messenger"
- 
+      run: echo "Hello from external-messenger"
+
   messenger:
     needs: detect-changes
     runs-on: ubuntu-latest
     if: ${{ needs.detect-changes.outputs.folder4-changed == 'true' || needs.detect-changes.outputs.libs-changed == 'true' }}
- 
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
- 
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Run lint for messenger
+      run: nx run messenger:lint:qa
+
     - name: Print Hello
       run: echo "Hello from messenger"
