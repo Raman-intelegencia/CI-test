@@ -7,7 +7,7 @@ on:
       - 'apps/admin/**'
       - 'apps/messenger/**'
       - 'apps/external-messenger/**'
-      - 'libs/**'   # Track changes in the /libs folder
+      - 'libs/**'
 
 jobs:
   detect-changes:
@@ -17,7 +17,7 @@ jobs:
       folder2-changed: ${{ steps.detect.outputs.folder2-changed }}
       folder3-changed: ${{ steps.detect.outputs.folder3-changed }}
       folder4-changed: ${{ steps.detect.outputs.folder4-changed }}
-      libs-changed: ${{ steps.detect.outputs.libs-changed }}  # Output for /libs
+      libs-changed: ${{ steps.detect.outputs.libs-changed }}
 
     steps:
     - name: Checkout code
@@ -26,26 +26,17 @@ jobs:
     - name: Detect changes in folders
       id: detect
       run: |
-        # Fetch the previous commit
         git fetch --depth=2
         previous_commit=$(git rev-parse HEAD^1)
         current_commit=$(git rev-parse HEAD)
-
-        # Initialize output variables
         folder1_changed="false"
         folder2_changed="false"
         folder3_changed="false"
         folder4_changed="false"
         libs_changed="false"
-
-        # Get list of changed files
         changed_files=$(git diff --name-only $previous_commit $current_commit)
-
-        # Print changed files for debugging
         echo "Changed files:"
         echo "$changed_files"
-
-        # Check changes for each folder
         if echo "$changed_files" | grep -q '^apps/account/'; then
           folder1_changed="true"
         fi
@@ -61,8 +52,6 @@ jobs:
         if echo "$changed_files" | grep -q '^libs/'; then
           libs_changed="true"
         fi
-
-        # Output the results
         echo "::set-output name=folder1-changed::$folder1_changed"
         echo "::set-output name=folder2-changed::$folder2_changed"
         echo "::set-output name=folder3-changed::$folder3_changed"
@@ -78,11 +67,16 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18.15.0'  # Use the Node.js version you need
+
     - name: Install dependencies
       run: npm install
 
     - name: Run lint for account
-      run: nx run account:lint:qa
+      run: npx nx run account:lint:qa
 
     - name: Print Hello
       run: echo "Hello from account"
@@ -96,11 +90,16 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18.15.0'
+
     - name: Install dependencies
       run: npm install
 
     - name: Run lint for admin
-      run: nx run admin:lint:qa
+      run: npx nx run admin:lint:qa
 
     - name: Print Hello
       run: echo "Hello from admin"
@@ -114,11 +113,16 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18.15.0'
+
     - name: Install dependencies
       run: npm install
 
     - name: Run lint for external-messenger
-      run: nx run external-messenger:lint:qa
+      run: npx nx run external-messenger:lint:qa
 
     - name: Print Hello
       run: echo "Hello from external-messenger"
@@ -132,11 +136,16 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18.15.0'
+
     - name: Install dependencies
       run: npm install
 
     - name: Run lint for messenger
-      run: nx run messenger:lint:qa
+      run: npx nx run messenger:lint:qa
 
     - name: Print Hello
       run: echo "Hello from messenger"
