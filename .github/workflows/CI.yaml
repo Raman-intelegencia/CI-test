@@ -75,8 +75,8 @@ jobs:
     - name: Install dependencies
       run: npm install
 
-    - name: Run lint for account
-      run: npx nx run account:lint:qa
+    - name: Run lint
+      run: npm run lint
 
     - name: Print Hello
       run: echo "Hello from account"
@@ -98,8 +98,8 @@ jobs:
     - name: Install dependencies
       run: npm install
 
-    - name: Run lint for admin
-      run: npx nx run admin:lint:qa
+    - name: Run lint
+      run: npm run lint
 
     - name: Print Hello
       run: echo "Hello from admin"
@@ -121,8 +121,8 @@ jobs:
     - name: Install dependencies
       run: npm install
 
-    - name: Run lint for external-messenger
-      run: npx nx run external-messenger:lint:qa
+    - name: Run lint
+      run: npm run lint
 
     - name: Print Hello
       run: echo "Hello from external-messenger"
@@ -144,8 +144,8 @@ jobs:
     - name: Install dependencies
       run: npm install
 
-    - name: Run lint for messenger
-      run: npx nx run messenger:lint:qa
+    - name: Run lint
+      run: npm run lint
 
     - name: Print Hello
       run: echo "Hello from messenger"
