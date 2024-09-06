@@ -70,7 +70,7 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '18.15.0'  # Use the Node.js version you need
+        node-version: '14.19.0'  # Use the Node.js version you need
 
     - name: Install dependencies
       run: npm install
@@ -116,14 +116,13 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '18.15.0'
+        node-version: '18.15.0'  # Use the Node.js version you need
 
     - name: Install dependencies
       run: npm install
-    
 
-    - name: Run lint
-      run: npx nx run external-messenger:lint
+    - name: Run linting for account
+      run: npx nx run external-messenger:lint --verbose
 
     - name: Print Hello
       run: echo "Hello from external-messenger"
@@ -140,13 +139,13 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '18.15.0'
+        node-version: '18.15.0'  # Use the Node.js version you need
 
     - name: Install dependencies
       run: npm install
 
-    - name: Run lint
-      run: npx nx run messenger:lint
+    - name: Run linting for account
+      run: npx nx run messenger:lint --verbose
 
     - name: Print Hello
       run: echo "Hello from messenger"
