@@ -70,13 +70,13 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '16.16.0'  # Use the Node.js version you need
+        node-version: '18.15.0'  # Use the Node.js version you need
 
     - name: Install dependencies
       run: npm install
     
     - name: Debug ESLint config path
-      run: ls -la
+      run: ls /apps/account/src
 
     - name: Run linting for account
       run: npx nx run account:lint --verbose
