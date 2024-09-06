@@ -76,7 +76,7 @@ jobs:
       run: npm install
     
     - name: Debug ESLint config path
-      run: ls -la ../../
+      run: ls -la
 
     - name: Run linting for account
       run: npx nx run account:lint --verbose
