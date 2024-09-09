@@ -5,9 +5,8 @@
   "scripts": {
     "precommit": "npm run lint",
     "lint": "ng lint",
-    "start:admin": "ng serve --ssl true --ssl-cert .ssl/admin-vm.dev.crt --ssl-key .ssl/admin-vm.dev.key --proxy-config proxy.conf.json --configuration=development --webpack-config webpack.config.js",
-    "start:account": "ng serve --ssl true --ssl-cert .ssl/account-vm.dev.crt --ssl-key .ssl/account-vm.dev.key --proxy-config proxy.conf.json --configuration=development --webpack-config webpack.config.js",
-    "start:all": "nx serve account --port=5105 & nx serve messenger --port=5101 & nx serve admin --port=5102"
+    "start:all": "nx run admin:serve & nx run messenger:serve & nx run account:serve",
+    "start:localdev": "nx run admin:serve:localdev & nx run messenger:serve:localdev & nx run account:serve:localdev"
   },
   "husky": {
     "hooks": {
