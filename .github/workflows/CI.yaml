@@ -122,7 +122,7 @@ jobs:
       run: npm install
   
     - name: Run linting for external-messenger
-      run: npx nx run external-messenger:lint --verbose
+      run: npx nx run extmsg:lint --verbose
 
     - name: Print Hello
       run: echo "Hello from external-messenger"
