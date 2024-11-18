@@ -1,4 +1,4 @@
-{
+{//test
   "emailAddress": "Please enter your email address to login",
   "warningEmailMsg": "OOPS! Looks like you haven't been provisioned for AMS connect yet.Please Contact your administrator.",
   "logInWithInstitution": "Login with your Institution",
