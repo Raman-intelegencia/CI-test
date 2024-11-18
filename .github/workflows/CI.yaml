@@ -1,13 +1,19 @@
 name: Build Docker Images Based on Folder Changes
 
 on:
-  push:
+  pull_request:
+    branches:
+      - develop
+      - main
+      - QA
+      - play-dev2
+    
     paths:
-      - 'apps/account/**'
-      - 'apps/admin/**'
-      - 'apps/messenger/**'
-      - 'apps/external-messenger/**'
-      - 'libs/**'
+       - 'apps/account/**'
+       - 'apps/admin/**'
+       - 'apps/messenger/**'
+       - 'apps/external-messenger/**'
+       - 'libs/**'
 
 jobs:
   detect-changes:
@@ -78,7 +84,7 @@ jobs:
     - name: Run linting for account
       run: npx nx run account:lint --verbose
 
-    - name: Print Hello
+    - name: Print Hello 
       run: echo "Hello from account"
 
   admin:
